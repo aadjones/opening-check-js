@@ -6,3 +6,5 @@ urllib3
 dataclasses 
 python-chess
 streamlit
+pytest
+pytest-mock

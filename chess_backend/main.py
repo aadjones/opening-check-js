@@ -5,8 +5,8 @@ from pydantic import BaseModel, HttpUrl # <-- Add BaseModel, HttpUrl
 from typing import List, Optional
 
 # Import your new service and the DeviationResult class
-from analysis_service import perform_game_analysis
-from deviation_result import DeviationResult as PythonDeviationResult # Rename for clarity
+from .analysis_service import perform_game_analysis
+from .deviation_result import DeviationResult
 
 # --- Pydantic Models ---
 class AnalysisRequest(BaseModel):
@@ -61,7 +61,7 @@ async def get_dummy_games():
 async def analyze_games_endpoint(request: AnalysisRequest):
     try:
         print(f"Received analysis request for user: {request.username}")
-        python_results: List[Optional[PythonDeviationResult]] = perform_game_analysis(
+        python_results: List[Optional[DeviationResult]] = perform_game_analysis(
             username=request.username,
             study_url_white=str(request.study_url_white), # Convert HttpUrl to string
             study_url_black=str(request.study_url_black), # Convert HttpUrl to string

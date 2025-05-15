@@ -5,8 +5,8 @@ This module provides utility functions for chess analysis.
 import os
 from typing import Optional
 import chess.pgn
-from deviation_result import DeviationResult
-from lichess_api import Study
+from .deviation_result import DeviationResult
+from .lichess_api import Study
 
 from streamlit.logger import get_logger
 logger = get_logger(__name__)
@@ -162,9 +162,9 @@ def get_player_color(
     white_player = recent_game.headers["White"]
     black_player = recent_game.headers["Black"]
 
-    if player_name == white_player:
+    if player_name.strip().lower() == white_player.strip().lower():
         return "White"
-    if player_name == black_player:
+    if player_name.strip().lower() == black_player.strip().lower():
         return "Black"
     # Else:
     raise Exception(f"Could not find match {player_name} to the game!")
