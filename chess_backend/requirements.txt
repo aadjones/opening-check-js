@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+pydantic
+requests
+urllib3
+dataclasses 
+python-chess
+streamlit
