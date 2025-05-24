@@ -1,0 +1,448 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# React TypeScript Development
+
+You're a React and TypeScript expert. Generate **high-quality React components** with TypeScript that follow these best practices:
+
+## General Guidelines
+
+1. **Use TypeScript Strictly:**
+   - Enable strict mode in tsconfig.json
+   - Define proper interfaces and types
+   - Avoid `any` type - use proper typing
+
+2. **Component Structure:**
+   - Use functional components with hooks
+   - Prefer composition over inheritance
+   - Keep components small and focused
+
+3. **File Organization:**
+   - Use PascalCase for component files
+   - Co-locate related files (styles, tests)
+   - Use index.ts for clean imports
+
+## Component Best Practices
+
+### Basic Component Template
+```typescript
+import React from 'react'
+
+interface ComponentProps {
+  title: string
+  isVisible?: boolean
+  onAction?: (id: string) => void
+  children?: React.ReactNode
+}
+
+export const Component: React.FC<ComponentProps> = ({ 
+  title, 
+  isVisible = true, 
+  onAction,
+  children 
+}) => {
+  if (!isVisible) return null
+
+  return (
+    <div className="component">
+      <h2>{title}</h2>
+      {children}
+      {onAction && (
+        <button onClick={() => onAction('example-id')}>
+          Action
+        </button>
+      )}
+    </div>
+  )
+}
+```
+
+### State Management with Hooks
+```typescript
+import React, { useState, useEffect, useCallback } from 'react'
+
+interface User {
+  id: string
+  name: string
+  email: string
+}
+
+export const UserProfile: React.FC = () => {
+  const [user, setUser] = useState<User | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  const fetchUser = useCallback(async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      const response = await fetch('/api/user')
+      if (!response.ok) throw new Error('Failed to fetch user')
+      const userData = await response.json()
+      setUser(userData)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unknown error')
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchUser()
+  }, [fetchUser])
+
+  if (loading) return <div>Loading...</div>
+  if (error) return <div>Error: {error}</div>
+  if (!user) return <div>No user found</div>
+
+  return (
+    <div className="user-profile">
+      <h1>{user.name}</h1>
+      <p>{user.email}</p>
+    </div>
+  )
+}
+```
+
+## Chess App Specific Components
+
+### Chess Board Component
+```typescript
+import React, { useState, useCallback } from 'react'
+
+interface Square {
+  file: string
+  rank: number
+  piece?: string
+}
+
+interface Move {
+  from: string
+  to: string
+  san: string
+  piece: string
+}
+
+interface ChessBoardProps {
+  position: string // FEN string
+  moves?: Move[]
+  highlightSquares?: string[]
+  onSquareClick?: (square: string) => void
+  showCoordinates?: boolean
+  flipped?: boolean
+}
+
+export const ChessBoard: React.FC<ChessBoardProps> = ({
+  position,
+  moves = [],
+  highlightSquares = [],
+  onSquareClick,
+  showCoordinates = true,
+  flipped = false
+}) => {
+  const [selectedSquare, setSelectedSquare] = useState<string | null>(null)
+
+  const handleSquareClick = useCallback((square: string) => {
+    setSelectedSquare(prev => prev === square ? null : square)
+    onSquareClick?.(square)
+  }, [onSquareClick])
+
+  const isHighlighted = useCallback((square: string) => {
+    return highlightSquares.includes(square) || selectedSquare === square
+  }, [highlightSquares, selectedSquare])
+
+  const renderSquare = useCallback((file: string, rank: number) => {
+    const square = `${file}${rank}`
+    const isLight = (file.charCodeAt(0) + rank) % 2 === 0
+    const piece = getPieceAtSquare(position, square)
+    
+    return (
+      <div
+        key={square}
+        className={`
+          chess-square 
+          ${isLight ? 'light' : 'dark'}
+          ${isHighlighted(square) ? 'highlighted' : ''}
+          ${piece ? 'has-piece' : ''}
+        `}
+        onClick={() => handleSquareClick(square)}
+      >
+        {piece && <div className={`piece ${piece}`} />}
+        {showCoordinates && file === 'a' && (
+          <div className="rank-coordinate">{rank}</div>
+        )}
+        {showCoordinates && rank === 1 && (
+          <div className="file-coordinate">{file}</div>
+        )}
+      </div>
+    )
+  }, [position, isHighlighted, handleSquareClick, showCoordinates])
+
+  const files = flipped ? ['h', 'g', 'f', 'e', 'd', 'c', 'b', 'a'] : ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
+  const ranks = flipped ? [1, 2, 3, 4, 5, 6, 7, 8] : [8, 7, 6, 5, 4, 3, 2, 1]
+
+  return (
+    <div className="chess-board">
+      {ranks.map(rank => (
+        <div key={rank} className="chess-rank">
+          {files.map(file => renderSquare(file, rank))}
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function getPieceAtSquare(fen: string, square: string): string | null {
+  // Simplified FEN parsing - implement proper FEN parsing
+  return null
+}
+```
+
+### Deviation Review Component
+```typescript
+import React, { useState, useCallback } from 'react'
+import { ChessBoard } from './ChessBoard'
+
+interface Deviation {
+  id: string
+  gameUrl: string
+  playedMove: string
+  expectedMove: string
+  fenBeforeDeviation: string
+  openingName?: string
+  chapterName?: string
+}
+
+interface DeviationReviewProps {
+  deviation: Deviation
+  onReview: (deviationId: string, result: 'correct' | 'incorrect' | 'skip') => void
+}
+
+export const DeviationReview: React.FC<DeviationReviewProps> = ({
+  deviation,
+  onReview
+}) => {
+  const [showSolution, setShowSolution] = useState(false)
+  const [selectedMove, setSelectedMove] = useState<string | null>(null)
+
+  const handleSquareClick = useCallback((square: string) => {
+    // Simple move selection logic - extend as needed
+    setSelectedMove(square)
+  }, [])
+
+  const handleReview = useCallback((result: 'correct' | 'incorrect' | 'skip') => {
+    onReview(deviation.id, result)
+  }, [deviation.id, onReview])
+
+  const highlightSquares = [
+    ...(showSolution ? [getSquareFromMove(deviation.expectedMove)] : []),
+    ...(selectedMove ? [selectedMove] : [])
+  ].filter(Boolean)
+
+  return (
+    <div className="deviation-review">
+      <div className="review-header">
+        <h3>Opening Deviation Review</h3>
+        {deviation.openingName && (
+          <p className="opening-name">{deviation.openingName}</p>
+        )}
+        {deviation.chapterName && (
+          <p className="chapter-name">Chapter: {deviation.chapterName}</p>
+        )}
+      </div>
+
+      <div className="review-content">
+        <ChessBoard
+          position={deviation.fenBeforeDeviation}
+          highlightSquares={highlightSquares}
+          onSquareClick={handleSquareClick}
+        />
+
+        <div className="review-info">
+          <div className="move-info">
+            <p><strong>You played:</strong> {deviation.playedMove}</p>
+            {showSolution && (
+              <p><strong>Expected move:</strong> {deviation.expectedMove}</p>
+            )}
+          </div>
+
+          <div className="review-actions">
+            {!showSolution ? (
+              <button 
+                onClick={() => setShowSolution(true)}
+                className="btn btn-secondary"
+              >
+                Show Solution
+              </button>
+            ) : (
+              <div className="review-buttons">
+                <button 
+                  onClick={() => handleReview('correct')}
+                  className="btn btn-success"
+                >
+                  I knew this
+                </button>
+                <button 
+                  onClick={() => handleReview('incorrect')}
+                  className="btn btn-danger"
+                >
+                  I was wrong
+                </button>
+                <button 
+                  onClick={() => handleReview('skip')}
+                  className="btn btn-neutral"
+                >
+                  Skip
+                </button>
+              </div>
+            )}
+          </div>
+
+          <a 
+            href={deviation.gameUrl} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="game-link"
+          >
+            View Original Game
+          </a>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function getSquareFromMove(move: string): string {
+  // Extract destination square from move notation
+  // This is simplified - implement proper move parsing
+  return move.slice(-2)
+}
+```
+
+### Supabase Integration Hook
+```typescript
+import { useEffect, useState } from 'react'
+import { createClient } from '@supabase/supabase-js'
+import type { User } from '@supabase/supabase-js'
+
+const supabase = createClient(
+  process.env.REACT_APP_SUPABASE_URL!,
+  process.env.REACT_APP_SUPABASE_ANON_KEY!
+)
+
+export const useAuth = () => {
+  const [user, setUser] = useState<User | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null)
+      setLoading(false)
+    })
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setUser(session?.user ?? null)
+        setLoading(false)
+      }
+    )
+
+    return () => subscription.unsubscribe()
+  }, [])
+
+  const signIn = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'lichess'
+    })
+    if (error) throw error
+  }
+
+  const signOut = async () => {
+    const { error } = await supabase.auth.signOut()
+    if (error) throw error
+  }
+
+  return {
+    user,
+    loading,
+    signIn,
+    signOut
+  }
+}
+
+export const useDeviations = () => {
+  const [deviations, setDeviations] = useState<Deviation[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const fetchDeviations = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('deviations')
+          .select('*')
+          .order('created_at', { ascending: false })
+
+        if (error) throw error
+        setDeviations(data || [])
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Unknown error')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchDeviations()
+
+    // Subscribe to real-time updates
+    const subscription = supabase
+      .channel('deviations')
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'deviations'
+      }, (payload) => {
+        setDeviations(prev => [payload.new as Deviation, ...prev])
+      })
+      .subscribe()
+
+    return () => {
+      subscription.unsubscribe()
+    }
+  }, [])
+
+  return { deviations, loading, error }
+}
+```
+
+## Best Practices
+
+1. **Type Safety:**
+   - Define interfaces for all props and state
+   - Use generics for reusable components
+   - Leverage TypeScript's strict mode
+
+2. **Performance:**
+   - Use React.memo for expensive components
+   - Implement useCallback and useMemo appropriately
+   - Avoid unnecessary re-renders
+
+3. **Error Handling:**
+   - Use error boundaries for component-level errors
+   - Handle async operations properly
+   - Provide meaningful error messages
+
+4. **Accessibility:**
+   - Use semantic HTML elements
+   - Implement proper ARIA attributes
+   - Ensure keyboard navigation works
+
+5. **Testing:**
+   - Write unit tests for all components
+   - Use React Testing Library
+   - Test user interactions and edge cases
+

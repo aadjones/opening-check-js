@@ -1,0 +1,221 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Database: Create RLS Policies
+
+You're a Supabase security expert specializing in Row Level Security (RLS) policies. Generate **secure and efficient RLS policies** that follow these best practices:
+
+## General Guidelines
+
+1. **Always Enable RLS:**
+   - Enable RLS on all tables that contain user data
+   - Use `ALTER TABLE table_name ENABLE ROW LEVEL SECURITY;`
+
+2. **Principle of Least Privilege:**
+   - Grant only the minimum permissions necessary
+   - Be explicit about what operations are allowed for which users
+
+3. **Use auth.uid() for User Identification:**
+   - Always use `auth.uid()` to get the current authenticated user's ID
+   - Never trust client-side user identification
+
+4. **Policy Naming Convention:**
+   - Use descriptive names that clearly indicate the operation and scope
+   - Format: `"Action description for role/user type"`
+
+## Policy Types
+
+### Basic User Data Isolation
+```sql
+-- Enable RLS on the table
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+
+-- Users can only see their own data
+CREATE POLICY "Users can view own data" ON users
+    FOR ALL USING (auth_user_id = auth.uid());
+
+-- Users can update their own data
+CREATE POLICY "Users can update own data" ON users
+    FOR UPDATE USING (auth_user_id = auth.uid());
+```
+
+### Read-Only Public Data
+```sql
+-- Studies cache can be read by all authenticated users
+CREATE POLICY "Authenticated users can read studies cache" ON studies_cache
+    FOR SELECT USING (auth.role() = 'authenticated');
+```
+
+### User-Specific Data with Joins
+```sql
+-- Deviations: Users can only see their own deviations
+CREATE POLICY "Users can view own deviations" ON deviations
+    FOR ALL USING (
+        user_id IN (
+            SELECT id FROM users WHERE auth_user_id = auth.uid()
+        )
+    );
+
+-- Reviews: Users can only see their own reviews
+CREATE POLICY "Users can view own reviews" ON reviews
+    FOR ALL USING (
+        user_id IN (
+            SELECT id FROM users WHERE auth_user_id = auth.uid()
+        )
+    );
+```
+
+### Insert Policies with Validation
+```sql
+-- Users can insert deviations for themselves
+CREATE POLICY "Users can insert own deviations" ON deviations
+    FOR INSERT WITH CHECK (
+        user_id IN (
+            SELECT id FROM users WHERE auth_user_id = auth.uid()
+        )
+    );
+
+-- Users can insert reviews for their own deviations
+CREATE POLICY "Users can insert reviews for own deviations" ON reviews
+    FOR INSERT WITH CHECK (
+        user_id IN (
+            SELECT id FROM users WHERE auth_user_id = auth.uid()
+        )
+        AND deviation_id IN (
+            SELECT d.id FROM deviations d
+            JOIN users u ON d.user_id = u.id
+            WHERE u.auth_user_id = auth.uid()
+        )
+    );
+```
+
+### Update Policies with Restrictions
+```sql
+-- Users can update their own deviations but not change ownership
+CREATE POLICY "Users can update own deviations" ON deviations
+    FOR UPDATE USING (
+        user_id IN (
+            SELECT id FROM users WHERE auth_user_id = auth.uid()
+        )
+    )
+    WITH CHECK (
+        user_id IN (
+            SELECT id FROM users WHERE auth_user_id = auth.uid()
+        )
+    );
+```
+
+### Delete Policies
+```sql
+-- Users can delete their own reviews
+CREATE POLICY "Users can delete own reviews" ON reviews
+    FOR DELETE USING (
+        user_id IN (
+            SELECT id FROM users WHERE auth_user_id = auth.uid()
+        )
+    );
+```
+
+### Performance Optimized Policies
+```sql
+-- For better performance, create an index on the auth_user_id column
+CREATE INDEX idx_users_auth_user_id ON users(auth_user_id);
+
+-- More efficient policy using direct comparison
+CREATE POLICY "Users can view own data efficient" ON users
+    FOR SELECT USING (auth_user_id = auth.uid());
+```
+
+### Service Role Policies
+```sql
+-- Allow service role to bypass RLS for background tasks
+CREATE POLICY "Service role can manage all data" ON deviations
+    TO service_role
+    USING (true)
+    WITH CHECK (true);
+```
+
+## Best Practices for Chess App
+
+### User Data Isolation
+```sql
+-- Ensure users can only access their own chess data
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE deviations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE reviews ENABLE ROW LEVEL SECURITY;
+
+-- Users table policies
+CREATE POLICY "Users can view own profile" ON users
+    FOR SELECT USING (auth_user_id = auth.uid());
+
+CREATE POLICY "Users can update own profile" ON users
+    FOR UPDATE USING (auth_user_id = auth.uid())
+    WITH CHECK (auth_user_id = auth.uid());
+
+-- Deviations table policies
+CREATE POLICY "Users can manage own deviations" ON deviations
+    FOR ALL USING (
+        user_id = (SELECT id FROM users WHERE auth_user_id = auth.uid())
+    );
+
+-- Reviews table policies  
+CREATE POLICY "Users can manage own reviews" ON reviews
+    FOR ALL USING (
+        user_id = (SELECT id FROM users WHERE auth_user_id = auth.uid())
+    );
+```
+
+### Public Data Access
+```sql
+-- Studies cache doesn't need RLS as it contains public Lichess data
+-- But we can still restrict to authenticated users
+CREATE POLICY "Authenticated users can read studies" ON studies_cache
+    FOR SELECT TO authenticated
+    USING (true);
+
+-- Only service role can update studies cache
+CREATE POLICY "Service role can manage studies cache" ON studies_cache
+    FOR ALL TO service_role
+    USING (true)
+    WITH CHECK (true);
+```
+
+## Testing RLS Policies
+
+### Test User Access
+```sql
+-- Test as specific user (replace with actual user ID)
+SELECT set_config('request.jwt.claims', '{"sub":"user-uuid-here"}', true);
+
+-- Test queries that should work
+SELECT * FROM deviations; -- Should only return user's deviations
+
+-- Test queries that should fail
+INSERT INTO deviations (user_id, game_id, ...) 
+VALUES ('different-user-id', 'game123', ...); -- Should fail
+```
+
+### Verify Policy Coverage
+```sql
+-- Check which tables have RLS enabled
+SELECT schemaname, tablename, rowsecurity 
+FROM pg_tables 
+WHERE schemaname = 'public';
+
+-- List all policies
+SELECT schemaname, tablename, policyname, cmd, qual
+FROM pg_policies 
+WHERE schemaname = 'public';
+```
+
+## Common Pitfalls to Avoid
+
+1. **Don't forget WITH CHECK clauses** for INSERT/UPDATE operations
+2. **Always test policies with different user contexts**
+3. **Consider performance impact** - add indexes on columns used in policies
+4. **Don't use client-side user identification** - always use auth.uid()
+5. **Remember to enable RLS** on all user data tables
+6. **Use service role policies** for background operations that need to bypass RLS
+
