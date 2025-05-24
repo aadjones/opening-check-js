@@ -1,112 +1,80 @@
-# Development Roadmap
+# Development Roadmap - Simplified Hobby Version
 
-## Phase 0: Foundation (Weeks 1-2)
-### Infrastructure Setup
-- [ ] Set up development environment
-- [ ] PostgreSQL database setup
-- [ ] Docker containerization
-- [ ] CI/CD pipeline (GitHub Actions)
-- [ ] Environment configuration management
+## Phase 0: Quick Start (Week 1)
+### Essential Setup
+- [x] Set up development environment
+- [ ] Supabase database setup (free tier) - **IN PROGRESS** 
+  - ✅ Setup guide created (`planning_docs/SUPABASE_SETUP.md`)
+  - ✅ Database schema ready (`planning_docs/supabase_schema.sql`)
+  - ✅ Environment template created (`env.example`)
+  - ⏳ Create Supabase account & project
+  - ⏳ Run database schema
+  - ⏳ Configure environment variables
+- [ ] Basic environment configuration (.env files)
 
-### Core Architecture
+### Minimal Architecture
 - [ ] FastAPI project structure
-- [ ] Database migrations system
-- [ ] Authentication middleware
-- [ ] Error handling framework
-- [ ] Logging and monitoring setup
+- [ ] Basic database models
+- [ ] Simple error handling
+- [ ] Basic logging
 
-## Phase 1: MVP Core (Weeks 3-6)
-### Backend Core Features
+## Phase 1: Core MVP (Weeks 2-4)
+### Backend Essentials
 - [ ] Lichess OAuth integration
-- [ ] User management system
-- [ ] Study selection and caching
-- [ ] Basic game polling
-- [ ] Deviation detection engine
-- [ ] REST API endpoints
+- [ ] User authentication (simple)
+- [ ] Study fetching from Lichess
+- [ ] Basic deviation detection
+- [ ] Simple REST API
 
-### Frontend Foundation
-- [ ] React project setup with TypeScript
-- [ ] Authentication flow
-- [ ] Dashboard layout
-- [ ] Study selection interface
-- [ ] Basic chess board integration
+### Frontend Basics
+- [ ] React setup with TypeScript
+- [ ] Login/logout flow
+- [ ] Study selection page
+- [ ] Chess board for reviewing deviations
+- [ ] Basic dashboard
 
-### Testing
-- [ ] Unit tests for core logic
-- [ ] Integration tests for API
-- [ ] End-to-end test setup
+### Quick Testing
+- [ ] Basic unit tests for core logic
+- [ ] Manual testing workflow
 
-## Phase 2: Spaced Repetition (Weeks 7-10)
-### Learning Engine
-- [ ] Spaced repetition algorithm implementation
-- [ ] Review queue management
+## Phase 2: Make it Fun (Weeks 5-6)
+### Learning Features
+- [ ] Simple review queue (no complex algorithms yet)
 - [ ] Review interface with chess board
-- [ ] Progress tracking system
-- [ ] Performance analytics
+- [ ] Basic progress tracking
+- [ ] Simple statistics
 
-### User Experience
-- [ ] Onboarding flow
-- [ ] Demo mode implementation
-- [ ] Dashboard improvements
-- [ ] Mobile-responsive design
-- [ ] Loading states and error handling
+### Polish
+- [ ] Responsive design basics
+- [ ] Loading states
+- [ ] Error messages that don't suck
+- [ ] Demo mode for trying without login
 
-## Phase 3: Polish & Performance (Weeks 11-14)
-### Performance Optimization
-- [ ] Database query optimization
-- [ ] Caching layer implementation
-- [ ] Background job processing
-- [ ] Rate limiting and throttling
-- [ ] Performance monitoring
+## Phase 3: If We Like It (Future)
+### Performance & Scale
+- [ ] Database optimization
+- [ ] Caching (if needed)
+- [ ] Docker containerization
+- [ ] CI/CD pipeline
+- [ ] Production deployment
 
-### User Experience Enhancements
-- [ ] Advanced filtering and search
-- [ ] Keyboard shortcuts
-- [ ] Dark mode support
-- [ ] Accessibility improvements
-- [ ] Progressive Web App features
-
-### Quality Assurance
-- [ ] Comprehensive testing suite
-- [ ] Load testing
-- [ ] Security audit
-- [ ] Documentation completion
-- [ ] Beta user feedback integration
-
-## Phase 4: Launch Preparation (Weeks 15-16)
-### Production Readiness
-- [ ] Production environment setup
-- [ ] Monitoring and alerting
-- [ ] Backup and disaster recovery
-- [ ] Legal documentation (Privacy, Terms)
-- [ ] Analytics tracking
-
-### Go-to-Market
-- [ ] Landing page optimization
-- [ ] User onboarding refinement
-- [ ] Help documentation
-- [ ] Community engagement plan
-- [ ] Launch announcement preparation
-
-## Post-Launch Roadmap (Months 4-12)
 ### Advanced Features
-- [ ] Coach mode and sharing
-- [ ] Advanced statistics and insights
+- [ ] Spaced repetition algorithm
+- [ ] Advanced analytics
 - [ ] Multiple repertoire support
-- [ ] Export and backup features
-- [ ] Chess.com integration
+- [ ] Social features
 
-### Growth Features
-- [ ] Social features (leaderboards, sharing)
-- [ ] Advanced filtering and organization
-- [ ] Custom study creation tools
-- [ ] Mobile app development
-- [ ] Premium tier features
+## Success Milestones (Realistic)
+- **Week 1**: Can log in with Lichess and see studies
+- **Week 4**: Can detect and review opening deviations
+- **Week 6**: Actually fun to use for improving openings
+- **Month 3**: Decide if worth taking seriously
 
-## Success Milestones
-- **Week 6**: MVP functional with basic deviation detection
-- **Week 10**: Spaced repetition system working
-- **Week 14**: Beta-ready product with full feature set
-- **Week 16**: Production launch
-- **Month 6**: 1,000+ active users
-- **Month 12**: Product-market fit validation
+## Technology Decisions (Simplified)
+- **Database**: Supabase (free tier, managed, easy auth)
+- **Backend**: FastAPI (fast to develop, good docs)
+- **Frontend**: React + TypeScript (familiar, good ecosystem)
+- **Deployment**: Vercel/Netlify for frontend, Railway/Render for backend
+- **No Docker** (for now)
+- **No CI/CD** (manual deployment is fine)
+- **No complex monitoring** (basic logging + Supabase dashboard)
