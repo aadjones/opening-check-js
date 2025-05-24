@@ -1,6 +1,6 @@
 ---
-description:
-globs:
+description: 
+globs: 
 alwaysApply: false
 ---
 # FastAPI Python Development
@@ -508,3 +508,4 @@ async def process_game_for_deviations(game: Dict, user: Dict, supabase: Client):
    - Use FastAPI's automatic documentation
    - Add clear docstrings to functions
    - Provide example requests/responses
+
