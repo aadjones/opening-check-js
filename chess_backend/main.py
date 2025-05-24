@@ -5,8 +5,8 @@ from pydantic import BaseModel, HttpUrl # <-- Add BaseModel, HttpUrl
 from typing import List, Optional
 
 # Import your new service and the DeviationResult class
-from .analysis_service import perform_game_analysis
-from .deviation_result import DeviationResult
+from analysis_service import perform_game_analysis
+from deviation_result import DeviationResult
 
 # --- Pydantic Models ---
 class AnalysisRequest(BaseModel):
@@ -25,6 +25,7 @@ class ApiDeviationResult(BaseModel):
     board_fen_before_deviation: str # FEN of the board *before* the deviating move
     reference_uci: Optional[str] = None # e.g., "e2e4"
     deviation_uci: Optional[str] = None # e.g., "g1f3"
+    pgn: str # Full PGN of the game for navigation
 
 # --- End Pydantic Models ---
 
@@ -89,7 +90,8 @@ async def analyze_games_endpoint(request: AnalysisRequest):
                     player_color=res.player_color,
                     board_fen_before_deviation=board_before_deviation.fen(),
                     reference_uci=ref_uci,
-                    deviation_uci=dev_uci
+                    deviation_uci=dev_uci,
+                    pgn=res.pgn
                 ))
             else:
                 api_results.append(None) # No deviation found for that game

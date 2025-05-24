@@ -1,11 +1,11 @@
 from typing import Optional, List, Tuple
 
-# Use relative imports from the chess_backend package
-from . import lichess_api
-from . import pgn_utils
-from .lichess_api import get_last_games_pgn
-from .chess_utils import find_deviation_in_entire_study_white_and_black
-from .deviation_result import DeviationResult
+# Use absolute imports instead of relative imports
+import lichess_api
+import pgn_utils
+from lichess_api import get_last_games_pgn
+from chess_utils import find_deviation_in_entire_study_white_and_black
+from deviation_result import DeviationResult
 
 # We're removing the Streamlit logger for now.
 # You can add standard Python logging later if you want.
@@ -17,10 +17,10 @@ def perform_game_analysis(
     study_url_white: str,
     study_url_black: str,
     max_games: int,
-) -> List[Tuple[Optional[DeviationResult], str]]: # <--- CORRECTED TYPE HINT
+) -> List[Optional[DeviationResult]]:
     """
     Handles the core logic of fetching games, studies, and finding deviations.
-    Returns a list of tuples, where each tuple is (DeviationResult or None, pgn_string_of_game).
+    Returns a list of DeviationResult objects or None for each game.
     """
     print(f"Starting analysis for user: {username}, max_games: {max_games}")
 
@@ -37,24 +37,27 @@ def perform_game_analysis(
         print(f"Error processing PGNs or fetching studies: {e}")
         return []
 
-    # This list will hold tuples of (DeviationResult or None, pgn_string)
-    results_with_pgn: List[Tuple[Optional[DeviationResult], str]] = [] # <--- CORRECTED LIST NAME AND TYPE
+    # This list will hold DeviationResult objects or None
+    results: List[Optional[DeviationResult]] = []
 
     for game_obj in test_game_list: # game_obj is a chess.pgn.Game object
-        pgn_string = str(game_obj) # Get the PGN string for this game
         deviation_info: Optional[DeviationResult] = None # Default to None
+        pgn_string = str(game_obj) # Get the PGN string for this game
 
         try:
             deviation_info = find_deviation_in_entire_study_white_and_black(
                 white_study, black_study, game_obj, username
             )
-            # Always append a tuple, deviation_info will be None if no deviation found
-            results_with_pgn.append((deviation_info, pgn_string))
+            # If we found a deviation, add the PGN to it
+            if deviation_info:
+                deviation_info.pgn = pgn_string
+            # Always append the deviation result (or None if no deviation found)
+            results.append(deviation_info)
         except Exception as e:
             print(f"Error analyzing one of the games for {username}: {e}")
-            # If an exception occurs during analysis, append a tuple with None for deviation
-            results_with_pgn.append((None, pgn_string))
+            # If an exception occurs during analysis, append None
+            results.append(None)
 
-    found_count = len([d for d, pgn in results_with_pgn if d is not None]) # Adjusted for tuple
-    print(f"Analysis complete for {username}. Found {found_count} deviations in {len(results_with_pgn)} games.")
-    return results_with_pgn # <--- Return the list of tuples
+    found_count = len([d for d in results if d is not None])
+    print(f"Analysis complete for {username}. Found {found_count} deviations in {len(results)} games.")
+    return results
