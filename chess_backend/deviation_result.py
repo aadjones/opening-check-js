@@ -17,6 +17,7 @@ class DeviationResult:
         reference_san (str): The SAN of the expected move in the repertoire.
         player_color (str): The color of the player who deviated.
         board (chess.Board): A board state to represent the position right before the deviation.
+        pgn (str): The full game PGN.
     """
 
     def __init__(
@@ -26,12 +27,14 @@ class DeviationResult:
         reference_san: str,
         player_color: str,
         board: Optional[chess.Board] = None,
+        pgn: str = "",
     ):
         self.whole_move_number = whole_move_number
         self.deviation_san = deviation_san
         self.reference_san = reference_san
         self.player_color = player_color
         self.board = chess.Board() if board is None else board
+        self.pgn = pgn
 
     def __repr__(self):
         return (
