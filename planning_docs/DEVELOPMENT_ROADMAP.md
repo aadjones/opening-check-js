@@ -3,14 +3,18 @@
 ## Phase 0: Quick Start (Week 1)
 ### Essential Setup
 - [x] Set up development environment
-- [ ] Supabase database setup (free tier) - **IN PROGRESS** 
+- [x] Supabase database setup (free tier) - **COMPLETE!** ✅
   - ✅ Setup guide created (`planning_docs/SUPABASE_SETUP.md`)
   - ✅ Database schema ready (`planning_docs/supabase_schema.sql`)
-  - ✅ Environment template created (`env.example`)
-  - ⏳ Create Supabase account & project
-  - ⏳ Run database schema
-  - ⏳ Configure environment variables
-- [ ] Basic environment configuration (.env files)
+  - ✅ Environment templates created (`chess_frontend/env.template`, `chess_backend/env.template`)
+  - ✅ Supabase client libraries installed
+  - ✅ Client configuration files created
+  - ✅ **USER ACTION COMPLETED**: Environment variables configured and tested
+- [x] Basic environment configuration (.env files) - **COMPLETE!** ✅
+- [x] Testing framework setup (Vitest) - **COMPLETE!** ✅
+  - ✅ Vitest configured with React Testing Library
+  - ✅ Supabase connection tests (unit + integration)
+  - ✅ Test documentation created (`chess_frontend/README-TESTING.md`)
 
 ### Minimal Architecture
 - [ ] FastAPI project structure

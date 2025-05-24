@@ -8,3 +8,6 @@ python-chess
 streamlit
 pytest
 pytest-mock
+supabase
+python-dotenv
+httpx
