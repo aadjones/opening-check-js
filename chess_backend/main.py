@@ -53,6 +53,12 @@ async def root() -> dict[str, str]:
     return {"message": "Hello from the Chess Backend!"}
 
 
+@app.get("/health")
+async def health_check() -> dict[str, str]:
+    """Health check endpoint for monitoring and CI/CD"""
+    return {"status": "healthy", "service": "chess-backend"}
+
+
 @app.get("/api/dummy_games")
 async def get_dummy_games() -> dict[str, List[str]]:
     return {"games": ["Game 1: My Awesome Win", "Game 2: That Close Draw", "Game 3: Learning Opportunity"]}
