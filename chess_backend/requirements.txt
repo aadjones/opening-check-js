@@ -4,6 +4,7 @@ pydantic
 requests
 python-chess
 pytest
+pytest-cov
 pytest-mock
 supabase
 python-dotenv
