@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react';
-import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useNavigate, MemoryRouter } from 'react-router-dom';
 import { describe, it, expect } from 'vitest';
+import App from '../App';
 
 // Simple test component that uses navigation
 const TestNavigationComponent = () => {
@@ -34,14 +35,29 @@ describe('React Router Setup', () => {
 
   it('should render routes correctly', () => {
     render(
-      <BrowserRouter>
+      <MemoryRouter initialEntries={['/test-route']}>
         <Routes>
           <Route path="/test-route" element={<TestRoute />} />
         </Routes>
-      </BrowserRouter>
+      </MemoryRouter>
     );
 
     // This test verifies routes can be rendered
     // In a real scenario, we'd test navigation, but this confirms basic setup
+  });
+});
+
+describe('Task 2 - Route Structure', () => {
+  it('should render all required routes without errors', () => {
+    const routes = ['/', '/dashboard', '/deviation/123', '/settings', '/analysis', '/demo'];
+
+    routes.forEach(route => {
+      render(
+        <MemoryRouter initialEntries={[route]}>
+          <App />
+        </MemoryRouter>
+      );
+      // Just verify it doesn't crash - no specific content assertions
+    });
   });
 });

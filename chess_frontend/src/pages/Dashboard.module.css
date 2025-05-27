@@ -1,0 +1,245 @@
+.dashboard {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-lg);
+}
+
+.header {
+  margin-bottom: var(--spacing-4xl);
+}
+
+.title {
+  margin-bottom: var(--spacing-lg);
+}
+
+.subtitle {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-lg);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-3xl);
+  margin-bottom: var(--spacing-4xl);
+}
+
+.section {
+  background: var(--color-background-card);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+.sectionHeader {
+  padding: var(--spacing-2xl);
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-neutral-50);
+}
+
+.sectionTitle {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  margin: 0;
+}
+
+.sectionContent {
+  padding: var(--spacing-2xl);
+}
+
+.recentActivity {
+  grid-column: 1 / -1;
+}
+
+.activityList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.activityItem {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-lg);
+  padding: var(--spacing-lg) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.activityItem:last-child {
+  border-bottom: none;
+}
+
+.activityIcon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-lg);
+  flex-shrink: 0;
+}
+
+.activityIcon.success {
+  background: var(--color-success-light);
+  color: var(--color-success);
+}
+
+.activityIcon.error {
+  background: var(--color-error-light);
+  color: var(--color-error);
+}
+
+.activityContent {
+  flex: 1;
+}
+
+.activityTitle {
+  font-weight: var(--font-weight-medium);
+  margin-bottom: var(--spacing-xs);
+}
+
+.activityMeta {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.gamesList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.gameItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-lg) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.gameItem:last-child {
+  border-bottom: none;
+}
+
+.gameInfo {
+  flex: 1;
+}
+
+.gameOpponent {
+  font-weight: var(--font-weight-medium);
+  margin-bottom: var(--spacing-xs);
+}
+
+.gameMeta {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.gameStatus {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xs) var(--spacing-md);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+.gameStatus.clean {
+  background: var(--color-success-light);
+  color: var(--color-success);
+}
+
+.gameStatus.deviation {
+  background: var(--color-error-light);
+  color: var(--color-error);
+}
+
+.filters {
+  background: var(--color-background-card);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+  padding: var(--spacing-2xl);
+}
+
+.filtersTitle {
+  margin-bottom: var(--spacing-xl);
+}
+
+.filterGroup {
+  margin-bottom: var(--spacing-xl);
+}
+
+.filterGroup:last-child {
+  margin-bottom: 0;
+}
+
+.filterLabel {
+  display: block;
+  margin-bottom: var(--spacing-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
+}
+
+.filterSelect {
+  width: 100%;
+  padding: var(--spacing-md) var(--spacing-lg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-background-input);
+  font-size: var(--font-size-base);
+  cursor: pointer;
+}
+
+.filterSelect:focus {
+  border-color: var(--color-border-focus);
+  background: var(--color-background-card);
+  box-shadow: 0 0 0 3px var(--color-primary-light);
+}
+
+.emptyState {
+  text-align: center;
+  padding: var(--spacing-4xl);
+  color: var(--color-text-muted);
+}
+
+.emptyStateIcon {
+  font-size: var(--font-size-4xl);
+  margin-bottom: var(--spacing-xl);
+  opacity: 0.5;
+}
+
+.emptyStateText {
+  font-size: var(--font-size-lg);
+  margin-bottom: var(--spacing-lg);
+}
+
+.emptyStateSubtext {
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-relaxed);
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
+  .dashboard {
+    padding: 0 var(--spacing-lg);
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-2xl);
+  }
+
+  .activityItem {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+  }
+
+  .gameItem {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+  }
+}

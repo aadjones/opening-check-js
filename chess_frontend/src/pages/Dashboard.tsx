@@ -1,0 +1,159 @@
+import React from 'react';
+import { usePageTitle } from '../hooks/usePageTitle';
+import styles from './Dashboard.module.css';
+
+const Dashboard: React.FC = () => {
+  usePageTitle('Dashboard');
+  // Mock data for demonstration
+  const recentActivity = [
+    {
+      id: 1,
+      type: 'deviation',
+      title: "Deviation in King's Indian Defense",
+      description: 'Move 6: played h3 instead of Be2',
+      time: '2 hours ago',
+      opponent: 'ChessMaster2000',
+    },
+    {
+      id: 2,
+      type: 'clean',
+      title: 'Perfect prep execution',
+      description: 'Followed Najdorf line for 12 moves',
+      time: '1 day ago',
+      opponent: 'BlitzKing99',
+    },
+  ];
+
+  const recentGames = [
+    {
+      id: 1,
+      opponent: 'ChessMaster2000',
+      rating: 1650,
+      timeControl: 'Blitz 5+3',
+      result: 'Loss',
+      status: 'deviation',
+      time: '2 hours ago',
+    },
+    {
+      id: 2,
+      opponent: 'BlitzKing99',
+      rating: 1580,
+      timeControl: 'Blitz 3+2',
+      result: 'Win',
+      status: 'clean',
+      time: '1 day ago',
+    },
+    {
+      id: 3,
+      opponent: 'PawnStorm',
+      rating: 1720,
+      timeControl: 'Rapid 10+0',
+      result: 'Draw',
+      status: 'clean',
+      time: '2 days ago',
+    },
+  ];
+
+  return (
+    <div className={styles.dashboard}>
+      <header className={styles.header}>
+        <h1 className={styles.title}>Dashboard</h1>
+        <p className={styles.subtitle}>Welcome back! Here's your recent chess activity.</p>
+      </header>
+
+      <div className={styles.grid}>
+        <section className={`${styles.section} ${styles.recentActivity}`}>
+          <div className={styles.sectionHeader}>
+            <h2 className={styles.sectionTitle}>Recent Activity</h2>
+          </div>
+          <div className={styles.sectionContent}>
+            {recentActivity.length > 0 ? (
+              <ul className={styles.activityList}>
+                {recentActivity.map(activity => (
+                  <li key={activity.id} className={styles.activityItem}>
+                    <div className={`${styles.activityIcon} ${styles[activity.type]}`}>
+                      {activity.type === 'deviation' ? '❌' : '✅'}
+                    </div>
+                    <div className={styles.activityContent}>
+                      <div className={styles.activityTitle}>{activity.title}</div>
+                      <div className={styles.activityMeta}>
+                        vs {activity.opponent} • {activity.time}
+                      </div>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <div className={styles.emptyState}>
+                <div className={styles.emptyStateIcon}>🎯</div>
+                <div className={styles.emptyStateText}>No recent activity</div>
+                <div className={styles.emptyStateSubtext}>
+                  Play some games on Lichess to see your prep tracking here!
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
+
+        <section className={styles.section}>
+          <div className={styles.sectionHeader}>
+            <h2 className={styles.sectionTitle}>Recent Games</h2>
+          </div>
+          <div className={styles.sectionContent}>
+            {recentGames.length > 0 ? (
+              <ul className={styles.gamesList}>
+                {recentGames.map(game => (
+                  <li key={game.id} className={styles.gameItem}>
+                    <div className={styles.gameInfo}>
+                      <div className={styles.gameOpponent}>
+                        {game.opponent} ({game.rating})
+                      </div>
+                      <div className={styles.gameMeta}>
+                        {game.timeControl} • {game.time}
+                      </div>
+                    </div>
+                    <div className={`${styles.gameStatus} ${styles[game.status]}`}>
+                      {game.status === 'clean' ? '✅' : '❌'}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <div className={styles.emptyState}>
+                <div className={styles.emptyStateIcon}>♟️</div>
+                <div className={styles.emptyStateText}>No games yet</div>
+                <div className={styles.emptyStateSubtext}>
+                  Your recent games will appear here once you start playing.
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
+      </div>
+
+      <section className={styles.filters}>
+        <h3 className={styles.filtersTitle}>Quick Filters</h3>
+        <div className={styles.filterGroup}>
+          <label className={styles.filterLabel}>Time Control</label>
+          <select className={styles.filterSelect}>
+            <option value="all">All Games</option>
+            <option value="bullet">Bullet</option>
+            <option value="blitz">Blitz</option>
+            <option value="rapid">Rapid</option>
+            <option value="classical">Classical</option>
+          </select>
+        </div>
+        <div className={styles.filterGroup}>
+          <label className={styles.filterLabel}>Date Range</label>
+          <select className={styles.filterSelect}>
+            <option value="week">This Week</option>
+            <option value="month">This Month</option>
+            <option value="all">All Time</option>
+          </select>
+        </div>
+      </section>
+    </div>
+  );
+};
+
+export default Dashboard;

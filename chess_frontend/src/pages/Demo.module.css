@@ -1,0 +1,103 @@
+.demo {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-lg);
+}
+
+.header {
+  margin-bottom: var(--spacing-4xl);
+  text-align: center;
+}
+
+.title {
+  margin-bottom: var(--spacing-lg);
+  color: var(--color-text);
+}
+
+.subtitle {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-lg);
+  line-height: var(--line-height-relaxed);
+}
+
+.formCard {
+  background: var(--color-background-card);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+  padding: var(--spacing-3xl);
+  margin-bottom: var(--spacing-4xl);
+}
+
+.resultsSection {
+  background: var(--color-background-card);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+.resultsSectionHeader {
+  padding: var(--spacing-2xl);
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-neutral-50);
+}
+
+.resultsSectionTitle {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  margin: 0;
+  color: var(--color-text);
+}
+
+.resultsSectionContent {
+  padding: var(--spacing-2xl);
+}
+
+.loadingMessage {
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-lg);
+  padding: var(--spacing-3xl);
+}
+
+.emptyMessage {
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-base);
+  padding: var(--spacing-2xl);
+  line-height: var(--line-height-relaxed);
+}
+
+.errorMessage {
+  background: var(--color-error-light);
+  color: var(--color-error);
+  border: 1px solid var(--color-error-border);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  margin: var(--spacing-2xl) 0;
+  font-weight: var(--font-weight-medium);
+}
+
+.resultsGrid {
+  display: grid;
+  gap: var(--spacing-2xl);
+  margin-top: var(--spacing-lg);
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
+  .demo {
+    padding: 0 var(--spacing-lg);
+  }
+
+  .formCard {
+    padding: var(--spacing-2xl);
+  }
+
+  .title {
+    font-size: var(--font-size-2xl);
+  }
+
+  .subtitle {
+    font-size: var(--font-size-base);
+  }
+}

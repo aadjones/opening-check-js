@@ -3,17 +3,7 @@ import React, { useState, useEffect, useCallback } from 'react'; // Added useCal
 import { Chessboard } from 'react-chessboard';
 import type { Arrow, Square, BoardOrientation } from 'react-chessboard/dist/chessboard/types';
 import { Chess } from 'chess.js'; // <--- IMPORT chess.js
-
-export interface ApiDeviationResult {
-  whole_move_number: number;
-  deviation_san: string;
-  reference_san: string;
-  player_color: string;
-  board_fen_before_deviation: string;
-  reference_uci: string | null;
-  deviation_uci: string | null;
-  pgn: string; // Added PGN field
-}
+import type { ApiDeviationResult } from '../../types';
 
 interface DeviationDisplayProps {
   result: ApiDeviationResult | null;

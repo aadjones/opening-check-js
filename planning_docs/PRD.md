@@ -90,8 +90,8 @@ Deviations are immutable. If you later edit your study, the system keeps the ori
 | 🤝 vs. BigBlunder420 (1740) — Blitz 5+3 — Result: Loss |  
 \-----------------------------------------------------------
 
-    You played:   6\. h3     ❌  
-    Expected:     6\. Be2    ✅
+    You played:   6.h3     ❌  
+    Expected:     6.Be2    ✅
 
 \<chessboard view at move 6 — white to move\>
 
@@ -146,7 +146,7 @@ Deviations are immutable. If you later edit your study, the system keeps the ori
 |                                                         |  
 | ✅ Automatic deviation detection                        |  
 | ✅ Review what you forgot, right after you forget it     |  
-| ✅ Stay aligned with your own prep (no judgment)         |  
+| ✅ Stay aligned with your own prep ()         |  
 |                                                         |  
 | \[ Connect with Lichess \]                                |  
 |                                                         |  
@@ -187,8 +187,8 @@ Deviations are immutable. If you later edit your study, the system keeps the ori
 |                                                         |  
 | \[ Your email: \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ \]                |  
 |                                                         |  
-| \[ ✅ Yes, send me updates \]                             |  
-| \[ Maybe later \]                                         |  
+| \[ ✅ \ \ Yes, send \ me \ updates \]                             |  
+| \[ Maybe \ later \]                                         |  
 \-----------------------------------------------------------
 
 ## **🧭 Typical User Journey**

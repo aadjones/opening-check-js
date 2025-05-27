@@ -1,0 +1,6 @@
+export { default as LandingPage } from './LandingPage';
+export { default as Dashboard } from './Dashboard';
+export { default as DeviationDetail } from './DeviationDetail';
+export { default as Settings } from './Settings';
+export { default as Analysis } from './Analysis';
+export { default as Demo } from './Demo';
