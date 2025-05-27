@@ -32,7 +32,9 @@ h1 {
   margin-right: auto;
 }
 
-input[type="text"], input[type="number"], input[type="url"] {
+input[type='text'],
+input[type='number'],
+input[type='url'] {
   width: 100%;
   box-sizing: border-box;
   padding: 0.9em 1em;
@@ -60,7 +62,9 @@ button {
   cursor: pointer;
   margin-top: 1em;
   box-shadow: 0 2px 8px 0 rgba(34, 49, 74, 0.07);
-  transition: background 0.2s, transform 0.1s;
+  transition:
+    background 0.2s,
+    transform 0.1s;
 }
 button:hover {
   background: linear-gradient(90deg, #3a6ee8 0%, #5b8def 100%);
@@ -138,42 +142,6 @@ button:hover {
     padding: 1.8rem 1.2rem 1.5rem 1.2rem;
     max-width: 90%;
   }
-}
-
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
-}
-
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
-
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
 }
 
 .analysis-form {
@@ -292,7 +260,7 @@ button:hover {
   padding: 0;
 }
 
-.move-slider input[type="range"] {
+.move-slider input[type='range'] {
   width: 100%;
   height: 4px;
   border-radius: 2px;
@@ -316,7 +284,7 @@ button:hover {
   margin-left: 7px;
 }
 
-.move-slider input[type="range"]::-webkit-slider-thumb {
+.move-slider input[type='range']::-webkit-slider-thumb {
   appearance: none;
   width: 14px;
   height: 14px;
@@ -324,19 +292,19 @@ button:hover {
   background: #5b8def;
   cursor: pointer;
   border: 1px solid #fff;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
   z-index: 20;
   position: relative;
 }
 
-.move-slider input[type="range"]::-moz-range-thumb {
+.move-slider input[type='range']::-moz-range-thumb {
   width: 14px;
   height: 14px;
   border-radius: 50%;
   background: #5b8def;
   cursor: pointer;
   border: 1px solid #fff;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
   z-index: 20;
   position: relative;
 }
@@ -354,18 +322,18 @@ button:hover {
   .navigation-controls {
     gap: 0.2rem;
   }
-  
+
   .navigation-controls button {
     padding: 0.35em 0.6em;
     font-size: 0.8em;
     min-width: 35px;
   }
-  
+
   .deviation-button {
     min-width: 65px !important;
     font-size: 0.75em !important;
   }
-  
+
   .result-card {
     min-width: 240px;
     max-width: 100%;

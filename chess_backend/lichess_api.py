@@ -3,17 +3,19 @@ This module handles requests to the Lichess API to get the last games from a use
 and get study data from a Lichess study.
 """
 
-from typing import Optional
-import typing
-import chess.pgn
 import dataclasses
+import logging
 import re
+from typing import Optional
+
+import chess.pgn
 import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
+
 import pgn_utils
-from streamlit.logger import get_logger
-LOG = get_logger(__name__)
+
+LOG = logging.getLogger(__name__)
 
 
 @dataclasses.dataclass

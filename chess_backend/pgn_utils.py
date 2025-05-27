@@ -2,8 +2,9 @@
 This module provides utility functions for pgn files.
 """
 
-import chess.pgn
 import io
+
+import chess.pgn
 
 
 def pgn_string_to_game(pgn_str: str) -> chess.pgn.Game:

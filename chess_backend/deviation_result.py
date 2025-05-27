@@ -3,8 +3,9 @@ This module contains the DeviationResult class for representing when your chess 
 first deviates from a reference game.
 """
 
-import chess
 from typing import Optional
+
+import chess
 
 
 class DeviationResult:
@@ -36,7 +37,7 @@ class DeviationResult:
         self.board = chess.Board() if board is None else board
         self.pgn = pgn
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             f"DeviationResult(whole_move_number={self.whole_move_number}, "
             f"deviation_san={self.deviation_san!r}, "
@@ -45,7 +46,7 @@ class DeviationResult:
             f"board_fen={self.board.fen()!r})"
         )
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
         if not isinstance(other, DeviationResult):
             # don't attempt to compare against unrelated types
             return NotImplemented

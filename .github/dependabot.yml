@@ -1,0 +1,58 @@
+version: 2
+updates:
+  # Python dependencies (Backend)
+  - package-ecosystem: "pip"
+    directory: "/chess_backend"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "adj"  # Replace with your GitHub username
+    assignees:
+      - "adj"  # Replace with your GitHub username
+    commit-message:
+      prefix: "deps(backend)"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "backend"
+
+  # Node.js dependencies (Frontend)
+  - package-ecosystem: "npm"
+    directory: "/chess_frontend"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "adj"  # Replace with your GitHub username
+    assignees:
+      - "adj"  # Replace with your GitHub username
+    commit-message:
+      prefix: "deps(frontend)"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "frontend"
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 3
+    reviewers:
+      - "adj"  # Replace with your GitHub username
+    assignees:
+      - "adj"  # Replace with your GitHub username
+    commit-message:
+      prefix: "deps(ci)"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "ci" 

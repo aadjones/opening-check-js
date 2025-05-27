@@ -30,13 +30,7 @@ const AnalysisForm: React.FC<AnalysisFormProps> = ({
     <form className="analysis-form" onSubmit={handleSubmit}>
       <div className="form-group">
         <label htmlFor="username">Enter your Lichess username</label>
-        <input
-          type="text"
-          id="username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          required
-        />
+        <input type="text" id="username" value={username} onChange={e => setUsername(e.target.value)} required />
       </div>
       <div className="form-group">
         <label htmlFor="maxGames">Enter number of games to analyze</label>
@@ -44,7 +38,7 @@ const AnalysisForm: React.FC<AnalysisFormProps> = ({
           type="number"
           id="maxGames"
           value={maxGames}
-          onChange={(e) => setMaxGames(e.target.value)}
+          onChange={e => setMaxGames(e.target.value)}
           required
           min="1"
         />
@@ -55,7 +49,7 @@ const AnalysisForm: React.FC<AnalysisFormProps> = ({
           type="url"
           id="studyUrlWhite"
           value={studyUrlWhite}
-          onChange={(e) => setStudyUrlWhite(e.target.value)}
+          onChange={e => setStudyUrlWhite(e.target.value)}
           required
         />
       </div>
@@ -65,7 +59,7 @@ const AnalysisForm: React.FC<AnalysisFormProps> = ({
           type="url"
           id="studyUrlBlack"
           value={studyUrlBlack}
-          onChange={(e) => setStudyUrlBlack(e.target.value)}
+          onChange={e => setStudyUrlBlack(e.target.value)}
           required
         />
       </div>

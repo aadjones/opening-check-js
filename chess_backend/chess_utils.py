@@ -4,7 +4,9 @@ This module provides utility functions for chess analysis.
 
 import os
 from typing import Optional
+
 import chess.pgn
+
 from deviation_result import DeviationResult
 from lichess_api import Study
 
@@ -30,13 +32,9 @@ def compare_moves(
     :param whole_move_number: int, the whole move number for display.
     :return: DeviationResult, or None if there's no deviation.
     """
-    illegal_msg = (
-        f"Illegal move: {recent_move} at position {recent_board.fen()}"
-    )
+    illegal_msg = f"Illegal move: {recent_move} at position {recent_board.fen()}"
     assert recent_move in recent_board.legal_moves, illegal_msg
-    if (
-        my_color != player_color
-    ):  # If the opponent was first to deviate, return None
+    if my_color != player_color:  # If the opponent was first to deviate, return None
         return None
     deviation_san = recent_board.san(recent_move)
     reference_san = repertoire_board.san(rep_move)
@@ -69,9 +67,7 @@ def find_deviation(
     my_color = get_player_color(recent_game, username)
 
     # Iterate through moves of both games simultaneously
-    moves_list = enumerate(
-        zip(repertoire_moves, my_game_moves, strict=False), start=1
-    )
+    moves_list = enumerate(zip(repertoire_moves, my_game_moves, strict=False), start=1)
     for half_move_number, (rep_move, recent_move) in moves_list:
         player_color = "White" if recent_board.turn else "Black"
         # Whole move count for display; move_number will be measured in ply (half-moves)
@@ -146,9 +142,7 @@ def find_deviation_in_entire_study_white_and_black(
     return None
 
 
-def get_player_color(
-    recent_game: chess.pgn.Game, player_name: str
-) -> str:
+def get_player_color(recent_game: chess.pgn.Game, player_name: str) -> str:
     """
     Determines the color the player was playing as in a given game.
 
@@ -185,12 +179,12 @@ def write_pgn(pgn_data: str, filename: str) -> None:
     print(f"PGN data successfully saved to: {full_path}")
 
 
-def read_pgn(pgn_file_path: str) -> chess.pgn.Game:
+def read_pgn(pgn_file_path: str) -> Optional[chess.pgn.Game]:
     """
     Reads a PGN file and returns the corresponding chess game object.
 
     :param pgn_file_path: str, the path to the PGN file
-    :return: chess.pgn.Game, the chess game object read from the PGN file
+    :return: chess.pgn.Game, the chess game object read from the PGN file, or None if no game found
     """
     with open(pgn_file_path, "r", encoding="utf-8") as pgn_file:
         return chess.pgn.read_game(pgn_file)
