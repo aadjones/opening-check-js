@@ -1,5 +1,5 @@
 -- Chess Opening Trainer Database Schema
--- Run this in your Supabase SQL Editor
+-- Initial migration for the chess opening deviation analyzer
 
 -- Enable Row Level Security by default
 ALTER DEFAULT PRIVILEGES REVOKE EXECUTE ON FUNCTIONS FROM PUBLIC;
@@ -100,18 +100,4 @@ CREATE INDEX idx_lichess_studies_user_id ON public.lichess_studies(user_id);
 CREATE INDEX idx_opening_deviations_user_id ON public.opening_deviations(user_id);
 CREATE INDEX idx_opening_deviations_study_id ON public.opening_deviations(study_id);
 CREATE INDEX idx_review_queue_user_id ON public.review_queue(user_id);
-CREATE INDEX idx_review_queue_next_review ON public.review_queue(next_review_at);
-
--- Sample data for testing (optional)
--- You can uncomment this after you've signed up and have a user ID
-
-/*
--- Insert a sample study (replace the user_id with your actual user ID)
-INSERT INTO public.lichess_studies (user_id, lichess_study_id, study_name, study_url) 
-VALUES (
-    'your-user-id-here',
-    'sample123',
-    'Sicilian Defense Basics',
-    'https://lichess.org/study/sample123'
-);
-*/ 
+CREATE INDEX idx_review_queue_next_review ON public.review_queue(next_review_at); 
