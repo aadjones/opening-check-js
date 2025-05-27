@@ -17,14 +17,14 @@ Breaking down the OutOfBook frontend architecture into small, isolated, testable
 ## Phase 1: Foundation (Tasks 1-8)
 
 ### Task 1: SETUP - Install and Configure React Router
-- [ ] **Goal**: Add client-side routing capability
-- [ ] **Files**: `package.json`, `src/main.tsx`
-- [ ] **Success Criteria**: 
-  - [ ] React Router v6 installed
-  - [ ] Basic router setup in main.tsx
-  - [ ] Can navigate between routes programmatically
-- [ ] **Tests**: Router navigation unit test
-- [ ] **Estimated Time**: 30 minutes
+- [x] **Goal**: Add client-side routing capability
+- [x] **Files**: `package.json`, `src/main.tsx`
+- [x] **Success Criteria**: 
+  - [x] React Router v6 installed
+  - [x] Basic router setup in main.tsx
+  - [x] Can navigate between routes programmatically
+- [x] **Tests**: Router navigation unit test
+- [x] **Estimated Time**: 30 minutes
 
 ### Task 2: ROUTING - Create Basic Route Structure  
 - [ ] **Goal**: Define all main routes with placeholder components
