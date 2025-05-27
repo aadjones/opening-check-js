@@ -11,12 +11,8 @@ function App() {
   // State for form inputs
   const [username, setUsername] = useState<string>('Jrjrjr4');
   const [maxGames, setMaxGames] = useState<string>('1');
-  const [studyUrlWhite, setStudyUrlWhite] = useState<string>(
-    'https://lichess.org/study/14RZiFdX/fvGLXd1D'
-  );
-  const [studyUrlBlack, setStudyUrlBlack] = useState<string>(
-    'https://lichess.org/study/bve0Qw48/7ZVSY8Po'
-  );
+  const [studyUrlWhite, setStudyUrlWhite] = useState<string>('https://lichess.org/study/14RZiFdX/fvGLXd1D');
+  const [studyUrlBlack, setStudyUrlBlack] = useState<string>('https://lichess.org/study/bve0Qw48/7ZVSY8Po');
 
   // State for API response and loading/error messages
   const [analysisResults, setAnalysisResults] = useState<Array<ApiDeviationResult | null>>([]);
@@ -89,13 +85,10 @@ function App() {
           <p>No analysis performed yet, or no deviations found.</p>
         )}
         <div className="results-grid">
-          {!isLoading && analysisResults.length > 0 &&
+          {!isLoading &&
+            analysisResults.length > 0 &&
             analysisResults.map((result, index) => (
-              <DeviationDisplay
-                key={index}
-                result={result}
-                gameNumber={index + 1}
-              />
+              <DeviationDisplay key={index} result={result} gameNumber={index + 1} />
             ))}
         </div>
       </div>

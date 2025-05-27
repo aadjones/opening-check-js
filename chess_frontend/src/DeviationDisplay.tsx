@@ -30,10 +30,8 @@ const uciToArrow = (uciMove: string | null, color: string): Arrow | null => {
 const DeviationDisplay: React.FC<DeviationDisplayProps> = ({ result, gameNumber }) => {
   // State for the current board position (FEN)
   const [currentFen, setCurrentFen] = useState<string | undefined>(undefined);
-  const [chessJsBoard, setChessJsBoard] = useState<Chess | null>(null);
   const [gameHistory, setGameHistory] = useState<string[]>([]);
   const [currentMoveIndex, setCurrentMoveIndex] = useState<number>(0);
-  const [moves, setMoves] = useState<string[]>([]);
   const [isFocused, setIsFocused] = useState<boolean>(false);
   const [whitePlayer, setWhitePlayer] = useState<string>('');
   const [blackPlayer, setBlackPlayer] = useState<string>('');
@@ -45,23 +43,22 @@ const DeviationDisplay: React.FC<DeviationDisplayProps> = ({ result, gameNumber 
       chess.loadPgn(pgn);
       const history = chess.history();
       const positions: string[] = [];
-      
+
       // Extract player names from PGN headers
       const whiteMatch = pgn.match(/\[White "([^"]+)"\]/);
       const blackMatch = pgn.match(/\[Black "([^"]+)"\]/);
       setWhitePlayer(whiteMatch ? whiteMatch[1] : 'White');
       setBlackPlayer(blackMatch ? blackMatch[1] : 'Black');
-      
+
       // Reset and replay to get all positions
       chess.reset();
       positions.push(chess.fen()); // Starting position
-      
+
       for (const move of history) {
         chess.move(move);
         positions.push(chess.fen());
       }
-      
-      setMoves(history);
+
       setGameHistory(positions);
       return positions;
     } catch (error) {
@@ -71,14 +68,15 @@ const DeviationDisplay: React.FC<DeviationDisplayProps> = ({ result, gameNumber 
   }, []);
 
   // Navigate to specific move
-  const goToMove = useCallback((moveIndex: number) => {
-    if (moveIndex >= 0 && moveIndex < gameHistory.length) {
-      setCurrentMoveIndex(moveIndex);
-      setCurrentFen(gameHistory[moveIndex]);
-      const chess = new Chess(gameHistory[moveIndex]);
-      setChessJsBoard(chess);
-    }
-  }, [gameHistory]);
+  const goToMove = useCallback(
+    (moveIndex: number) => {
+      if (moveIndex >= 0 && moveIndex < gameHistory.length) {
+        setCurrentMoveIndex(moveIndex);
+        setCurrentFen(gameHistory[moveIndex]);
+      }
+    },
+    [gameHistory]
+  );
 
   // Navigation functions
   const goToStart = useCallback(() => goToMove(0), [goToMove]);
@@ -94,28 +92,31 @@ const DeviationDisplay: React.FC<DeviationDisplayProps> = ({ result, gameNumber 
   }, [result, gameHistory.length, goToMove]);
 
   // Keyboard event handler - only works when this component is focused
-  const handleKeyPress = useCallback((event: KeyboardEvent) => {
-    if (!isFocused) return; // Only handle keys when this game is focused
-    
-    switch (event.key) {
-      case 'ArrowLeft':
-        event.preventDefault();
-        goToPrevious();
-        break;
-      case 'ArrowRight':
-        event.preventDefault();
-        goToNext();
-        break;
-      case 'Home':
-        event.preventDefault();
-        goToStart();
-        break;
-      case 'End':
-        event.preventDefault();
-        goToEnd();
-        break;
-    }
-  }, [goToPrevious, goToNext, goToStart, goToEnd, isFocused]);
+  const handleKeyPress = useCallback(
+    (event: KeyboardEvent) => {
+      if (!isFocused) return; // Only handle keys when this game is focused
+
+      switch (event.key) {
+        case 'ArrowLeft':
+          event.preventDefault();
+          goToPrevious();
+          break;
+        case 'ArrowRight':
+          event.preventDefault();
+          goToNext();
+          break;
+        case 'Home':
+          event.preventDefault();
+          goToStart();
+          break;
+        case 'End':
+          event.preventDefault();
+          goToEnd();
+          break;
+      }
+    },
+    [goToPrevious, goToNext, goToStart, goToEnd, isFocused]
+  );
 
   useEffect(() => {
     // Initialize when the result prop changes
@@ -124,17 +125,14 @@ const DeviationDisplay: React.FC<DeviationDisplayProps> = ({ result, gameNumber 
       // Auto-navigate to deviation position
       const deviationMoveIndex = (result.whole_move_number - 1) * 2 + (result.player_color === 'Black' ? 1 : 0);
       const targetIndex = Math.min(deviationMoveIndex, positions.length - 1);
-      
+
       setCurrentFen(positions[targetIndex]);
-      setChessJsBoard(new Chess(positions[targetIndex]));
       setCurrentMoveIndex(targetIndex);
     } else {
       const startFen = new Chess().fen();
       setCurrentFen(startFen);
-      setChessJsBoard(new Chess());
       setGameHistory([startFen]);
       setCurrentMoveIndex(0);
-      setMoves([]);
     }
   }, [result, parsePGN]);
 
@@ -166,16 +164,11 @@ const DeviationDisplay: React.FC<DeviationDisplayProps> = ({ result, gameNumber 
     }
   }
 
-  const currentMove = currentMoveIndex > 0 ? moves[currentMoveIndex - 1] : null;
-  const moveNumber = Math.ceil(currentMoveIndex / 2);
-  const isWhiteMove = currentMoveIndex % 2 === 1;
-  const currentPlayerName = isWhiteMove ? whitePlayer : blackPlayer;
-  
   // Determine opponent name (the player who is NOT the user)
   const opponentName = result.player_color === 'White' ? blackPlayer : whitePlayer;
 
   return (
-    <div 
+    <div
       className={`result-card ${isFocused ? 'focused' : ''}`}
       tabIndex={0}
       onFocus={() => setIsFocused(true)}
@@ -184,7 +177,7 @@ const DeviationDisplay: React.FC<DeviationDisplayProps> = ({ result, gameNumber 
     >
       <h3>Game {gameNumber}</h3>
       <div className="opponent-name">{opponentName}</div>
-      
+
       <div className="chess-board-container">
         <Chessboard
           position={currentFen}
@@ -220,12 +213,12 @@ const DeviationDisplay: React.FC<DeviationDisplayProps> = ({ result, gameNumber 
             min="0"
             max={gameHistory.length - 1}
             value={currentMoveIndex}
-            onChange={(e) => goToMove(parseInt(e.target.value))}
+            onChange={e => goToMove(parseInt(e.target.value))}
           />
-          <div 
+          <div
             className="deviation-marker"
             style={{
-              left: `${((result.whole_move_number - 1) * 2 + (result.player_color === 'Black' ? 1 : 0)) / Math.max(gameHistory.length - 1, 1) * 100}%`
+              left: `${(((result.whole_move_number - 1) * 2 + (result.player_color === 'Black' ? 1 : 0)) / Math.max(gameHistory.length - 1, 1)) * 100}%`,
             }}
             title="Deviation position"
           />
