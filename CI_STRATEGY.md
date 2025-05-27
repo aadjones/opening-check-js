@@ -12,11 +12,6 @@ Every time you push code or make a PR, GitHub automatically:
 ## Files Added
 
 - `.github/workflows/ci.yml` - The main CI pipeline
-- `.github/dependabot.yml` - Auto-updates dependencies weekly
-
-## What Dependabot Does
-
-Creates PRs like "Bump react from 19.1.0 to 19.2.0" when new versions come out. You can review and merge them. Keeps your dependencies secure and up-to-date.
 
 ## Local Development
 
