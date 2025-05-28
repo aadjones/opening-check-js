@@ -3,6 +3,16 @@
 ## Overview
 Breaking down the OutOfBook frontend architecture into small, isolated, testable task loops. Each task should be completable in 1-2 hours and have clear success criteria.
 
+## Architecture Decision: Auth.js + Lichess OAuth
+**Status**: Accepted - 27 May 2025
+
+**Key Changes**:
+- Auth.js (NextAuth) replaces Supabase Auth for authentication
+- Lichess OAuth 2.0 with PKCE as sole identity provider
+- Supabase remains as Postgres-only database
+- Custom JWT signing for Supabase RLS compatibility
+- No client secrets required, PKCE mandatory
+
 ## Task Loop Categories
 - **SETUP**: Infrastructure and tooling
 - **AUTH**: Authentication and user management  
@@ -14,7 +24,7 @@ Breaking down the OutOfBook frontend architecture into small, isolated, testable
 
 ---
 
-## Phase 1: Foundation (Tasks 1-8)
+## Phase 1: Foundation (Tasks 1-9)
 
 ### Task 1: SETUP - Install and Configure React Router
 - [x] **Goal**: Add client-side routing capability
@@ -49,63 +59,86 @@ Breaking down the OutOfBook frontend architecture into small, isolated, testable
 - [x] **Tests**: Layout rendering and responsive behavior
 - [x] **Estimated Time**: 1 hour
 
-### Task 4: AUTH - Install and Configure Supabase Auth
-- [ ] **Goal**: Set up authentication infrastructure
-- [ ] **Files**: `src/lib/supabase.ts`, `src/contexts/AuthContext.tsx`
+### Task 4: AUTH - Install and Configure Auth.js with Lichess Provider
+- [ ] **Goal**: Set up Auth.js with custom Lichess OAuth provider
+- [ ] **Files**: `package.json`, `src/lib/auth/lichess.ts`, `src/lib/auth/config.ts`
 - [ ] **Success Criteria**:
-  - [ ] Supabase client configured
-  - [ ] Auth context provides user state
-  - [ ] Login/logout functions available
-- [ ] **Tests**: Auth context state management
+  - [ ] Auth.js (NextAuth) installed
+  - [ ] Custom Lichess OAuth provider configured
+  - [ ] PKCE flow implemented (no client secret)
+  - [ ] Environment variables configured
+- [ ] **Tests**: OAuth provider configuration
+- [ ] **Estimated Time**: 1.5 hours
+
+### Task 4b: AUTH - Create JWT Helper for Supabase Compatibility
+- [ ] **Goal**: Sign custom JWTs for Supabase RLS
+- [ ] **Files**: `src/lib/auth/supaToken.ts`
+- [ ] **Success Criteria**:
+  - [ ] Signs JWTs with supabase_jwt_secret
+  - [ ] Includes required claims (sub, role, lichess)
+  - [ ] Compatible with Supabase RLS
+- [ ] **Tests**: JWT signing and verification
 - [ ] **Estimated Time**: 1 hour
 
 ### Task 5: COMPONENTS - Create Protected Route Component
-- [ ] **Goal**: Route wrapper that requires authentication
+- [ ] **Goal**: Route wrapper that requires Auth.js session
 - [ ] **Files**: `src/components/ProtectedRoute.tsx`
 - [ ] **Success Criteria**:
+  - [ ] Uses Auth.js useSession hook
   - [ ] Redirects unauthenticated users to landing
-  - [ ] Passes through authenticated users
-  - [ ] Shows loading state during auth check
+  - [ ] Shows loading state during session check
+  - [ ] Sets Supabase session with custom JWT
 - [ ] **Tests**: Authentication flow scenarios
-- [ ] **Estimated Time**: 45 minutes
+- [ ] **Estimated Time**: 1 hour
 
 ### Task 6: PAGES - Create Landing Page
-- [ ] **Goal**: Marketing page with OAuth login
+- [ ] **Goal**: Marketing page with Lichess OAuth login
 - [ ] **Files**: `src/pages/LandingPage.tsx`
 - [ ] **Success Criteria**:
   - [ ] Matches PRD wireframe design
-  - [ ] "Connect with Lichess" button
+  - [ ] "Connect with Lichess" button using Auth.js signIn
   - [ ] Demo mode link
   - [ ] Responsive design
-- [ ] **Tests**: Component rendering and button interactions
+- [ ] **Tests**: Component rendering and Auth.js integration
 - [ ] **Estimated Time**: 1.5 hours
 
 ### Task 7: PAGES - Create Onboarding Flow
-- [ ] **Goal**: Study selection after login
+- [ ] **Goal**: Study selection after Lichess login
 - [ ] **Files**: `src/pages/OnboardingPage.tsx`, `src/components/StudySelector.tsx`
 - [ ] **Success Criteria**:
   - [ ] Study URL input fields (White/Black)
   - [ ] Validation for Lichess study URLs
   - [ ] "Start Tracking" button
-  - [ ] Saves to user profile
+  - [ ] Saves to user profile in Supabase
 - [ ] **Tests**: Form validation and submission
 - [ ] **Estimated Time**: 2 hours
 
-### Task 8: SETUP - Create Custom Hooks for API Calls
-- [ ] **Goal**: Reusable data fetching patterns
-- [ ] **Files**: `src/hooks/useAuth.ts`, `src/hooks/useDeviations.ts`
+### Task 8: SETUP - Create Custom Hooks for Auth.js Integration
+- [ ] **Goal**: Reusable patterns for Auth.js + Supabase
+- [ ] **Files**: `src/hooks/useAuth.ts`, `src/hooks/useSupabaseSession.ts`, `src/hooks/useDeviations.ts`
 - [ ] **Success Criteria**:
-  - [ ] useAuth hook for authentication state
+  - [ ] useAuth hook wrapping Auth.js useSession
+  - [ ] useSupabaseSession hook for RLS-compatible sessions
   - [ ] useDeviations hook for fetching user deviations
   - [ ] Proper loading/error states
-- [ ] **Tests**: Hook behavior with mocked API responses
+- [ ] **Tests**: Hook behavior with mocked sessions
+- [ ] **Estimated Time**: 1.5 hours
+
+### Task 9: SETUP - Update Database Schema for Auth.js
+- [ ] **Goal**: Create users table compatible with Auth.js
+- [ ] **Files**: Database migration, `src/lib/database.types.ts`
+- [ ] **Success Criteria**:
+  - [ ] Users table with lichess_username, access_token fields
+  - [ ] RLS policies updated for new JWT structure
+  - [ ] TypeScript types generated
+- [ ] **Tests**: Database schema validation
 - [ ] **Estimated Time**: 1 hour
 
 ---
 
-## Phase 2: Core Functionality (Tasks 9-15)
+## Phase 2: Core Functionality (Tasks 10-16)
 
-### Task 9: PAGES - Create Dashboard Page Structure
+### Task 10: PAGES - Create Dashboard Page Structure
 - [ ] **Goal**: Main dashboard layout without data
 - [ ] **Files**: `src/pages/DashboardPage.tsx`
 - [ ] **Success Criteria**:
@@ -116,7 +149,7 @@ Breaking down the OutOfBook frontend architecture into small, isolated, testable
 - [ ] **Tests**: Layout rendering and responsiveness
 - [ ] **Estimated Time**: 1 hour
 
-### Task 10: COMPONENTS - Create Deviation Summary Card
+### Task 11: COMPONENTS - Create Deviation Summary Card
 - [ ] **Goal**: Compact deviation display for dashboard
 - [ ] **Files**: `src/components/DeviationCard.tsx`
 - [ ] **Success Criteria**:
@@ -126,7 +159,7 @@ Breaking down the OutOfBook frontend architecture into small, isolated, testable
 - [ ] **Tests**: Card rendering with different data states
 - [ ] **Estimated Time**: 1 hour
 
-### Task 11: COMPONENTS - Create Games List Component
+### Task 12: COMPONENTS - Create Games List Component
 - [ ] **Goal**: Recent games with deviation status
 - [ ] **Files**: `src/components/GamesList.tsx`
 - [ ] **Success Criteria**:
@@ -136,7 +169,7 @@ Breaking down the OutOfBook frontend architecture into small, isolated, testable
 - [ ] **Tests**: List rendering and interaction
 - [ ] **Estimated Time**: 1 hour
 
-### Task 12: COMPONENTS - Migrate Existing Chess Board
+### Task 13: COMPONENTS - Migrate Existing Chess Board
 - [ ] **Goal**: Extract and enhance current DeviationDisplay
 - [ ] **Files**: `src/components/ChessBoard.tsx`, `src/components/MoveNavigation.tsx`
 - [ ] **Success Criteria**:
@@ -147,7 +180,7 @@ Breaking down the OutOfBook frontend architecture into small, isolated, testable
 - [ ] **Tests**: Board state management and navigation
 - [ ] **Estimated Time**: 2 hours
 
-### Task 13: PAGES - Create Deviation Detail Page
+### Task 14: PAGES - Create Deviation Detail Page
 - [ ] **Goal**: Full deviation review interface
 - [ ] **Files**: `src/pages/DeviationDetailPage.tsx`
 - [ ] **Success Criteria**:
@@ -158,17 +191,18 @@ Breaking down the OutOfBook frontend architecture into small, isolated, testable
 - [ ] **Tests**: Page functionality and user interactions
 - [ ] **Estimated Time**: 2 hours
 
-### Task 14: INTEGRATION - Connect Dashboard to Real Data
-- [ ] **Goal**: Wire dashboard to Supabase data
+### Task 15: INTEGRATION - Connect Dashboard to Real Data
+- [ ] **Goal**: Wire dashboard to Supabase data with Auth.js sessions
 - [ ] **Files**: Update dashboard components
 - [ ] **Success Criteria**:
-  - [ ] Fetches user's actual deviations
+  - [ ] Fetches user's actual deviations using RLS
   - [ ] Shows loading states
   - [ ] Handles empty states gracefully
-- [ ] **Tests**: Data loading scenarios
+  - [ ] Proper error handling for auth failures
+- [ ] **Tests**: Data loading scenarios with auth
 - [ ] **Estimated Time**: 1.5 hours
 
-### Task 15: COMPONENTS - Create Filter Controls
+### Task 16: COMPONENTS - Create Filter Controls
 - [ ] **Goal**: Time control and date filtering
 - [ ] **Files**: `src/components/FilterControls.tsx`
 - [ ] **Success Criteria**:
@@ -180,19 +214,19 @@ Breaking down the OutOfBook frontend architecture into small, isolated, testable
 
 ---
 
-## Phase 3: Polish & Enhancement (Tasks 16-20)
+## Phase 3: Polish & Enhancement (Tasks 17-22)
 
-### Task 16: PAGES - Create Settings Page
+### Task 17: PAGES - Create Settings Page
 - [ ] **Goal**: User preferences and notifications
 - [ ] **Files**: `src/pages/SettingsPage.tsx`
 - [ ] **Success Criteria**:
   - [ ] Email notification preferences
   - [ ] Study management
-  - [ ] Account settings
+  - [ ] Account settings with Lichess username display
 - [ ] **Tests**: Settings persistence
 - [ ] **Estimated Time**: 2 hours
 
-### Task 17: COMPONENTS - Add Loading States
+### Task 18: COMPONENTS - Add Loading States
 - [ ] **Goal**: Consistent loading UX across app
 - [ ] **Files**: `src/components/LoadingSpinner.tsx`, update all pages
 - [ ] **Success Criteria**:
@@ -202,7 +236,7 @@ Breaking down the OutOfBook frontend architecture into small, isolated, testable
 - [ ] **Tests**: Loading state rendering
 - [ ] **Estimated Time**: 1 hour
 
-### Task 18: COMPONENTS - Add Error Boundaries
+### Task 19: COMPONENTS - Add Error Boundaries
 - [ ] **Goal**: Graceful error handling
 - [ ] **Files**: `src/components/ErrorBoundary.tsx`
 - [ ] **Success Criteria**:
@@ -212,7 +246,17 @@ Breaking down the OutOfBook frontend architecture into small, isolated, testable
 - [ ] **Tests**: Error boundary behavior
 - [ ] **Estimated Time**: 45 minutes
 
-### Task 19: POLISH - Add Page Transitions
+### Task 20: AUTH - Add Session Management
+- [ ] **Goal**: Handle Auth.js session lifecycle
+- [ ] **Files**: `src/components/SessionProvider.tsx`, update App.tsx
+- [ ] **Success Criteria**:
+  - [ ] Wraps app with Auth.js SessionProvider
+  - [ ] Handles session refresh
+  - [ ] Manages Supabase session sync
+- [ ] **Tests**: Session lifecycle management
+- [ ] **Estimated Time**: 1 hour
+
+### Task 21: POLISH - Add Page Transitions
 - [ ] **Goal**: Smooth navigation experience
 - [ ] **Files**: Add Framer Motion, update router
 - [ ] **Success Criteria**:
@@ -222,15 +266,31 @@ Breaking down the OutOfBook frontend architecture into small, isolated, testable
 - [ ] **Tests**: Animation performance
 - [ ] **Estimated Time**: 1.5 hours
 
-### Task 20: INTEGRATION - Add Real-time Updates
+### Task 22: INTEGRATION - Add Real-time Updates
 - [ ] **Goal**: Live deviation notifications
 - [ ] **Files**: `src/hooks/useRealtimeDeviations.ts`
 - [ ] **Success Criteria**:
-  - [ ] Supabase real-time subscriptions
+  - [ ] Supabase real-time subscriptions with RLS
   - [ ] Dashboard updates automatically
   - [ ] Notification system
-- [ ] **Tests**: Real-time data flow
+- [ ] **Tests**: Real-time data flow with auth
 - [ ] **Estimated Time**: 2 hours
+
+---
+
+## Environment Variables Required
+
+```ini
+# Auth.js Configuration
+LICHESS_CLIENT_ID=<<our registered app id>>
+NEXTAUTH_SECRET=<<random 32+ char string>>
+NEXTAUTH_URL=http://localhost:3000
+
+# Supabase Configuration (Database Only)
+SUPABASE_URL=<<project url>>
+SUPABASE_ANON_KEY=<<anon key>>
+SUPABASE_JWT_SECRET=<<from project settings>>
+```
 
 ---
 
@@ -241,24 +301,28 @@ Breaking down the OutOfBook frontend architecture into small, isolated, testable
 - [ ] Hook behavior
 - [ ] Utility functions
 - [ ] Form validation
+- [ ] JWT signing/verification
 
 ### Integration Tests (After Phases)
-- [ ] Authentication flow
+- [ ] Auth.js + Lichess OAuth flow
+- [ ] Supabase RLS with custom JWTs
 - [ ] Data fetching and caching
-- [ ] Route navigation
+- [ ] Route navigation with auth
 - [ ] User workflows
 
 ### E2E Tests (Final)
-- [ ] Complete user journey
+- [ ] Complete user journey with Lichess login
 - [ ] Cross-browser compatibility
 - [ ] Mobile responsiveness
+- [ ] Session persistence
 
 ---
 
 ## Success Metrics
 
 ### Phase 1 Complete
-- [ ] User can log in with Lichess
+- [ ] User can log in with Lichess OAuth
+- [ ] Auth.js sessions work with Supabase RLS
 - [ ] User can select studies
 - [ ] All routes are accessible
 - [ ] Basic navigation works
@@ -277,10 +341,30 @@ Breaking down the OutOfBook frontend architecture into small, isolated, testable
 
 ---
 
+## Migration Notes
+
+### Removed Dependencies
+- [ ] Remove `@supabase/auth-helpers-react`
+- [ ] Remove Supabase Auth UI components
+
+### Added Dependencies
+- [ ] Add `next-auth` (Auth.js)
+- [ ] Add `jsonwebtoken` for JWT signing
+- [ ] Add `@types/jsonwebtoken`
+
+### Architecture Benefits
+- **Simplified Auth Flow**: Single OAuth provider reduces user friction
+- **No Secrets Management**: PKCE eliminates need for client secrets
+- **Supabase RLS**: Still get database-level security with custom JWTs
+- **Long-lived Tokens**: 1-year Lichess tokens reduce re-auth frequency
+
+---
+
 ## Notes
 
 - Each task should be in its own branch
 - All tasks include TypeScript interfaces
 - Maintain existing CSS styling approach
 - Focus on functionality over visual polish initially
-- Can parallelize some tasks after Phase 1 
+- Can parallelize some tasks after Phase 1
+- Test JWT compatibility with Supabase RLS thoroughly 
