@@ -16,9 +16,12 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
+    "@auth/core": "^0.39.1",
     "@supabase/supabase-js": "^2.49.8",
     "@types/react-router-dom": "^5.3.3",
     "chess.js": "^1.2.0",
+    "jsonwebtoken": "^9.0.2",
+    "next-auth": "^5.0.0-beta.28",
     "react": "^19.1.0",
     "react-chessboard": "^4.7.3",
     "react-dom": "^19.1.0",
@@ -30,6 +33,7 @@
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
     "@types/chess.js": "^0.13.7",
+    "@types/jsonwebtoken": "^9.0.9",
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",
     "@vitejs/plugin-react": "^4.4.1",
