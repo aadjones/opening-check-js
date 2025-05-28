@@ -60,36 +60,39 @@ Breaking down the OutOfBook frontend architecture into small, isolated, testable
 - [x] **Estimated Time**: 1 hour
 
 ### Task 4: AUTH - Install and Configure Auth.js with Lichess Provider
-- [ ] **Goal**: Set up Auth.js with custom Lichess OAuth provider
-- [ ] **Files**: `package.json`, `src/lib/auth/lichess.ts`, `src/lib/auth/config.ts`
-- [ ] **Success Criteria**:
-  - [ ] Auth.js (NextAuth) installed
-  - [ ] Custom Lichess OAuth provider configured
-  - [ ] PKCE flow implemented (no client secret)
-  - [ ] Environment variables configured
-- [ ] **Tests**: OAuth provider configuration
-- [ ] **Estimated Time**: 1.5 hours
+- [x] **Goal**: Set up Auth.js with custom Lichess OAuth provider
+- [x] **Files**: `package.json`, `src/lib/auth/lichess.ts`, `src/lib/auth/config.ts`
+- [x] **Success Criteria**:
+  - [x] Auth.js (NextAuth) installed
+  - [x] Custom Lichess OAuth provider configured
+  - [x] PKCE flow implemented (no client secret)
+  - [x] Environment variables configured
+- [x] **Tests**: OAuth provider configuration
+- [x] **Estimated Time**: 1.5 hours
 
 ### Task 4b: AUTH - Create JWT Helper for Supabase Compatibility
-- [ ] **Goal**: Sign custom JWTs for Supabase RLS
-- [ ] **Files**: `src/lib/auth/supaToken.ts`
-- [ ] **Success Criteria**:
-  - [ ] Signs JWTs with supabase_jwt_secret
-  - [ ] Includes required claims (sub, role, lichess)
-  - [ ] Compatible with Supabase RLS
-- [ ] **Tests**: JWT signing and verification
-- [ ] **Estimated Time**: 1 hour
+- [x] **Goal**: Sign custom JWTs for Supabase RLS
+- [x] **Files**: `src/lib/auth/supaToken.ts`
+- [x] **Success Criteria**:
+  - [x] Signs JWTs with supabase_jwt_secret
+  - [x] Includes required claims (sub, role, lichess)
+  - [x] Compatible with Supabase RLS
+  - [x] Sets Supabase session with custom JWT (Frontend ready, pending serverless JWT integration)
+- [x] **Tests**: JWT signing and verification
+- [x] **Estimated Time**: 1 hour
+
+> **Reminder:** When backend/serverless JWT signing is ready, wire up the real JWT in `syncSupabaseSession` and uncomment the session setting code.
 
 ### Task 5: COMPONENTS - Create Protected Route Component
-- [ ] **Goal**: Route wrapper that requires Auth.js session
-- [ ] **Files**: `src/components/ProtectedRoute.tsx`
-- [ ] **Success Criteria**:
-  - [ ] Uses Auth.js useSession hook
-  - [ ] Redirects unauthenticated users to landing
-  - [ ] Shows loading state during session check
-  - [ ] Sets Supabase session with custom JWT
-- [ ] **Tests**: Authentication flow scenarios
-- [ ] **Estimated Time**: 1 hour
+- [x] **Goal**: Route wrapper that requires Auth.js session
+- [x] **Files**: `src/components/ProtectedRoute.tsx`
+- [x] **Success Criteria**:
+  - [x] Uses Auth.js useSession hook
+  - [x] Redirects unauthenticated users to landing
+  - [x] Shows loading state during session check
+  - [x] Sets Supabase session with custom JWT (Frontend ready, pending serverless JWT integration)
+- [x] **Tests**: Authentication flow scenarios
+- [x] **Estimated Time**: 1 hour
 
 ### Task 6: PAGES - Create Landing Page
 - [ ] **Goal**: Marketing page with Lichess OAuth login
