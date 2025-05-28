@@ -1,6 +1,6 @@
 // src/App.tsx
 import { Routes, Route } from 'react-router-dom';
-import { Layout } from './components';
+import { Layout, ProtectedRoute } from './components';
 import { LandingPage, Dashboard, DeviationDetail, Settings, Analysis, Demo, AuthCallback } from './pages';
 import { AuthProvider } from './contexts/AuthJSContext';
 import './styles/index.css';
@@ -21,10 +21,41 @@ function App() {
           element={
             <Layout>
               <Routes>
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/deviation/:id" element={<DeviationDetail />} />
-                <Route path="/settings" element={<Settings />} />
-                <Route path="/analysis" element={<Analysis />} />
+                {/* Protected routes - require authentication */}
+                <Route
+                  path="/dashboard"
+                  element={
+                    <ProtectedRoute>
+                      <Dashboard />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/deviation/:id"
+                  element={
+                    <ProtectedRoute>
+                      <DeviationDetail />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/settings"
+                  element={
+                    <ProtectedRoute>
+                      <Settings />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/analysis"
+                  element={
+                    <ProtectedRoute>
+                      <Analysis />
+                    </ProtectedRoute>
+                  }
+                />
+
+                {/* Public routes - no authentication required */}
                 <Route path="/demo" element={<Demo />} />
               </Routes>
             </Layout>

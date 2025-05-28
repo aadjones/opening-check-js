@@ -60,7 +60,9 @@ const Dashboard: React.FC = () => {
     <div className={styles.dashboard}>
       <header className={styles.header}>
         <h1 className={styles.title}>Dashboard</h1>
-        <p className={styles.subtitle}>Welcome back! Here's your recent chess activity.</p>
+        <p className={styles.subtitle}>
+          {user ? `Welcome back, ${user.name}!` : 'Welcome back!'} Here's your recent chess activity.
+        </p>
 
         {/* Auth Status Display - you can see the AuthContext working! */}
         <div
@@ -76,7 +78,7 @@ const Dashboard: React.FC = () => {
           <br />
           Loading: {loading ? 'Yes' : 'No'}
           <br />
-          User: {user ? user.email || 'Logged in (no email)' : 'Not logged in'}
+          User: {user ? `Logged in as ${user.name} (Lichess)` : 'Not logged in'}
           <br />
           {user && (
             <button

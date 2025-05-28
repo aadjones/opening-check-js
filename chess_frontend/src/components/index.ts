@@ -9,3 +9,6 @@ export { default as Layout } from './layout/Layout';
 
 // UI components
 export { default as UnderConstruction } from './ui/UnderConstruction';
+
+// Auth components
+export { default as ProtectedRoute } from './ProtectedRoute';
