@@ -1,6 +1,6 @@
 import React from 'react';
 import { usePageTitle } from '../hooks/usePageTitle';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import styles from './Dashboard.module.css';
 
 const Dashboard: React.FC = () => {
