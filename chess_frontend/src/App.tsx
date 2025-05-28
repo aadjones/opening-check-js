@@ -11,7 +11,7 @@ function App() {
       <Routes>
         {/* Landing page without layout */}
         <Route path="/" element={<LandingPage />} />
-        
+
         {/* OAuth callback without layout */}
         <Route path="/auth/callback" element={<AuthCallback />} />
 

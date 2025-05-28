@@ -5,9 +5,15 @@ import { generatePKCE, storeCodeVerifier, getStoredCodeVerifier, clearCodeVerifi
 const mockSessionStorage = {
   store: {} as Record<string, string>,
   getItem: (key: string) => mockSessionStorage.store[key] || null,
-  setItem: (key: string, value: string) => { mockSessionStorage.store[key] = value; },
-  removeItem: (key: string) => { delete mockSessionStorage.store[key]; },
-  clear: () => { mockSessionStorage.store = {}; },
+  setItem: (key: string, value: string) => {
+    mockSessionStorage.store[key] = value;
+  },
+  removeItem: (key: string) => {
+    delete mockSessionStorage.store[key];
+  },
+  clear: () => {
+    mockSessionStorage.store = {};
+  },
 };
 
 Object.defineProperty(window, 'sessionStorage', {
@@ -56,7 +62,7 @@ describe('PKCE Utilities', () => {
 
     it('should generate code verifier of appropriate length', async () => {
       const pkce = await generatePKCE();
-      
+
       // Base64url encoded 32 bytes should be 43 characters
       expect(pkce.codeVerifier.length).toBe(43);
     });
@@ -65,10 +71,10 @@ describe('PKCE Utilities', () => {
   describe('code verifier storage', () => {
     it('should store and retrieve code verifier', () => {
       const testVerifier = 'test-code-verifier-123';
-      
+
       storeCodeVerifier(testVerifier);
       const retrieved = getStoredCodeVerifier();
-      
+
       expect(retrieved).toBe(testVerifier);
     });
 
@@ -79,12 +85,12 @@ describe('PKCE Utilities', () => {
 
     it('should clear stored code verifier', () => {
       const testVerifier = 'test-code-verifier-456';
-      
+
       storeCodeVerifier(testVerifier);
       expect(getStoredCodeVerifier()).toBe(testVerifier);
-      
+
       clearCodeVerifier();
       expect(getStoredCodeVerifier()).toBeNull();
     });
   });
-}); 
+});

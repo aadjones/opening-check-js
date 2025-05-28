@@ -61,29 +61,34 @@ const Dashboard: React.FC = () => {
       <header className={styles.header}>
         <h1 className={styles.title}>Dashboard</h1>
         <p className={styles.subtitle}>Welcome back! Here's your recent chess activity.</p>
-        
+
         {/* Auth Status Display - you can see the AuthContext working! */}
-        <div style={{ 
-          background: '#f0f0f0', 
-          padding: '10px', 
-          borderRadius: '5px', 
-          margin: '10px 0',
-          fontSize: '14px'
-        }}>
-          <strong>🔐 Auth Status:</strong><br/>
-          Loading: {loading ? 'Yes' : 'No'}<br/>
-          User: {user ? user.email || 'Logged in (no email)' : 'Not logged in'}<br/>
+        <div
+          style={{
+            background: '#f0f0f0',
+            padding: '10px',
+            borderRadius: '5px',
+            margin: '10px 0',
+            fontSize: '14px',
+          }}
+        >
+          <strong>🔐 Auth Status:</strong>
+          <br />
+          Loading: {loading ? 'Yes' : 'No'}
+          <br />
+          User: {user ? user.email || 'Logged in (no email)' : 'Not logged in'}
+          <br />
           {user && (
-            <button 
+            <button
               onClick={signOut}
-              style={{ 
-                marginTop: '5px', 
-                padding: '5px 10px', 
-                background: '#ff6b6b', 
-                color: 'white', 
-                border: 'none', 
+              style={{
+                marginTop: '5px',
+                padding: '5px 10px',
+                background: '#ff6b6b',
+                color: 'white',
+                border: 'none',
                 borderRadius: '3px',
-                cursor: 'pointer'
+                cursor: 'pointer',
               }}
             >
               Sign Out

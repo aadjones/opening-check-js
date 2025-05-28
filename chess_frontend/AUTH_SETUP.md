@@ -23,6 +23,7 @@ SUPABASE_JWT_SECRET=your_supabase_jwt_secret
 **No registration required!** Lichess now uses a public-client-only model:
 
 - **For Development**: Use any globally unique string as `client_id`
+
   - Example: `outofbook.dev.local` (already set above)
   - Keep it stable so users don't have to re-consent
 
@@ -38,6 +39,7 @@ SUPABASE_JWT_SECRET=your_supabase_jwt_secret
 ### 2. Generate Auth Secret
 
 Run this command to generate a secure secret:
+
 ```bash
 openssl rand -base64 32
 ```
@@ -45,6 +47,7 @@ openssl rand -base64 32
 ### 3. Get Supabase Configuration
 
 From your Supabase project dashboard:
+
 - **Project URL**: Settings > API > Project URL
 - **Anon Key**: Settings > API > Project API keys > anon public
 - **JWT Secret**: Settings > API > JWT Settings > JWT Secret
@@ -67,4 +70,4 @@ From your Supabase project dashboard:
 
 1. Set up serverless function for JWT signing
 2. Create session sync utility
-3. Update existing AuthContext to use Auth.js 
+3. Update existing AuthContext to use Auth.js

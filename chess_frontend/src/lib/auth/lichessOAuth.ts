@@ -13,6 +13,67 @@ const LICHESS_CONFIG = {
 };
 
 /**
+ * Lichess user profile interface
+ */
+export interface LichessUser {
+  id: string;
+  username: string;
+  email?: string;
+  title?: string;
+  patron?: boolean;
+  verified?: boolean;
+  profile?: {
+    country?: string;
+    location?: string;
+    bio?: string;
+    firstName?: string;
+    lastName?: string;
+  };
+  perfs?: Record<
+    string,
+    {
+      games: number;
+      rating: number;
+      rd: number;
+      prog: number;
+      prov?: boolean;
+    }
+  >;
+  createdAt?: number;
+  seenAt?: number;
+  playTime?: {
+    total: number;
+    tv: number;
+  };
+  url?: string;
+  count?: {
+    all: number;
+    rated: number;
+    ai: number;
+    draw: number;
+    drawH: number;
+    loss: number;
+    lossH: number;
+    win: number;
+    winH: number;
+    bookmark: number;
+    playing: number;
+    import: number;
+    me: number;
+  };
+}
+
+/**
+ * Token exchange response interface
+ */
+export interface TokenResponse {
+  access_token: string;
+  token_type: string;
+  expires_in?: number;
+  scope?: string;
+}
+
+/**
  * Generates a random state parameter for OAuth security
  */
 function generateState(): string {
@@ -30,11 +91,11 @@ function generateState(): string {
 export async function buildLichessOAuthURL(): Promise<string> {
   const { codeVerifier, codeChallenge } = await generatePKCE();
   const state = generateState();
-  
+
   // Store the code verifier and state for later verification
   storeCodeVerifier(codeVerifier);
   sessionStorage.setItem('oauth_state', state);
-  
+
   const params = new URLSearchParams({
     response_type: 'code',
     client_id: LICHESS_CONFIG.clientId,
@@ -44,13 +105,13 @@ export async function buildLichessOAuthURL(): Promise<string> {
     code_challenge_method: 'S256',
     state: state,
   });
-  
+
   const authUrl = `${LICHESS_CONFIG.authorizationEndpoint}?${params.toString()}`;
-  
+
   console.log('Generated Lichess OAuth URL:', authUrl);
   console.log('Redirect URI:', LICHESS_CONFIG.redirectUri);
   console.log('Client ID:', LICHESS_CONFIG.clientId);
-  
+
   return authUrl;
 }
 
@@ -78,25 +139,109 @@ export function validateOAuthCallback(searchParams: URLSearchParams): {
   const code = searchParams.get('code');
   const state = searchParams.get('state');
   const error = searchParams.get('error');
-  
+
   if (error) {
     throw new Error(`OAuth error: ${error}`);
   }
-  
+
   if (!code) {
     throw new Error('No authorization code received');
   }
-  
+
   if (!state) {
     throw new Error('No state parameter received');
   }
-  
+
   const storedState = sessionStorage.getItem('oauth_state');
   if (state !== storedState) {
     throw new Error('Invalid state parameter - possible CSRF attack');
   }
-  
+
   return { code, state };
 }
 
-export { LICHESS_CONFIG }; 
+/**
+ * Exchanges authorization code for access token
+ */
+export async function exchangeCodeForToken(code: string, codeVerifier: string): Promise<TokenResponse> {
+  const tokenParams = new URLSearchParams({
+    grant_type: 'authorization_code',
+    client_id: LICHESS_CONFIG.clientId,
+    code: code,
+    redirect_uri: LICHESS_CONFIG.redirectUri,
+    code_verifier: codeVerifier,
+  });
+
+  console.log('Exchanging code for token with Lichess...');
+
+  const response = await fetch(LICHESS_CONFIG.tokenEndpoint, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      Accept: 'application/json',
+    },
+    body: tokenParams.toString(),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error('Token exchange failed:', response.status, errorText);
+    throw new Error(`Token exchange failed: ${response.status} ${errorText}`);
+  }
+
+  const tokenData = await response.json();
+  console.log('Token exchange successful');
+
+  return tokenData;
+}
+
+/**
+ * Fetches user profile from Lichess using access token
+ */
+export async function fetchLichessUser(accessToken: string): Promise<LichessUser> {
+  console.log('Fetching Lichess user profile...');
+
+  const response = await fetch(LICHESS_CONFIG.userInfoEndpoint, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      Accept: 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error('User info fetch failed:', response.status, errorText);
+    throw new Error(`Failed to fetch user info: ${response.status} ${errorText}`);
+  }
+
+  const userData = await response.json();
+  console.log('User profile fetched successfully:', userData.username);
+
+  return userData;
+}
+
+/**
+ * Complete OAuth flow: exchange code for token and fetch user info
+ */
+export async function completeOAuthFlow(
+  code: string,
+  codeVerifier: string
+): Promise<{ user: LichessUser; accessToken: string }> {
+  try {
+    // Exchange code for access token
+    const tokenResponse = await exchangeCodeForToken(code, codeVerifier);
+
+    // Fetch user profile
+    const user = await fetchLichessUser(tokenResponse.access_token);
+
+    return {
+      user,
+      accessToken: tokenResponse.access_token,
+    };
+  } catch (error) {
+    console.error('OAuth flow completion failed:', error);
+    throw error;
+  }
+}
+
+export { LICHESS_CONFIG };

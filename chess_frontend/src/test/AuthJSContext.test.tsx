@@ -93,4 +93,4 @@ describe('AuthJSContext', () => {
 
     consoleSpy.mockRestore();
   });
-}); 
+});

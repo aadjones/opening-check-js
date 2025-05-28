@@ -54,4 +54,4 @@ export const authConfig: AuthConfig = {
   pages: {
     signIn: '/', // Redirect to landing page for sign in
   },
-}; 
+};

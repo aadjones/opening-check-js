@@ -22,11 +22,7 @@ const LandingPage: React.FC = () => {
           <p className={styles.heroSubtitle}>Track your real chess games against your real prep.</p>
 
           <div className={styles.heroActions}>
-            <button 
-              onClick={handleLichessLogin}
-              disabled={loading}
-              className="btn btn-primary btn-lg"
-            >
+            <button onClick={handleLichessLogin} disabled={loading} className="btn btn-primary btn-lg">
               {loading ? 'Connecting...' : 'Connect with Lichess'}
             </button>
             <Link to="/demo" className="btn btn-secondary btn-lg">

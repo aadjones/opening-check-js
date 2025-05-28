@@ -16,7 +16,7 @@ describe('Supabase JWT Helper', () => {
     };
 
     const token = signSupabaseJWT(payload);
-    
+
     expect(token).toBeDefined();
     expect(typeof token).toBe('string');
     expect(token.split('.')).toHaveLength(3); // JWT has 3 parts
@@ -58,16 +58,16 @@ describe('Supabase JWT Helper', () => {
 
   it('should set expiry to 1 hour from now', () => {
     const beforeSign = Math.floor(Date.now() / 1000);
-    
+
     const token = signSupabaseJWT({
       sub: 'user999',
       role: 'authenticated',
     });
-    
+
     const verified = verifySupabaseJWT(token);
-    const expectedExpiry = beforeSign + (60 * 60); // 1 hour
-    
+    const expectedExpiry = beforeSign + 60 * 60; // 1 hour
+
     expect(verified.exp).toBeGreaterThanOrEqual(expectedExpiry - 1); // Allow 1 second tolerance
     expect(verified.exp).toBeLessThanOrEqual(expectedExpiry + 1);
   });
-}); 
+});

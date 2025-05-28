@@ -42,7 +42,7 @@ export async function generatePKCE(): Promise<{
 }> {
   const codeVerifier = generateCodeVerifier();
   const codeChallenge = await generateCodeChallenge(codeVerifier);
-  
+
   return {
     codeVerifier,
     codeChallenge,
@@ -71,4 +71,4 @@ export function getStoredCodeVerifier(): string | null {
  */
 export function clearCodeVerifier(): void {
   sessionStorage.removeItem('oauth_code_verifier');
-} 
+}

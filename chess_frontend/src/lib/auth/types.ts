@@ -33,4 +33,4 @@ declare module '@auth/core/types' {
     accessToken?: string;
     lichessUsername?: string;
   }
-} 
+}

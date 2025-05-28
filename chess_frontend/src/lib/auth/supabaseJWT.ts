@@ -16,7 +16,7 @@ export interface SupabaseJWTPayload {
  */
 export function signSupabaseJWT(payload: Omit<SupabaseJWTPayload, 'aud' | 'exp' | 'iat'>): string {
   const secret = process.env.SUPABASE_JWT_SECRET;
-  
+
   if (!secret) {
     throw new Error('SUPABASE_JWT_SECRET is not configured');
   }
@@ -41,7 +41,7 @@ export function signSupabaseJWT(payload: Omit<SupabaseJWTPayload, 'aud' | 'exp' 
  */
 export function verifySupabaseJWT(token: string): SupabaseJWTPayload {
   const secret = process.env.SUPABASE_JWT_SECRET;
-  
+
   if (!secret) {
     throw new Error('SUPABASE_JWT_SECRET is not configured');
   }
@@ -49,4 +49,4 @@ export function verifySupabaseJWT(token: string): SupabaseJWTPayload {
   return jwt.verify(token, secret, {
     algorithms: ['HS256'],
   }) as SupabaseJWTPayload;
-} 
+}
