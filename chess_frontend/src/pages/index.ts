@@ -4,3 +4,4 @@ export { default as DeviationDetail } from './DeviationDetail';
 export { default as Settings } from './Settings';
 export { default as Analysis } from './Analysis';
 export { default as Demo } from './Demo';
+export { default as AuthCallback } from './AuthCallback';

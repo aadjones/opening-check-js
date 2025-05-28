@@ -1,5 +1,6 @@
 import React, { createContext, useEffect, useState, useCallback } from 'react';
 import { syncSupabaseSession } from '../lib/auth/supabaseSync';
+import { startLichessOAuth } from '../lib/auth/lichessOAuth';
 import type { Session, User } from '@auth/core/types';
 
 // Maintain the same interface as the original AuthContext
@@ -68,14 +69,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         throw new Error('Only Lichess OAuth is supported');
       }
 
-      // For now, we'll simulate the OAuth flow
-      // In the full implementation, this would redirect to Lichess
       console.log('Auth.js: Starting Lichess OAuth flow...');
       
-      // TODO: Implement actual OAuth redirect
-      // window.location.href = '/api/auth/signin/lichess';
+      // Start the real OAuth flow - this will redirect to Lichess
+      await startLichessOAuth();
       
-      console.log('Auth.js: OAuth flow would redirect to Lichess');
+      // Note: This code won't execute because startLichessOAuth redirects the page
+      // The loading state will be reset when the user returns from Lichess
       
     } catch (error) {
       console.error(`OAuth ${provider} error:`, error);

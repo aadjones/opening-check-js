@@ -1,7 +1,7 @@
 // src/App.tsx
 import { Routes, Route } from 'react-router-dom';
 import { Layout } from './components';
-import { LandingPage, Dashboard, DeviationDetail, Settings, Analysis, Demo } from './pages';
+import { LandingPage, Dashboard, DeviationDetail, Settings, Analysis, Demo, AuthCallback } from './pages';
 import { AuthProvider } from './contexts/AuthJSContext';
 import './styles/index.css';
 
@@ -11,6 +11,9 @@ function App() {
       <Routes>
         {/* Landing page without layout */}
         <Route path="/" element={<LandingPage />} />
+        
+        {/* OAuth callback without layout */}
+        <Route path="/auth/callback" element={<AuthCallback />} />
 
         {/* All other routes with layout */}
         <Route
