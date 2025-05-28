@@ -2,7 +2,7 @@
 import { Routes, Route } from 'react-router-dom';
 import { Layout } from './components';
 import { LandingPage, Dashboard, DeviationDetail, Settings, Analysis, Demo } from './pages';
-import { AuthProvider } from './contexts/AuthContext';
+import { AuthProvider } from './contexts/AuthJSContext';
 import './styles/index.css';
 
 function App() {

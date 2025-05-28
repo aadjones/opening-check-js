@@ -1,8 +1,19 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
 import styles from './LandingPage.module.css';
 
 const LandingPage: React.FC = () => {
+  const { signInWithOAuth, loading } = useAuth();
+
+  const handleLichessLogin = async () => {
+    try {
+      await signInWithOAuth('lichess');
+    } catch (error) {
+      console.error('Login failed:', error);
+    }
+  };
+
   return (
     <div className={styles.landingPage}>
       <div className="container">
@@ -11,9 +22,13 @@ const LandingPage: React.FC = () => {
           <p className={styles.heroSubtitle}>Track your real chess games against your real prep.</p>
 
           <div className={styles.heroActions}>
-            <Link to="/dashboard" className="btn btn-primary btn-lg">
-              Connect with Lichess
-            </Link>
+            <button 
+              onClick={handleLichessLogin}
+              disabled={loading}
+              className="btn btn-primary btn-lg"
+            >
+              {loading ? 'Connecting...' : 'Connect with Lichess'}
+            </button>
             <Link to="/demo" className="btn btn-secondary btn-lg">
               Try a demo
             </Link>
