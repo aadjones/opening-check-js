@@ -1,0 +1,32 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Backend - Lean Rules
+
+## FastAPI Basics
+- Use Pydantic models for all request/response
+- Use `HTTPException(status_code=422, detail="message")`
+- Always type function parameters and returns
+
+## Supabase
+- Environment: `os.getenv("SUPABASE_URL")` and `os.getenv("SUPABASE_SERVICE_ROLE_KEY")`
+- Use dependency injection: `supabase: Client = Depends(get_supabase_client)`
+
+## Testing
+- Use pytest: `import pytest`
+- Use httpx for API testing: `async with httpx.AsyncClient() as client:`
+
+## Error Handling
+```python
+try:
+    # operation
+except Exception as e:
+    logger.error(f"Error: {e}")
+    raise HTTPException(status_code=500, detail="Operation failed")
+```
+
+## Authentication
+- JWT tokens: `authorization: str = Header(None)`
+- Verify with Supabase: `supabase.auth.get_user(token)`

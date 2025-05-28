@@ -27,27 +27,27 @@ Breaking down the OutOfBook frontend architecture into small, isolated, testable
 - [x] **Estimated Time**: 30 minutes
 
 ### Task 2: ROUTING - Create Basic Route Structure  
-- [ ] **Goal**: Define all main routes with placeholder components
-- [ ] **Files**: `src/routes/`, `src/App.tsx`
-- [ ] **Routes to Create**:
-  - [ ] `/` (Landing)
-  - [ ] `/onboarding` (Study Selection)
-  - [ ] `/dashboard` (Main App)
-  - [ ] `/deviation/:id` (Detail View)
-  - [ ] `/settings` (User Preferences)
-- [ ] **Success Criteria**: All routes render placeholder content
-- [ ] **Tests**: Route rendering tests
-- [ ] **Estimated Time**: 45 minutes
+- [x] **Goal**: Define all main routes with placeholder components
+- [x] **Files**: `src/routes/`, `src/App.tsx`
+- [x] **Routes to Create**:
+  - [x] `/` (Landing)
+  - [x] `/onboarding` (Study Selection)
+  - [x] `/dashboard` (Main App)
+  - [x] `/deviation/:id` (Detail View)
+  - [x] `/settings` (User Preferences)
+- [x] **Success Criteria**: All routes render placeholder content
+- [x] **Tests**: Route rendering tests
+- [x] **Estimated Time**: 45 minutes
 
 ### Task 3: COMPONENTS - Create Layout Component
-- [ ] **Goal**: Shared layout with header/navigation
-- [ ] **Files**: `src/components/Layout.tsx`, `src/components/Header.tsx`
-- [ ] **Success Criteria**: 
-  - [ ] Responsive layout component
-  - [ ] Header with navigation links
-  - [ ] Proper TypeScript interfaces
-- [ ] **Tests**: Layout rendering and responsive behavior
-- [ ] **Estimated Time**: 1 hour
+- [x] **Goal**: Shared layout with header/navigation
+- [x] **Files**: `src/components/Layout.tsx`
+- [x] **Success Criteria**: 
+  - [x] Responsive layout component
+  - [x] Header with navigation links
+  - [x] Proper TypeScript interfaces
+- [x] **Tests**: Layout rendering and responsive behavior
+- [x] **Estimated Time**: 1 hour
 
 ### Task 4: AUTH - Install and Configure Supabase Auth
 - [ ] **Goal**: Set up authentication infrastructure
