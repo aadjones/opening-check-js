@@ -95,15 +95,15 @@ Breaking down the OutOfBook frontend architecture into small, isolated, testable
 - [x] **Estimated Time**: 1 hour
 
 ### Task 6: PAGES - Create Landing Page
-- [ ] **Goal**: Marketing page with Lichess OAuth login
-- [ ] **Files**: `src/pages/LandingPage.tsx`
-- [ ] **Success Criteria**:
-  - [ ] Matches PRD wireframe design
-  - [ ] "Connect with Lichess" button using Auth.js signIn
-  - [ ] Demo mode link
-  - [ ] Responsive design
-- [ ] **Tests**: Component rendering and Auth.js integration
-- [ ] **Estimated Time**: 1.5 hours
+- [x] **Goal**: Marketing page with Lichess OAuth login
+- [x] **Files**: `src/pages/LandingPage.tsx`
+- [x] **Success Criteria**:
+  - [x] Matches PRD wireframe design (responsive, gradient hero title, feature cards, etc.)
+  - [x] "Connect with Lichess" button using Auth.js signIn (via useAuth hook)
+  - [x] Demo mode link (to /demo) is present
+  - [x] Responsive design (mobile styles in LandingPage.module.css)
+- [x] **Tests**: Component rendering and Auth.js integration (via useAuth hook)
+- [x] **Estimated Time**: 1.5 hours
 
 ### Task 7: PAGES - Create Onboarding Flow
 - [ ] **Goal**: Study selection after Lichess login
@@ -115,6 +115,61 @@ Breaking down the OutOfBook frontend architecture into small, isolated, testable
   - [ ] Saves to user profile in Supabase
 - [ ] **Tests**: Form validation and submission
 - [ ] **Estimated Time**: 2 hours
+
+#### Task 7a: COMPONENTS - Create StudySelector Component
+- [x] **Goal**: Basic study URL input with validation
+- [x] **Files**: `src/components/StudySelector.tsx`
+- [x] **Success Criteria**:
+  - [x] URL input fields for White/Black studies
+  - [x] Basic URL format validation
+  - [x] Loading states
+  - [x] Error message display
+- [x] **Tests**: 
+  - [x] URL format validation
+  - [x] Component rendering
+  - [x] Error state handling
+- [x] **Estimated Time**: 45 minutes
+
+#### Task 7b: INTEGRATION - Add Lichess Study Validation
+- [ ] **Goal**: Verify study access via Lichess API
+- [ ] **Files**: `src/lib/lichess/studyValidation.ts`
+- [ ] **Success Criteria**:
+  - [ ] Study existence check
+  - [ ] Access verification
+  - [ ] Error handling
+  - [ ] Caching strategy
+- [ ] **Tests**:
+  - [ ] API integration
+  - [ ] Error scenarios
+  - [ ] Cache behavior
+- [ ] **Estimated Time**: 45 minutes
+
+#### Task 7c: PAGES - Create OnboardingPage
+- [ ] **Goal**: Study selection page with form
+- [ ] **Files**: `src/pages/OnboardingPage.tsx`
+- [ ] **Success Criteria**:
+  - [ ] Uses StudySelector component
+  - [ ] Progress indication
+  - [ ] Help text
+  - [ ] Demo option
+- [ ] **Tests**:
+  - [ ] Page rendering
+  - [ ] Form submission
+  - [ ] Navigation
+- [ ] **Estimated Time**: 30 minutes
+
+#### Task 7d: INTEGRATION - Connect to Supabase
+- [ ] **Goal**: Save study selections to user profile
+- [ ] **Files**: Update OnboardingPage
+- [ ] **Success Criteria**:
+  - [ ] Save study IDs to user profile
+  - [ ] Handle save errors
+  - [ ] Redirect after success
+- [ ] **Tests**:
+  - [ ] Database operations
+  - [ ] Error handling
+  - [ ] Success flow
+- [ ] **Estimated Time**: 30 minutes
 
 ### Task 8: SETUP - Create Custom Hooks for Auth.js Integration
 - [ ] **Goal**: Reusable patterns for Auth.js + Supabase

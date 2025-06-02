@@ -4,7 +4,7 @@
 
 You spent hours preparing your lines. King's Indian, Najdorf, London System—whatever flavor of self-respect you cooked up. But then? You mixed up your move order and played h3 on move 6 instead of Be2. **OutOfBook** is the assistant that remembers your prep *even when you don't*. It watches your games, waits for you to slip, and politely shows you what you meant to play.
 
-You plug in your Lichess studies (White and Black), and from then on, we quietly track your games. When you go out-of-book, we’ll let you know—and walk you back to the line.
+You plug in your Lichess studies (White and Black), and from then on, we quietly track your games. When you go out-of-book, we'll let you know—and walk you back to the line.
 
 ## **🧠 Core Loop**
 
@@ -14,7 +14,7 @@ You plug in your Lichess studies (White and Black), and from then on, we quietly
 
 2. System polls for recent games
 
-3. Detects deviation from user’s study-defined repertoire
+3. Detects deviation from user's study-defined repertoire
 
 4. Logs the deviation with exact FEN, move, and chapter context
 
@@ -86,7 +86,7 @@ Deviations are immutable. If you later edit your study, the system keeps the ori
 
 \-----------------------------------------------------------  
 | ❌ You deviated from your prep on move 6                |  
-| 📖 Opening: King’s Indian – Classical                   |  
+| 📖 Opening: King's Indian – Classical                   |  
 | 🤝 vs. BigBlunder420 (1740) — Blitz 5+3 — Result: Loss |  
 \-----------------------------------------------------------
 
@@ -156,24 +156,52 @@ Deviations are immutable. If you later edit your study, the system keeps the ori
 
 2\. Study Selection  
 \-----------------------------------------------------------  
-| 🎯 Choose Your Repertoire Studies                       |  
-|  White:  \[ dropdown/search \]                            |  
-|  Black:  \[ dropdown/search \]                            |  
-|                                                         |  
-|  \[ Load Demo Studies \]                                  |  
-|  \[ ✅ Start Tracking \]                                   |  
+| 🎯 Step 2: Choose Your Repertoire                        |
+|                                                          |
+| 🧠 Welcome to OutOfBook                                  |
+| Track your games against your prep.                      |
+\-----------------------------------------------------------
+
+[Card: White Repertoire]
+🔍 White Repertoire Study URL
+[________________________________________________]
+[Validate]  [How to find your study URL? →]
+
+[Card: Black Repertoire]
+🔍 Black Repertoire Study URL
+[________________________________________________]
+[Validate]  [How to find your study URL? →]
+
+[Card: Quick Start]
+⬜ Load Demo Repertoires
+(Perfect for trying out the system)
+
+[Card: Status]
+✅ URLs validated and ready
+⚠️ Please fix the following:
+  • White study URL is invalid
+  • Black study URL is private
+
+[Primary Action Button]
+✅ Start Tracking Your Games
+
+\-----------------------------------------------------------
+[Card: Help & Privacy]
+📚 Need help? Check our guide on setting up studies
+🔒 Your studies stay private - we only read your opening lines
+📎 We'll access your studies through your Lichess account
 \-----------------------------------------------------------
 
 3\. Ready State  
 \-----------------------------------------------------------  
 | ✅ You're ready to go\!                                  |  
 |                                                         |  
-| We’ll start checking your new games for deviations.     |  
+| We'll start checking your new games for deviations.     |  
 |                                                         |  
 | What happens next?                                      |  
 | \- You play games on Lichess (as usual)                  |  
 | \- We check for opening drift                            |  
-| \- You get notified when something’s worth reviewing     |  
+| \- You get notified when something's worth reviewing     |  
 |                                                         |  
 | \[ View Dashboard (0 Deviations) \]                       |  
 \-----------------------------------------------------------
@@ -219,13 +247,13 @@ Deviations are immutable. If you later edit your study, the system keeps the ori
 
 * Replays correct line
 
-* Clicks “Mark as Reviewed”
+* Clicks "Mark as Reviewed"
 
 ### **4\. Follow-up**
 
 * Plays again next day
 
-* No deviations detected: “Nice—your prep held.”
+* No deviations detected: "Nice—your prep held."
 
 * Weekly summary email shows improvement trends
 
@@ -273,5 +301,5 @@ Deviations are immutable. If you later edit your study, the system keeps the ori
 
 ## **🗣️ One-Sentence Pitch**
 
-**“OutOfBook watches your games, remembers your prep, and tells you exactly where you drifted—so you can stop making the same mistake on move 6 over and over.”**
+**"OutOfBook watches your games, remembers your prep, and tells you exactly where you drifted—so you can stop making the same mistake on move 6 over and over."**
 
