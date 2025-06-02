@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { StudySelector } from '../components';
 import { useAuth } from '../hooks/useAuth';
-import { saveUserStudies } from '../lib/auth/onboardingUtils';
+import { saveUserStudySelections } from '../lib/database/studyOperations';
 import { extractStudyId } from '../lib/lichess/studyValidation';
 import styles from './OnboardingPage.module.css';
 
@@ -17,6 +17,7 @@ const OnboardingPage: React.FC = () => {
   const [blackStudyId, setBlackStudyId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isDemoMode, setIsDemoMode] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleStudyChange = (whiteId: string | null, blackId: string | null) => {
     if (whiteId !== null) {
@@ -24,6 +25,10 @@ const OnboardingPage: React.FC = () => {
     }
     if (blackId !== null) {
       setBlackStudyId(blackId);
+    }
+    // Clear any previous errors when user makes changes
+    if (error) {
+      setError(null);
     }
   };
 
@@ -47,23 +52,30 @@ const OnboardingPage: React.FC = () => {
       setWhiteStudyId(null);
       setBlackStudyId(null);
     }
+    
+    // Clear any previous errors when toggling demo mode
+    if (error) {
+      setError(null);
+    }
   };
 
   const handleStartTracking = async () => {
     if (!whiteStudyId && !blackStudyId) {
-      return; // At least one study is required
+      setError('Please select at least one study to continue.');
+      return;
     }
 
     if (!session?.user?.id) {
-      console.error('No user session found');
+      setError('No user session found. Please try logging in again.');
       return;
     }
 
     setIsLoading(true);
+    setError(null);
+    
     try {
-      // Save study selections using utility function
-      // This will be replaced with Supabase integration in Task 7d
-      saveUserStudies(session.user.id, whiteStudyId, blackStudyId);
+      // Save study selections to Supabase database
+      await saveUserStudySelections(session.user.id, whiteStudyId, blackStudyId);
       
       if (isDemoMode) {
         console.log('Demo onboarding completed! Redirecting to dashboard...');
@@ -75,7 +87,11 @@ const OnboardingPage: React.FC = () => {
       navigate('/dashboard');
     } catch (error) {
       console.error('Error saving studies:', error);
-      // TODO: Show error message to user
+      setError(
+        error instanceof Error 
+          ? error.message 
+          : 'Failed to save your study selections. Please try again.'
+      );
     } finally {
       setIsLoading(false);
     }
@@ -115,6 +131,13 @@ const OnboardingPage: React.FC = () => {
           </div>
         </div>
 
+        {error && (
+          <div className={styles.errorMessage}>
+            <span className={styles.errorIcon}>⚠️</span>
+            {error}
+          </div>
+        )}
+
         <div className={styles.content}>
           <div className={styles.quickStart}>
             <div className={styles.card}>
@@ -129,6 +152,7 @@ const OnboardingPage: React.FC = () => {
                       className={styles.checkbox}
                       checked={isDemoMode}
                       onChange={(e) => handleDemoModeToggle(e.target.checked)}
+                      disabled={isLoading}
                     />
                     Load Demo Repertoires
                   </label>

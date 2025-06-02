@@ -162,17 +162,17 @@ Breaking down the OutOfBook frontend architecture into small, isolated, testable
 - [x] **Estimated Time**: 30 minutes
 
 #### Task 7d: INTEGRATION - Connect to Supabase
-- [ ] **Goal**: Save study selections to user profile
-- [ ] **Files**: Update OnboardingPage
-- [ ] **Success Criteria**:
-  - [ ] Save study IDs to user profile
-  - [ ] Handle save errors
-  - [ ] Redirect after success
-- [ ] **Tests**:
-  - [ ] Database operations
-  - [ ] Error handling
-  - [ ] Success flow
-- [ ] **Estimated Time**: 30 minutes
+- [x] **Goal**: Save study selections to user profile
+- [x] **Files**: Update OnboardingPage
+- [x] **Success Criteria**:
+  - [x] Save study IDs to user profile
+  - [x] Handle save errors
+  - [x] Redirect after success
+- [x] **Tests**:
+  - [x] Database operations
+  - [x] Error handling
+  - [x] Success flow
+- [x] **Estimated Time**: 30 minutes
 
 ### Task 8: SETUP - Create Custom Hooks for Auth.js Integration
 - [ ] **Goal**: Reusable patterns for Auth.js + Supabase

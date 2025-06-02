@@ -13,12 +13,13 @@ if (!supabaseAnonKey) {
   console.warn('VITE_SUPABASE_ANON_KEY is not set. Supabase functionality will be limited.');
 }
 
-// Create Supabase client
-// Use fallback values for development/testing when env vars are not set
+// Create Supabase client for DATABASE OPERATIONS ONLY
+// We use Auth.js with Lichess OAuth for authentication, not Supabase auth
+// This client is only used for database queries with the anon key
 export const supabase = createClient(
   supabaseUrl || 'https://placeholder.supabase.co',
   supabaseAnonKey || 'placeholder-anon-key'
 );
 
-// Export types for TypeScript
-export type { User, Session } from '@supabase/supabase-js';
+// Export database-related types only (not auth types since we use Auth.js)
+export type { User } from '@supabase/supabase-js';
