@@ -106,16 +106,48 @@
 .errorMessage {
   color: var(--color-error);
   font-size: var(--font-size-sm);
-  margin-top: var(--spacing-xs);
+  margin-top: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  background: var(--color-error-bg, #fef2f2);
+  border: 1px solid var(--color-error-border, #fecaca);
+  border-radius: var(--radius-sm);
+}
+
+.corsWarning {
+  background: var(--color-warning-bg, #fffbeb);
+  border-color: var(--color-warning-border, #fed7aa);
+  color: var(--color-warning-text, #92400e);
+}
+
+.corsExplanation {
+  margin-top: var(--spacing-sm);
+  padding-top: var(--spacing-sm);
+  border-top: 1px solid var(--color-warning-border, #fed7aa);
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-relaxed);
+}
+
+.corsExplanation strong {
+  display: block;
+  margin-bottom: var(--spacing-xs);
+  font-weight: var(--font-weight-semibold);
 }
 
 .successMessage {
   color: var(--color-success);
   font-size: var(--font-size-sm);
+  margin-top: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  background: var(--color-success-bg, #f0fdf4);
+  border: 1px solid var(--color-success-border, #bbf7d0);
+  border-radius: var(--radius-sm);
+}
+
+.corsNote {
   margin-top: var(--spacing-xs);
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  font-style: italic;
 }
 
 .visibilityBadge {

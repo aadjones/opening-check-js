@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { validateOAuthCallback, completeOAuthFlow } from '../lib/auth/lichessOAuth';
 import { getStoredCodeVerifier, clearCodeVerifier } from '../lib/auth/pkce';
+import { hasCompletedOnboarding } from '../lib/auth/onboardingUtils';
 
 const AuthCallback: React.FC = () => {
   const [status, setStatus] = useState<'processing' | 'success' | 'error'>('processing');
@@ -49,16 +50,29 @@ const AuthCallback: React.FC = () => {
         // Notify AuthJSContext that a new session is available
         window.dispatchEvent(new CustomEvent('auth-session-refresh'));
 
+        // Check if this is a first-time user
+        const isFirstTime = !hasCompletedOnboarding(user.id);
+        
         setStatus('success');
-        setMessage(`Welcome ${user.username}! Redirecting...`);
+        if (isFirstTime) {
+          setMessage(`Welcome ${user.username}! Let's set up your repertoire...`);
+        } else {
+          setMessage(`Welcome back ${user.username}! Redirecting to dashboard...`);
+        }
 
         // Clean up OAuth-specific stored values
         clearCodeVerifier();
         sessionStorage.removeItem('oauth_state');
 
-        // Redirect to dashboard after a short delay
+        // Redirect based on user status
         setTimeout(() => {
-          navigate('/dashboard');
+          if (isFirstTime) {
+            console.log('First-time user detected, redirecting to onboarding...');
+            navigate('/onboarding');
+          } else {
+            console.log('Returning user detected, redirecting to dashboard...');
+            navigate('/dashboard');
+          }
         }, 2000);
       } catch (error) {
         console.error('OAuth callback error:', error);
@@ -104,7 +118,7 @@ const AuthCallback: React.FC = () => {
           <>
             <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>✅</div>
             <h2>Authentication Successful!</h2>
-            <p>Welcome! Redirecting you to the dashboard...</p>
+            <p>{message}</p>
           </>
         )}
 

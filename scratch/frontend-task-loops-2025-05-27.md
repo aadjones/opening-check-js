@@ -145,18 +145,21 @@ Breaking down the OutOfBook frontend architecture into small, isolated, testable
 - [x] **Estimated Time**: 45 minutes
 
 #### Task 7c: PAGES - Create OnboardingPage
-- [ ] **Goal**: Study selection page with form
-- [ ] **Files**: `src/pages/OnboardingPage.tsx`
-- [ ] **Success Criteria**:
-  - [ ] Uses StudySelector component
-  - [ ] Progress indication
-  - [ ] Help text
-  - [ ] Demo option
-- [ ] **Tests**:
-  - [ ] Page rendering
-  - [ ] Form submission
-  - [ ] Navigation
-- [ ] **Estimated Time**: 30 minutes
+- [x] **Goal**: Study selection page with form
+- [x] **Files**: `src/pages/OnboardingPage.tsx`
+- [x] **Success Criteria**:
+  - [x] Uses StudySelector component
+  - [x] Progress indication
+  - [x] Help text
+  - [x] Demo option (loads demo studies for current user)
+  - [x] Integrates with onboarding flow (first-time user detection)
+  - [x] Saves study selections and redirects to dashboard
+- [x] **Tests**:
+  - [x] Page rendering
+  - [x] Form submission
+  - [x] Navigation
+  - [x] Demo mode functionality
+- [x] **Estimated Time**: 30 minutes
 
 #### Task 7d: INTEGRATION - Connect to Supabase
 - [ ] **Goal**: Save study selections to user profile

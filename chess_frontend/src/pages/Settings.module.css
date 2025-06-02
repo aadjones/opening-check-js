@@ -29,6 +29,11 @@
   padding: var(--spacing-2xl);
   border-bottom: 1px solid var(--color-border);
   background: var(--color-neutral-50);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
 }
 
 .sectionTitle {
@@ -36,6 +41,18 @@
   font-weight: var(--font-weight-semibold);
   margin: 0;
   color: var(--color-text);
+}
+
+.studyStatus {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.statusText {
+  font-size: var(--font-size-sm);
+  color: var(--color-success);
+  font-weight: var(--font-weight-medium);
 }
 
 .sectionContent {
@@ -77,6 +94,68 @@
 
 .input::placeholder {
   color: var(--color-text-muted);
+}
+
+.studyInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: var(--spacing-sm);
+  padding: var(--spacing-md);
+  background: var(--color-neutral-50);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+}
+
+.studyId {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+}
+
+.studyLink {
+  font-size: var(--font-size-sm);
+  color: var(--color-primary);
+  text-decoration: none;
+  font-weight: var(--font-weight-medium);
+  transition: color var(--transition-normal);
+}
+
+.studyLink:hover {
+  color: var(--color-primary-hover);
+  text-decoration: underline;
+}
+
+.saveMessage {
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  margin-top: var(--spacing-lg);
+  animation: slideIn 0.3s ease-out;
+}
+
+.saveMessage.success {
+  background: var(--color-success-light);
+  color: var(--color-success-dark);
+  border: 1px solid var(--color-success);
+}
+
+.saveMessage.error {
+  background: var(--color-error-light);
+  color: var(--color-error-dark);
+  border: 1px solid var(--color-error);
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .checkboxGroup {
@@ -197,18 +276,32 @@
 }
 
 .saveButton {
-  background: var(--color-primary);
-  color: white;
+  background: var(--color-neutral-300);
+  color: var(--color-text-muted);
   border: none;
   padding: var(--spacing-md) var(--spacing-2xl);
   border-radius: var(--radius-lg);
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-medium);
-  cursor: pointer;
+  cursor: not-allowed;
   transition: all var(--transition-normal);
 }
 
-.saveButton:hover {
+.saveButton:disabled {
+  background: var(--color-neutral-300);
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.saveButtonActive {
+  background: var(--color-primary);
+  color: white;
+  cursor: pointer;
+}
+
+.saveButtonActive:hover:not(:disabled) {
   background: var(--color-primary-hover);
   transform: translateY(-1px);
   box-shadow: var(--shadow-md);
@@ -231,10 +324,17 @@
   transition: all var(--transition-normal);
 }
 
-.cancelButton:hover {
+.cancelButton:hover:not(:disabled) {
   background: var(--color-neutral-50);
   transform: translateY(-1px);
   box-shadow: var(--shadow-md);
+}
+
+.cancelButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 .cancelButton:focus {
@@ -255,6 +355,17 @@
     padding: 0 var(--spacing-lg);
   }
 
+  .sectionHeader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .studyInfo {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+  }
+
   .actions {
     flex-direction: column;
     gap: var(--spacing-md);
@@ -266,3 +377,4 @@
     justify-content: center;
   }
 }
+

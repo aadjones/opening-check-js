@@ -16,6 +16,7 @@ interface StudyValidation {
   isPublic?: boolean;
   chapterCount?: number;
   isValidating?: boolean;
+  corsBlocked?: boolean; // Track if validation was blocked by CORS
 }
 
 const LICHESS_STUDY_PATTERN = /^https?:\/\/lichess\.org\/study\/([a-zA-Z0-9]+)(?:\/[a-zA-Z0-9]+)?$/;
@@ -66,13 +67,15 @@ const StudySelector: React.FC<StudySelectorProps> = ({ onStudyChange, isLoading 
           studyName: result.studyName,
           isPublic: result.isPublic,
           chapterCount: result.chapterCount,
-          isValidating: false
+          isValidating: false,
+          corsBlocked: result.corsBlocked
         });
       } else {
         setValidation({
           isValid: false,
           error: result.error,
-          isValidating: false
+          isValidating: false,
+          corsBlocked: result.corsBlocked
         });
       }
     } catch (error) {
@@ -121,6 +124,44 @@ const StudySelector: React.FC<StudySelectorProps> = ({ onStudyChange, isLoading 
     performApiValidation(blackStudyUrl, setBlackValidation);
   };
 
+  // Helper function to render validation messages
+  const renderValidationMessage = (validation: StudyValidation) => {
+    if (!validation.isValid && validation.error) {
+      return (
+        <div className={`${styles.errorMessage} ${validation.corsBlocked ? styles.corsWarning : ''}`}>
+          {validation.error}
+          {validation.corsBlocked && (
+            <div className={styles.corsExplanation}>
+              <strong>Why is this happening?</strong> Browser security prevents direct validation of Lichess studies. 
+              Your URL format is correct, and you can proceed with onboarding. Full validation will be available once we implement backend support.
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    if (validation.isValid && validation.studyName) {
+      return (
+        <div className={styles.successMessage}>
+          ✓ Study found: "{validation.studyName}" 
+          {validation.chapterCount && ` (${validation.chapterCount} chapters)`}
+          {validation.isPublic !== undefined && (
+            <span className={styles.visibilityBadge}>
+              {validation.isPublic ? 'Public' : 'Private'}
+            </span>
+          )}
+          {validation.corsBlocked && (
+            <div className={styles.corsNote}>
+              <em>Note: Format validated only (full validation pending backend implementation)</em>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    return null;
+  };
+
   return (
     <div className={styles.studySelector}>
       <div className={styles.card}>
@@ -151,20 +192,7 @@ const StudySelector: React.FC<StudySelectorProps> = ({ onStudyChange, isLoading 
                 {whiteValidation.isValidating ? 'Validating...' : 'Validate'}
               </button>
             </div>
-            {!whiteValidation.isValid && (
-              <div className={styles.errorMessage}>{whiteValidation.error}</div>
-            )}
-            {whiteValidation.isValid && whiteValidation.studyName && (
-              <div className={styles.successMessage}>
-                ✓ Study found: "{whiteValidation.studyName}" 
-                {whiteValidation.chapterCount && ` (${whiteValidation.chapterCount} chapters)`}
-                {whiteValidation.isPublic !== undefined && (
-                  <span className={styles.visibilityBadge}>
-                    {whiteValidation.isPublic ? 'Public' : 'Private'}
-                  </span>
-                )}
-              </div>
-            )}
+            {renderValidationMessage(whiteValidation)}
             <div className={styles.helpText}>
               <a href="https://lichess.org/study" target="_blank" rel="noopener noreferrer">
                 How to find your study URL? →
@@ -202,20 +230,7 @@ const StudySelector: React.FC<StudySelectorProps> = ({ onStudyChange, isLoading 
                 {blackValidation.isValidating ? 'Validating...' : 'Validate'}
               </button>
             </div>
-            {!blackValidation.isValid && (
-              <div className={styles.errorMessage}>{blackValidation.error}</div>
-            )}
-            {blackValidation.isValid && blackValidation.studyName && (
-              <div className={styles.successMessage}>
-                ✓ Study found: "{blackValidation.studyName}" 
-                {blackValidation.chapterCount && ` (${blackValidation.chapterCount} chapters)`}
-                {blackValidation.isPublic !== undefined && (
-                  <span className={styles.visibilityBadge}>
-                    {blackValidation.isPublic ? 'Public' : 'Private'}
-                  </span>
-                )}
-              </div>
-            )}
+            {renderValidationMessage(blackValidation)}
             <div className={styles.helpText}>
               <a href="https://lichess.org/study" target="_blank" rel="noopener noreferrer">
                 How to find your study URL? →

@@ -1,7 +1,7 @@
 // src/App.tsx
 import { Routes, Route } from 'react-router-dom';
 import { Layout, ProtectedRoute } from './components';
-import { LandingPage, Dashboard, DeviationDetail, Settings, Analysis, Demo, AuthCallback } from './pages';
+import { LandingPage, Dashboard, DeviationDetail, Settings, Analysis, Demo, AuthCallback, OnboardingPage } from './pages';
 import { AuthProvider } from './contexts/AuthJSContext';
 import './styles/index.css';
 
@@ -22,6 +22,14 @@ function App() {
             <Layout>
               <Routes>
                 {/* Protected routes - require authentication */}
+                <Route
+                  path="/onboarding"
+                  element={
+                    <ProtectedRoute>
+                      <OnboardingPage />
+                    </ProtectedRoute>
+                  }
+                />
                 <Route
                   path="/dashboard"
                   element={

@@ -6,6 +6,9 @@
  * 2. Checking if the user has access (with their Lichess token)
  * 3. Providing detailed error messages for different scenarios
  * 4. Caching results to avoid repeated API calls
+ * 
+ * NOTE: Direct browser requests to Lichess API are blocked by CORS.
+ * This module is prepared for backend/serverless proxy implementation.
  */
 
 // Study validation result interface
@@ -16,6 +19,7 @@ export interface StudyValidationResult {
   isPublic?: boolean;
   chapterCount?: number;
   studyId?: string;
+  corsBlocked?: boolean; // Flag to indicate CORS blocking
 }
 
 // Study metadata from Lichess API
@@ -83,7 +87,15 @@ function cacheResult(studyId: string, result: StudyValidationResult): void {
 }
 
 /**
+ * Detect if we're running in a browser environment
+ */
+function isBrowserEnvironment(): boolean {
+  return typeof window !== 'undefined' && typeof fetch !== 'undefined';
+}
+
+/**
  * Check if study exists and get basic info (public endpoint)
+ * NOTE: This will fail in browser due to CORS - needs backend proxy
  */
 async function checkStudyExists(studyId: string): Promise<LichessStudyInfo | null> {
   try {
@@ -110,6 +122,10 @@ async function checkStudyExists(studyId: string): Promise<LichessStudyInfo | nul
     const studyInfo: LichessStudyInfo = await response.json();
     return studyInfo;
   } catch (error) {
+    // Check if this is a CORS error (common in browser)
+    if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+      throw new Error('CORS_BLOCKED');
+    }
     if (error instanceof Error) {
       throw error;
     }
@@ -119,6 +135,7 @@ async function checkStudyExists(studyId: string): Promise<LichessStudyInfo | nul
 
 /**
  * Check study access with user's Lichess token
+ * NOTE: This will fail in browser due to CORS - needs backend proxy
  */
 async function checkStudyAccess(studyId: string, accessToken: string): Promise<LichessStudyInfo | null> {
   try {
@@ -146,11 +163,40 @@ async function checkStudyAccess(studyId: string, accessToken: string): Promise<L
     const studyInfo: LichessStudyInfo = await response.json();
     return studyInfo;
   } catch (error) {
+    // Check if this is a CORS error (common in browser)
+    if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+      throw new Error('CORS_BLOCKED');
+    }
     if (error instanceof Error) {
       throw error;
     }
     throw new Error('NETWORK_ERROR');
   }
+}
+
+/**
+ * Temporary validation for browser environment
+ * Just validates URL format until backend proxy is implemented
+ */
+function validateUrlFormatOnly(studyUrl: string): StudyValidationResult {
+  const studyId = extractStudyId(studyUrl);
+  if (!studyId) {
+    return {
+      isValid: false,
+      error: 'Invalid study URL format. Please use a valid Lichess study URL like: https://lichess.org/study/abc123'
+    };
+  }
+
+  // For now, assume valid format means valid study
+  // This is a temporary workaround until backend validation is implemented
+  return {
+    isValid: true,
+    studyName: `Study ${studyId} (Format Validated)`,
+    isPublic: undefined, // Unknown without API access
+    chapterCount: undefined, // Unknown without API access
+    studyId,
+    corsBlocked: true
+  };
 }
 
 /**
@@ -179,6 +225,20 @@ export async function validateStudyAccess(
     return cachedResult;
   }
 
+  // If we're in a browser environment, we know CORS will block us
+  if (isBrowserEnvironment()) {
+    console.warn('🚫 CORS Limitation: Cannot validate Lichess studies directly from browser');
+    console.warn('📝 Study URL format appears valid:', studyUrl);
+    console.warn('🔧 Backend proxy needed for full validation');
+    
+    // Return format-only validation with CORS warning
+    const result = validateUrlFormatOnly(studyUrl);
+    result.error = '⚠️ Study validation temporarily limited due to browser security (CORS). URL format is valid, but we cannot verify the study exists until backend validation is implemented.';
+    
+    cacheResult(studyId, result);
+    return result;
+  }
+
   try {
     let studyInfo: LichessStudyInfo | null = null;
 
@@ -188,6 +248,18 @@ export async function validateStudyAccess(
         studyInfo = await checkStudyAccess(studyId, accessToken);
       } catch (error) {
         if (error instanceof Error) {
+          // Handle CORS blocking
+          if (error.message === 'CORS_BLOCKED') {
+            const result: StudyValidationResult = {
+              isValid: false,
+              error: '🚫 Browser security (CORS) prevents direct validation of Lichess studies. This feature requires a backend server to work properly.',
+              studyId,
+              corsBlocked: true
+            };
+            cacheResult(studyId, result);
+            return result;
+          }
+          
           // If access denied with token, the study exists but user can't access it
           if (error.message === 'ACCESS_DENIED') {
             const result: StudyValidationResult = {
@@ -210,8 +282,13 @@ export async function validateStudyAccess(
       } catch (error) {
         if (error instanceof Error) {
           let errorMessage: string;
+          let corsBlocked = false;
           
           switch (error.message) {
+            case 'CORS_BLOCKED':
+              errorMessage = '🚫 Browser security (CORS) prevents direct validation of Lichess studies. The URL format looks correct, but we cannot verify the study exists without a backend server.';
+              corsBlocked = true;
+              break;
             case 'PRIVATE_STUDY':
               errorMessage = accessToken 
                 ? 'This study is private and you don\'t have access to it.'
@@ -233,10 +310,14 @@ export async function validateStudyAccess(
           const result: StudyValidationResult = {
             isValid: false,
             error: errorMessage,
-            studyId
+            studyId,
+            corsBlocked
           };
           
-          // Don't cache error results for too long
+          // Don't cache CORS errors for too long
+          if (!corsBlocked) {
+            cacheResult(studyId, result);
+          }
           return result;
         }
       }
