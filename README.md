@@ -9,7 +9,9 @@ A web application that analyzes chess games to find opening deviations and their
 
 ## Backend Setup
 
-### Quick Start (Automated)
+### Quick Start (Cross-Platform)
+
+The Makefile automatically detects your operating system (Windows, Mac, or Linux) and uses the appropriate commands.
 
 1. Navigate to the backend directory:
    ```bash
@@ -28,42 +30,50 @@ A web application that analyzes chess games to find opening deviations and their
 
 ### Manual Setup
 
-1. Navigate to the backend directory:
-   ```bash
-   cd chess_backend
-   ```
+If you prefer to set up manually or the Makefile doesn't work on your system:
 
-2. Create and activate a Python virtual environment:
-   ```bash
-   python -m venv env
-   source env/bin/activate  # On Windows, use: env\Scripts\activate
-   ```
+#### Windows (PowerShell/CMD)
+```bash
+cd chess_backend
+python -m venv env
+env\Scripts\activate
+pip install -r requirements.txt
+pip install -e .
+uvicorn main:app --reload
+```
 
-3. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
+#### Mac/Linux
+```bash
+cd chess_backend
+python3 -m venv env
+source env/bin/activate
+pip install -r requirements.txt
+pip install -e .
+uvicorn main:app --reload
+```
 
-4. Set up environment variables (optional for Supabase features):
-   ```bash
-   cp .env.example .env
-   # Edit .env with your Supabase credentials
-   ```
+### Environment Variables (Optional)
 
-5. Set up the database (if using Supabase features):
-   1. Go to your Supabase project dashboard (using the URL from your environment variables)
-   2. Click "SQL Editor" in the left sidebar
-   3. Copy the contents of `supabase/migrations/20250526184440_initial_schema.sql`
-   4. Paste and run the SQL in the editor
+For Supabase features, set up environment variables:
+```bash
+cp .env.example .env
+# Edit .env with your Supabase credentials
+```
 
-6. Start the backend server:
-   ```bash
-   uvicorn main:app --reload
-   ```
-   The backend will run on `http://localhost:8000`
+### Database Setup (If using Supabase)
+
+1. Go to your Supabase project dashboard (using the URL from your environment variables)
+2. Click "SQL Editor" in the left sidebar
+3. Copy the contents of `supabase/migrations/20250526184440_initial_schema.sql`
+4. Paste and run the SQL in the editor
+
+The backend will run on `http://localhost:8000`
 
 ### Available Make Commands
 
+All commands work cross-platform (Windows, Mac, Linux):
+
+- `make help` - Show all available commands
 - `make setup` - Create virtual environment and install dependencies
 - `make start` - Start the development server (localhost only)
 - `make dev` - Start the server with external access
@@ -109,7 +119,7 @@ A web application that analyzes chess games to find opening deviations and their
 ### Backend Tests
 ```bash
 cd chess_backend
-make test    # Run all backend tests
+make test    # Run all backend tests (works on all platforms)
 ```
 
 ### Frontend Tests
@@ -127,4 +137,19 @@ For detailed frontend testing information, see `chess_frontend/README-TESTING.md
 
 - Backend API documentation is available at `http://localhost:8000/docs` when the server is running
 - Frontend is built with React, TypeScript, and Vite
-- Backend is built with Python, FastAPI, and python-chess 
+- Backend is built with Python, FastAPI, and python-chess
+- The Makefile automatically detects your OS and uses appropriate commands
+
+## Cross-Platform Notes
+
+The project is designed to work seamlessly on:
+- **Windows** (PowerShell, Command Prompt)
+- **macOS** (Terminal, Bash, Zsh)
+- **Linux** (Bash and other shells)
+
+The Makefile automatically detects your operating system and uses the appropriate:
+- Python command (`python` vs `python3`)
+- Virtual environment activation method
+- File system commands
+
+If you encounter any platform-specific issues, please check the manual setup instructions above. 
