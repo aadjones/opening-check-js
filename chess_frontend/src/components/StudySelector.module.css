@@ -109,6 +109,28 @@
   margin-top: var(--spacing-xs);
 }
 
+.successMessage {
+  color: var(--color-success);
+  font-size: var(--font-size-sm);
+  margin-top: var(--spacing-xs);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.visibilityBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: var(--color-neutral-100);
+  color: var(--color-text-muted);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
 .helpText {
   margin-top: var(--spacing-sm);
   font-size: var(--font-size-sm);

@@ -131,18 +131,18 @@ Breaking down the OutOfBook frontend architecture into small, isolated, testable
 - [x] **Estimated Time**: 45 minutes
 
 #### Task 7b: INTEGRATION - Add Lichess Study Validation
-- [ ] **Goal**: Verify study access via Lichess API
-- [ ] **Files**: `src/lib/lichess/studyValidation.ts`
-- [ ] **Success Criteria**:
-  - [ ] Study existence check
-  - [ ] Access verification
-  - [ ] Error handling
-  - [ ] Caching strategy
-- [ ] **Tests**:
-  - [ ] API integration
-  - [ ] Error scenarios
-  - [ ] Cache behavior
-- [ ] **Estimated Time**: 45 minutes
+- [x] **Goal**: Verify study access via Lichess API
+- [x] **Files**: `src/lib/lichess/studyValidation.ts`
+- [x] **Success Criteria**:
+  - [x] Study existence check
+  - [x] Access verification
+  - [x] Error handling
+  - [x] Caching strategy
+- [x] **Tests**:
+  - [x] API integration
+  - [x] Error scenarios
+  - [x] Cache behavior
+- [x] **Estimated Time**: 45 minutes
 
 #### Task 7c: PAGES - Create OnboardingPage
 - [ ] **Goal**: Study selection page with form

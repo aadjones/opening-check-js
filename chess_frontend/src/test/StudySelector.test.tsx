@@ -1,6 +1,26 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import StudySelector from '../components/StudySelector';
+import { AuthProvider } from '../contexts/AuthJSContext';
+
+// Mock the useAuth hook
+vi.mock('../hooks/useAuth', () => ({
+  useAuth: () => ({
+    session: null,
+    user: null,
+    loading: false,
+    signOut: vi.fn(),
+    signInWithOAuth: vi.fn(),
+  })
+}));
+
+// Mock the validation module
+vi.mock('../lib/lichess/studyValidation', () => ({
+  validateStudyAccess: vi.fn(),
+  extractStudyId: vi.fn(),
+  clearValidationCache: vi.fn(),
+  getCacheStats: vi.fn(),
+}));
 
 describe('StudySelector', () => {
   const mockOnStudyChange = vi.fn();
@@ -9,15 +29,23 @@ describe('StudySelector', () => {
     mockOnStudyChange.mockClear();
   });
 
+  const renderWithAuth = (component: React.ReactElement) => {
+    return render(
+      <AuthProvider>
+        {component}
+      </AuthProvider>
+    );
+  };
+
   it('renders white and black study input fields', () => {
-    render(<StudySelector onStudyChange={mockOnStudyChange} />);
+    renderWithAuth(<StudySelector onStudyChange={mockOnStudyChange} />);
     
     expect(screen.getByLabelText(/white repertoire study url/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/black repertoire study url/i)).toBeInTheDocument();
   });
 
   it('validates white study URL format', () => {
-    render(<StudySelector onStudyChange={mockOnStudyChange} />);
+    renderWithAuth(<StudySelector onStudyChange={mockOnStudyChange} />);
     
     const whiteInput = screen.getByLabelText(/white repertoire study url/i);
     
@@ -33,7 +61,7 @@ describe('StudySelector', () => {
   });
 
   it('validates black study URL format', () => {
-    render(<StudySelector onStudyChange={mockOnStudyChange} />);
+    renderWithAuth(<StudySelector onStudyChange={mockOnStudyChange} />);
     
     const blackInput = screen.getByLabelText(/black repertoire study url/i);
     
@@ -49,7 +77,7 @@ describe('StudySelector', () => {
   });
 
   it('handles loading state', () => {
-    render(<StudySelector onStudyChange={mockOnStudyChange} isLoading={true} />);
+    renderWithAuth(<StudySelector onStudyChange={mockOnStudyChange} isLoading={true} />);
     
     const inputs = screen.getAllByRole('textbox');
     const buttons = screen.getAllByRole('button');
@@ -64,7 +92,7 @@ describe('StudySelector', () => {
   });
 
   it('shows help links', () => {
-    render(<StudySelector onStudyChange={mockOnStudyChange} />);
+    renderWithAuth(<StudySelector onStudyChange={mockOnStudyChange} />);
     
     const helpLinks = screen.getAllByText(/how to find your study url/i);
     expect(helpLinks).toHaveLength(2);
@@ -73,6 +101,18 @@ describe('StudySelector', () => {
       expect(link).toHaveAttribute('href', 'https://lichess.org/study');
       expect(link).toHaveAttribute('target', '_blank');
       expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+    });
+  });
+
+  it('shows validate buttons', () => {
+    renderWithAuth(<StudySelector onStudyChange={mockOnStudyChange} />);
+    
+    const validateButtons = screen.getAllByText(/validate/i);
+    expect(validateButtons).toHaveLength(2);
+    
+    validateButtons.forEach(button => {
+      expect(button).toBeInTheDocument();
+      expect(button).toBeDisabled(); // Should be disabled when no URL is entered
     });
   });
 }); 
