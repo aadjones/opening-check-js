@@ -1,30 +1,59 @@
 import React from 'react';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { useAuth } from '../hooks/useAuth';
+import { useDeviations } from '../hooks/useDeviations';
 import styles from './Dashboard.module.css';
 
 const Dashboard: React.FC = () => {
   usePageTitle('Dashboard');
-  const { user, loading, signOut } = useAuth();
-  // Mock data for demonstration
-  const recentActivity = [
-    {
-      id: 1,
-      type: 'deviation',
-      title: "Deviation in King's Indian Defense",
-      description: 'Move 6: played h3 instead of Be2',
-      time: '2 hours ago',
-      opponent: 'ChessMaster2000',
-    },
-    {
-      id: 2,
-      type: 'clean',
-      title: 'Perfect prep execution',
-      description: 'Followed Najdorf line for 12 moves',
-      time: '1 day ago',
-      opponent: 'BlitzKing99',
-    },
-  ];
+  const { user, loading: authLoading, signOut } = useAuth();
+  const { 
+    deviations, 
+    loading: deviationsLoading, 
+    error: deviationsError,
+    hasMore,
+    loadMore,
+    refetch 
+  } = useDeviations({ limit: 5 });
+
+  // Show loading state while auth or data is loading
+  if (authLoading || deviationsLoading) {
+    return (
+      <div className={styles.loadingState}>
+        <div className={styles.loadingSpinner}>⌛</div>
+        <div className={styles.loadingText}>Loading your dashboard...</div>
+      </div>
+    );
+  }
+
+  // Show error state if there's an error
+  if (deviationsError) {
+    return (
+      <div className={styles.errorState}>
+        <div className={styles.errorIcon}>⚠️</div>
+        <div className={styles.errorText}>
+          {deviationsError.message || 'Failed to load deviations'}
+        </div>
+        <button 
+          className={styles.retryButton}
+          onClick={() => refetch()}
+        >
+          Try Again
+        </button>
+      </div>
+    );
+  }
+
+  // Transform deviations into activity items
+  const recentActivity = deviations.map(deviation => ({
+    id: deviation.id,
+    type: 'deviation',
+    title: `Deviation in ${deviation.opening_name || 'Unknown Opening'}`,
+    description: `Move ${deviation.move_number}: played ${deviation.played_move} instead of ${deviation.expected_move}`,
+    time: new Date(deviation.created_at).toLocaleString(),
+    opponent: deviation.opponent || 'Unknown',
+    gameUrl: deviation.game_url,
+  }));
 
   const recentGames = [
     {
@@ -76,7 +105,7 @@ const Dashboard: React.FC = () => {
         >
           <strong>🔐 Auth Status:</strong>
           <br />
-          Loading: {loading ? 'Yes' : 'No'}
+          Loading: {authLoading ? 'Yes' : 'No'}
           <br />
           User: {user ? `Logged in as ${user.name} (Lichess)` : 'Not logged in'}
           <br />
@@ -103,6 +132,14 @@ const Dashboard: React.FC = () => {
         <section className={`${styles.section} ${styles.recentActivity}`}>
           <div className={styles.sectionHeader}>
             <h2 className={styles.sectionTitle}>Recent Activity</h2>
+            {hasMore && (
+              <button 
+                className={styles.loadMoreButton}
+                onClick={() => loadMore()}
+              >
+                Load More
+              </button>
+            )}
           </div>
           <div className={styles.sectionContent}>
             {recentActivity.length > 0 ? (
@@ -117,6 +154,14 @@ const Dashboard: React.FC = () => {
                       <div className={styles.activityMeta}>
                         vs {activity.opponent} • {activity.time}
                       </div>
+                      <a 
+                        href={activity.gameUrl} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className={styles.gameLink}
+                      >
+                        View Game on Lichess →
+                      </a>
                     </div>
                   </li>
                 ))}

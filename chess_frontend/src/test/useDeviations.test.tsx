@@ -49,8 +49,9 @@ vi.mock('../lib/supabase', () => ({
   },
 }));
 
-const row: ApiDeviationResult = {
-  whole_move_number: 1,
+const mockDeviation: ApiDeviationResult = {
+  id: 'test-id-1',
+  whole_move_number: 10,
   deviation_san: 'e4',
   reference_san: 'd4',
   player_color: 'white',
@@ -58,6 +59,23 @@ const row: ApiDeviationResult = {
   reference_uci: 'd2d4',
   deviation_uci: 'e2e4',
   pgn: '1. e4',
+  opening_name: 'Sicilian Defense',
+  move_number: 1,
+  played_move: 'e4',
+  expected_move: 'd4',
+  created_at: '2024-03-20T12:00:00Z',
+  opponent: 'TestOpponent',
+  game_url: 'https://lichess.org/test-game',
+  game_id: 'test-game-1',
+  time_control: 'Blitz 5+3',
+  game_result: '1-0',
+  reviewed: false,
+  review_count: 0,
+  ease_factor: 2.5,
+  interval_days: 1,
+  next_review_date: null,
+  last_reviewed: null,
+  is_resolved: false
 };
 
 /* ------------------------------------------------------------------ */
@@ -66,7 +84,7 @@ const row: ApiDeviationResult = {
 describe('useDeviations', () => {
   beforeEach(() => {
     // default mock: one row, no error
-    (supabase.from as Mock).mockReturnValue(makeQueryBuilder([row]));
+    (supabase.from as Mock).mockReturnValue(makeQueryBuilder([mockDeviation]));
   });
 
   afterEach(() => vi.clearAllMocks());
@@ -103,8 +121,8 @@ describe('useDeviations', () => {
     (supabase.from as Mock).mockImplementation(() => {
       call += 1;
       return call === 1
-        ? makeQueryBuilder([row], false, 2) // first query
-        : makeQueryBuilder([{ ...row, whole_move_number: 2 }]); // second query
+        ? makeQueryBuilder([mockDeviation], false, 2) // first query
+        : makeQueryBuilder([{ ...mockDeviation, whole_move_number: 2 }]); // second query
     });
 
     const { result } = renderHook(() => useDeviations());
