@@ -106,15 +106,15 @@ Breaking down the OutOfBook frontend architecture into small, isolated, testable
 - [x] **Estimated Time**: 1.5 hours
 
 ### Task 7: PAGES - Create Onboarding Flow
-- [ ] **Goal**: Study selection after Lichess login
-- [ ] **Files**: `src/pages/OnboardingPage.tsx`, `src/components/StudySelector.tsx`
-- [ ] **Success Criteria**:
-  - [ ] Study URL input fields (White/Black)
-  - [ ] Validation for Lichess study URLs
-  - [ ] "Start Tracking" button
-  - [ ] Saves to user profile in Supabase
-- [ ] **Tests**: Form validation and submission
-- [ ] **Estimated Time**: 2 hours
+- [x] **Goal**: Study selection after Lichess login
+- [x] **Files**: `src/pages/OnboardingPage.tsx`, `src/components/StudySelector.tsx`
+- [x] **Success Criteria**:
+  - [x] Study URL input fields (White/Black)
+  - [x] Validation for Lichess study URLs
+  - [x] "Start Tracking" button
+  - [x] Saves to user profile in Supabase
+- [x] **Tests**: Form validation and submission
+- [x] **Estimated Time**: 2 hours
 
 #### Task 7a: COMPONENTS - Create StudySelector Component
 - [x] **Goal**: Basic study URL input with validation
@@ -175,15 +175,15 @@ Breaking down the OutOfBook frontend architecture into small, isolated, testable
 - [x] **Estimated Time**: 30 minutes
 
 ### Task 8: SETUP - Create Custom Hooks for Auth.js Integration
-- [ ] **Goal**: Reusable patterns for Auth.js + Supabase
-- [ ] **Files**: `src/hooks/useAuth.ts`, `src/hooks/useSupabaseSession.ts`, `src/hooks/useDeviations.ts`
-- [ ] **Success Criteria**:
-  - [ ] useAuth hook wrapping Auth.js useSession
-  - [ ] useSupabaseSession hook for RLS-compatible sessions
-  - [ ] useDeviations hook for fetching user deviations
-  - [ ] Proper loading/error states
-- [ ] **Tests**: Hook behavior with mocked sessions
-- [ ] **Estimated Time**: 1.5 hours
+- [x] **Goal**: Reusable patterns for Auth.js + Supabase
+- [x] **Files**: `src/hooks/useAuth.ts`, `src/hooks/useSupabaseSession.ts`, `src/hooks/useDeviations.ts`
+- [x] **Success Criteria**:
+  - [x] useAuth hook wrapping Auth.js useSession
+  - [x] useSupabaseSession hook for RLS-compatible sessions
+  - [x] useDeviations hook for fetching user deviations
+  - [x] Proper loading/error states
+- [x] **Tests**: Hook behavior with mocked sessions
+- [x] **Estimated Time**: 1.5 hours
 
 ### Task 9: SETUP - Update Database Schema for Auth.js
 - [ ] **Goal**: Create users table compatible with Auth.js
@@ -194,6 +194,23 @@ Breaking down the OutOfBook frontend architecture into small, isolated, testable
   - [ ] TypeScript types generated
 - [ ] **Tests**: Database schema validation
 - [ ] **Estimated Time**: 1 hour
+
+### Task 9.5: BACKEND - Lichess Game Ingestion & Deviation Analysis
+- [ ] **Goal**: Automatically fetch recent Lichess games, analyze for deviations, and insert results into Supabase for the authenticated user.
+- [ ] **Files**: `supabase/functions/analyzeGames.ts`, `supabase/functions/utils/lichess.ts`, `supabase/functions/utils/deviation.ts`
+- [ ] **Subtasks**:
+  - [ ] **Ingestion Function**: Create a Supabase Edge Function (or serverless function) to fetch recent games for a user from Lichess.
+  - [ ] **Deviation Analysis**: Implement logic to compare games against user studies and detect deviations.
+  - [ ] **Database Insert**: Insert detected deviations into the `opening_deviations` table, linked to the correct user.
+  - [ ] **Triggering**: Allow the function to be triggered manually (API call) and/or on a schedule (cron).
+  - [ ] **Error Handling**: Handle API errors, rate limits, and duplicate game detection.
+  - [ ] **Testing**: End-to-end test with a real Lichess account and Supabase project.
+- [ ] **Success Criteria**:
+  - [ ] Function can be triggered for a user and processes their recent games.
+  - [ ] Deviations are correctly inserted into Supabase and visible in the dashboard.
+  - [ ] Handles duplicate games gracefully (no double-inserts).
+  - [ ] Logs errors and successes for debugging.
+- [ ] **Estimated Time**: 2-3 hours
 
 ---
 
