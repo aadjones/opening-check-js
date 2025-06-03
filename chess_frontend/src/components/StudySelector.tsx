@@ -33,11 +33,11 @@ const StudySelector: React.FC<StudySelectorProps> = ({ onStudyChange, isLoading 
     if (!url) {
       return { isValid: true }; // Empty is valid (not required yet)
     }
-    
+
     if (!LICHESS_STUDY_PATTERN.test(url)) {
       return {
         isValid: false,
-        error: 'Please enter a valid Lichess study URL (e.g., https://lichess.org/study/abc123)'
+        error: 'Please enter a valid Lichess study URL (e.g., https://lichess.org/study/abc123)',
       };
     }
 
@@ -45,57 +45,60 @@ const StudySelector: React.FC<StudySelectorProps> = ({ onStudyChange, isLoading 
   }, []);
 
   // API validation function
-  const performApiValidation = useCallback(async (
-    url: string, 
-    setValidation: (validation: StudyValidation | ((prev: StudyValidation) => StudyValidation)) => void
-  ): Promise<void> => {
-    if (!url) return;
+  const performApiValidation = useCallback(
+    async (
+      url: string,
+      setValidation: (validation: StudyValidation | ((prev: StudyValidation) => StudyValidation)) => void
+    ): Promise<void> => {
+      if (!url) return;
 
-    // Set loading state
-    setValidation((prev: StudyValidation) => ({ ...prev, isValidating: true }));
+      // Set loading state
+      setValidation((prev: StudyValidation) => ({ ...prev, isValidating: true }));
 
-    try {
-      // Get user's Lichess access token if available
-      const accessToken = session?.accessToken;
-      
-      // Call our validation API
-      const result: StudyValidationResult = await validateStudyAccess(url, accessToken);
-      
-      if (result.isValid) {
-        setValidation({
-          isValid: true,
-          studyName: result.studyName,
-          isPublic: result.isPublic,
-          chapterCount: result.chapterCount,
-          isValidating: false,
-          corsBlocked: result.corsBlocked
-        });
-      } else {
+      try {
+        // Get user's Lichess access token if available
+        const accessToken = session?.accessToken;
+
+        // Call our validation API
+        const result: StudyValidationResult = await validateStudyAccess(url, accessToken);
+
+        if (result.isValid) {
+          setValidation({
+            isValid: true,
+            studyName: result.studyName,
+            isPublic: result.isPublic,
+            chapterCount: result.chapterCount,
+            isValidating: false,
+            corsBlocked: result.corsBlocked,
+          });
+        } else {
+          setValidation({
+            isValid: false,
+            error: result.error,
+            isValidating: false,
+            corsBlocked: result.corsBlocked,
+          });
+        }
+      } catch (error) {
+        console.error('Study validation error:', error);
         setValidation({
           isValid: false,
-          error: result.error,
+          error: 'An unexpected error occurred while validating the study. Please try again.',
           isValidating: false,
-          corsBlocked: result.corsBlocked
         });
       }
-    } catch (error) {
-      console.error('Study validation error:', error);
-      setValidation({
-        isValid: false,
-        error: 'An unexpected error occurred while validating the study. Please try again.',
-        isValidating: false
-      });
-    }
-  }, [session?.accessToken]);
+    },
+    [session?.accessToken]
+  );
 
   const handleWhiteStudyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const url = e.target.value;
     setWhiteStudyUrl(url);
-    
+
     // Reset to basic validation when URL changes
     const validation = validateStudyUrl(url);
     setWhiteValidation(validation);
-    
+
     if (validation.isValid) {
       const match = url.match(LICHESS_STUDY_PATTERN);
       onStudyChange(match ? match[1] : null, null);
@@ -105,11 +108,11 @@ const StudySelector: React.FC<StudySelectorProps> = ({ onStudyChange, isLoading 
   const handleBlackStudyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const url = e.target.value;
     setBlackStudyUrl(url);
-    
+
     // Reset to basic validation when URL changes
     const validation = validateStudyUrl(url);
     setBlackValidation(validation);
-    
+
     if (validation.isValid) {
       const match = url.match(LICHESS_STUDY_PATTERN);
       onStudyChange(null, match ? match[1] : null);
@@ -132,8 +135,9 @@ const StudySelector: React.FC<StudySelectorProps> = ({ onStudyChange, isLoading 
           {validation.error}
           {validation.corsBlocked && (
             <div className={styles.corsExplanation}>
-              <strong>Why is this happening?</strong> Browser security prevents direct validation of Lichess studies. 
-              Your URL format is correct, and you can proceed with onboarding. Full validation will be available once we implement backend support.
+              <strong>Why is this happening?</strong> Browser security prevents direct validation of Lichess studies.
+              Your URL format is correct, and you can proceed with onboarding. Full validation will be available once we
+              implement backend support.
             </div>
           )}
         </div>
@@ -143,12 +147,9 @@ const StudySelector: React.FC<StudySelectorProps> = ({ onStudyChange, isLoading 
     if (validation.isValid && validation.studyName) {
       return (
         <div className={styles.successMessage}>
-          ✓ Study found: "{validation.studyName}" 
-          {validation.chapterCount && ` (${validation.chapterCount} chapters)`}
+          ✓ Study found: "{validation.studyName}"{validation.chapterCount && ` (${validation.chapterCount} chapters)`}
           {validation.isPublic !== undefined && (
-            <span className={styles.visibilityBadge}>
-              {validation.isPublic ? 'Public' : 'Private'}
-            </span>
+            <span className={styles.visibilityBadge}>{validation.isPublic ? 'Public' : 'Private'}</span>
           )}
           {validation.corsBlocked && (
             <div className={styles.corsNote}>
@@ -186,7 +187,12 @@ const StudySelector: React.FC<StudySelectorProps> = ({ onStudyChange, isLoading 
               <button
                 type="button"
                 className={styles.validateButton}
-                disabled={isLoading || !whiteStudyUrl || whiteValidation.isValidating || !validateStudyUrl(whiteStudyUrl).isValid}
+                disabled={
+                  isLoading ||
+                  !whiteStudyUrl ||
+                  whiteValidation.isValidating ||
+                  !validateStudyUrl(whiteStudyUrl).isValid
+                }
                 onClick={handleWhiteValidation}
               >
                 {whiteValidation.isValidating ? 'Validating...' : 'Validate'}
@@ -224,7 +230,12 @@ const StudySelector: React.FC<StudySelectorProps> = ({ onStudyChange, isLoading 
               <button
                 type="button"
                 className={styles.validateButton}
-                disabled={isLoading || !blackStudyUrl || blackValidation.isValidating || !validateStudyUrl(blackStudyUrl).isValid}
+                disabled={
+                  isLoading ||
+                  !blackStudyUrl ||
+                  blackValidation.isValidating ||
+                  !validateStudyUrl(blackStudyUrl).isValid
+                }
                 onClick={handleBlackValidation}
               >
                 {blackValidation.isValidating ? 'Validating...' : 'Validate'}
@@ -243,4 +254,4 @@ const StudySelector: React.FC<StudySelectorProps> = ({ onStudyChange, isLoading 
   );
 };
 
-export default StudySelector; 
+export default StudySelector;

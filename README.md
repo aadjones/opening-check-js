@@ -152,4 +152,28 @@ The Makefile automatically detects your operating system and uses the appropriat
 - Virtual environment activation method
 - File system commands
 
-If you encounter any platform-specific issues, please check the manual setup instructions above. 
+If you encounter any platform-specific issues, please check the manual setup instructions above.
+
+## Proxy Functionality for Lichess API
+
+To handle CORS issues when accessing the Lichess API from the frontend, a proxy endpoint has been implemented in the backend.
+
+### Proxy Endpoint
+
+- **Endpoint**: `/proxy/{path:path}`
+- **Description**: This endpoint forwards requests to the Lichess API, allowing the frontend to bypass CORS restrictions.
+- **Usage**: Replace direct Lichess API calls in the frontend with calls to this proxy endpoint.
+  - Example: Instead of calling `https://lichess.org/api/study/{studyId}.pgn`, use `/proxy/api/study/{studyId}.pgn`.
+
+### How It Works
+
+1. The frontend sends a request to the proxy endpoint with the desired Lichess API path.
+2. The proxy forwards the request to the Lichess API and returns the response to the frontend.
+3. This allows the frontend to access Lichess data without encountering CORS issues.
+
+### Testing the Proxy
+
+- Use tools like `curl` or Postman to test the proxy endpoint.
+- Ensure the backend server is running and accessible at `http://localhost:8000`.
+
+This proxy setup is essential for ensuring smooth communication between the frontend and the Lichess API, especially during development and testing. 

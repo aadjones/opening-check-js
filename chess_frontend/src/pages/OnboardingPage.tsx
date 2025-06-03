@@ -5,6 +5,7 @@ import { useAuth } from '../hooks/useAuth';
 import { saveUserStudySelections } from '../lib/database/studyOperations';
 import { extractStudyId } from '../lib/lichess/studyValidation';
 import styles from './OnboardingPage.module.css';
+import { supabase } from '../lib/supabase';
 
 // Demo study URLs
 const DEMO_WHITE_STUDY = 'https://lichess.org/study/WyolAMxV/pkza6G22';
@@ -34,25 +35,25 @@ const OnboardingPage: React.FC = () => {
 
   const handleDemoModeToggle = (enabled: boolean) => {
     setIsDemoMode(enabled);
-    
+
     if (enabled) {
       // Load demo studies
       const demoWhiteId = extractStudyId(DEMO_WHITE_STUDY);
       const demoBlackId = extractStudyId(DEMO_BLACK_STUDY);
-      
+
       setWhiteStudyId(demoWhiteId);
       setBlackStudyId(demoBlackId);
-      
+
       console.log('Demo mode enabled with studies:', {
         white: demoWhiteId,
-        black: demoBlackId
+        black: demoBlackId,
       });
     } else {
       // Clear studies when demo mode is disabled
       setWhiteStudyId(null);
       setBlackStudyId(null);
     }
-    
+
     // Clear any previous errors when toggling demo mode
     if (error) {
       setError(null);
@@ -72,26 +73,63 @@ const OnboardingPage: React.FC = () => {
 
     setIsLoading(true);
     setError(null);
-    
+
     try {
       // Save study selections to Supabase database
-      await saveUserStudySelections(session.user.id, whiteStudyId, blackStudyId);
-      
+      try {
+        await saveUserStudySelections(session.user.id, whiteStudyId, blackStudyId);
+        console.log('Study selections saved successfully:', { whiteStudyId, blackStudyId });
+      } catch (saveError: unknown) {
+        let message = '';
+        if (saveError instanceof Error) {
+          message = saveError.message;
+        } else if (
+          typeof saveError === 'object' &&
+          saveError &&
+          'message' in saveError &&
+          typeof (saveError as { message?: unknown }).message === 'string'
+        ) {
+          message = (saveError as { message: string }).message;
+        } else {
+          message = String(saveError);
+        }
+        if (message.match(/duplicate|constraint|unique/i)) {
+          console.warn('Duplicate/constraint error when saving studies, continuing onboarding:', message);
+        } else {
+          console.error('Error saving studies:', saveError);
+          setError(message || 'Failed to save your study selections. Please try again.');
+          setIsLoading(false);
+          return;
+        }
+      }
+
+      // Mark onboarding as completed regardless of study save result
+      console.log('[Onboarding] Attempting to update onboarding_completed flag for user:', session.user.id);
+      const {
+        data: onboardingData,
+        error: onboardingError,
+        status,
+        statusText,
+      } = await supabase.from('profiles').update({ onboarding_completed: true }).eq('id', session.user.id).select(); // Get updated rows for debugging
+      console.log('[Onboarding] Supabase update result:', { onboardingData, onboardingError, status, statusText });
+      if (onboardingError) {
+        console.error('Error updating onboarding_completed flag:', onboardingError.message);
+        setError('Failed to update onboarding status. Please try again.');
+        setIsLoading(false);
+        return;
+      }
+
       if (isDemoMode) {
         console.log('Demo onboarding completed! Redirecting to dashboard...');
       } else {
         console.log('Onboarding completed! Redirecting to dashboard...');
       }
-      
+
       // Navigate to dashboard after successful onboarding
       navigate('/dashboard');
     } catch (error) {
-      console.error('Error saving studies:', error);
-      setError(
-        error instanceof Error 
-          ? error.message 
-          : 'Failed to save your study selections. Please try again.'
-      );
+      console.error('Unexpected error in onboarding:', error);
+      setError(error instanceof Error ? error.message : 'Failed to complete onboarding. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -106,9 +144,7 @@ const OnboardingPage: React.FC = () => {
           <h1 className={styles.title}>🎯 Choose Your Repertoire</h1>
           <div className={styles.welcome}>
             <h2 className={styles.welcomeTitle}>🧠 Welcome to OutOfBook</h2>
-            <p className={styles.welcomeSubtitle}>
-              Track your games against your prep.
-            </p>
+            <p className={styles.welcomeSubtitle}>Track your games against your prep.</p>
           </div>
         </div>
 
@@ -147,11 +183,11 @@ const OnboardingPage: React.FC = () => {
               <div className={styles.cardBody}>
                 <div className={styles.demoOption}>
                   <label className={styles.checkboxLabel}>
-                    <input 
-                      type="checkbox" 
+                    <input
+                      type="checkbox"
                       className={styles.checkbox}
                       checked={isDemoMode}
-                      onChange={(e) => handleDemoModeToggle(e.target.checked)}
+                      onChange={e => handleDemoModeToggle(e.target.checked)}
                       disabled={isLoading}
                     />
                     Load Demo Repertoires
@@ -163,13 +199,23 @@ const OnboardingPage: React.FC = () => {
                     <div className={styles.demoInfo}>
                       <div className={styles.demoStudy}>
                         <span className={styles.demoLabel}>White Demo:</span>
-                        <a href={DEMO_WHITE_STUDY} target="_blank" rel="noopener noreferrer" className={styles.demoLink}>
+                        <a
+                          href={DEMO_WHITE_STUDY}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={styles.demoLink}
+                        >
                           Sample White Repertoire →
                         </a>
                       </div>
                       <div className={styles.demoStudy}>
                         <span className={styles.demoLabel}>Black Demo:</span>
-                        <a href={DEMO_BLACK_STUDY} target="_blank" rel="noopener noreferrer" className={styles.demoLink}>
+                        <a
+                          href={DEMO_BLACK_STUDY}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={styles.demoLink}
+                        >
                           Sample Black Repertoire →
                         </a>
                       </div>
@@ -180,12 +226,7 @@ const OnboardingPage: React.FC = () => {
             </div>
           </div>
 
-          {!isDemoMode && (
-            <StudySelector 
-              onStudyChange={handleStudyChange}
-              isLoading={isLoading}
-            />
-          )}
+          {!isDemoMode && <StudySelector onStudyChange={handleStudyChange} isLoading={isLoading} />}
 
           <div className={styles.actions}>
             <button
@@ -193,7 +234,7 @@ const OnboardingPage: React.FC = () => {
               onClick={handleStartTracking}
               disabled={!canStartTracking}
             >
-              {isLoading ? 'Setting up...' : isDemoMode ? '🚀 Let\'s go!' : '✅ Start Tracking Your Games'}
+              {isLoading ? 'Setting up...' : isDemoMode ? "🚀 Let's go!" : '✅ Start Tracking Your Games'}
             </button>
           </div>
 
@@ -232,4 +273,4 @@ const OnboardingPage: React.FC = () => {
   );
 };
 
-export default OnboardingPage; 
+export default OnboardingPage;

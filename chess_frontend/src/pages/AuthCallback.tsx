@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { validateOAuthCallback, completeOAuthFlow } from '../lib/auth/lichessOAuth';
 import { getStoredCodeVerifier, clearCodeVerifier } from '../lib/auth/pkce';
-import { hasCompletedOnboarding } from '../lib/auth/onboardingUtils';
+import { supabase } from '../lib/supabase';
 
 const AuthCallback: React.FC = () => {
   const [status, setStatus] = useState<'processing' | 'success' | 'error'>('processing');
@@ -40,19 +40,29 @@ const AuthCallback: React.FC = () => {
         // Exchange authorization code for access token and fetch user info
         const { user, accessToken } = await completeOAuthFlow(code, codeVerifier);
 
-        console.log('OAuth flow completed successfully for user:', user.username);
+        // Resolve the UUID for this user (creating a profile if needed)
+        const { getOrCreateUserProfile } = await import('../lib/database/studyOperations');
+        const uuid = await getOrCreateUserProfile(user.username);
+        const userWithUUID = { ...user, id: uuid };
 
-        // TODO: Create Auth.js session and sync with Supabase
-        // For now, we'll store the user data temporarily
-        sessionStorage.setItem('lichess_user', JSON.stringify(user));
+        // Store the user data with UUID in sessionStorage
+        sessionStorage.setItem('lichess_user', JSON.stringify(userWithUUID));
         sessionStorage.setItem('lichess_access_token', accessToken);
 
         // Notify AuthJSContext that a new session is available
         window.dispatchEvent(new CustomEvent('auth-session-refresh'));
 
         // Check if this is a first-time user
-        const isFirstTime = !hasCompletedOnboarding(user.id);
-        
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('onboarding_completed')
+          .eq('id', uuid)
+          .single();
+        if (profileError) {
+          console.error('Error fetching onboarding status:', profileError);
+        }
+        const isFirstTime = !profile?.onboarding_completed;
+
         setStatus('success');
         if (isFirstTime) {
           setMessage(`Welcome ${user.username}! Let's set up your repertoire...`);

@@ -1,9 +1,11 @@
 # First-Time Login Onboarding Flow
 
 ## Overview
+
 When a user logs in with Lichess OAuth for the first time, they are automatically redirected to the onboarding page to set up their repertoire studies. Returning users go directly to the dashboard.
 
 ## Flow Diagram
+
 ```
 Landing Page
      ↓ (Click "Connect with Lichess")
@@ -18,19 +20,23 @@ Auth Callback
 ## Implementation Details
 
 ### 1. AuthCallback (`/auth/callback`)
+
 - Completes OAuth flow with Lichess
 - Checks if user has completed onboarding using `hasCompletedOnboarding(userId)`
 - Redirects to `/onboarding` for first-time users
 - Redirects to `/dashboard` for returning users
 
 ### 2. OnboardingPage (`/onboarding`)
+
 - Protected route (requires authentication)
 - Uses `StudySelector` component for study URL input
 - Saves study selections using `saveUserStudies()` utility
 - Redirects to dashboard after completion
 
 ### 3. Onboarding Status Tracking
+
 Currently uses localStorage (temporary solution):
+
 - Key: `user_studies_${userId}`
 - Value: `{ whiteStudyId, blackStudyId, completedAt, userId }`
 - Will be replaced with Supabase in Task 7d
@@ -38,13 +44,16 @@ Currently uses localStorage (temporary solution):
 ## Testing the Flow
 
 ### First-Time Login Test
+
 1. **Clear onboarding status** (if testing with existing user):
+
    ```javascript
    // Open browser console and run:
    onboardingUtils.clearOnboardingStatus('your-lichess-user-id');
    ```
 
 2. **Start fresh login**:
+
    - Go to landing page (`/`)
    - Click "Connect with Lichess"
    - Complete OAuth flow
@@ -56,6 +65,7 @@ Currently uses localStorage (temporary solution):
    - Should redirect to `/dashboard`
 
 ### Returning User Test
+
 1. **Login again** (after completing onboarding once):
    - Go to landing page (`/`)
    - Click "Connect with Lichess"
@@ -90,12 +100,14 @@ onboardingUtils.saveUserStudies('user-id', 'white-study-id', 'black-study-id');
 ## User Experience
 
 ### First-Time User Journey
+
 1. **Landing Page**: "Connect with Lichess" → OAuth
 2. **Auth Success**: "Welcome! Let's set up your repertoire..."
 3. **Onboarding**: Study selection with progress indicator
 4. **Completion**: "Start Tracking Your Games" → Dashboard
 
 ### Returning User Journey
+
 1. **Landing Page**: "Connect with Lichess" → OAuth
 2. **Auth Success**: "Welcome back! Redirecting to dashboard..."
 3. **Dashboard**: Immediate access to app features
@@ -111,4 +123,4 @@ onboardingUtils.saveUserStudies('user-id', 'white-study-id', 'black-study-id');
 - Onboarding page is a protected route (requires authentication)
 - Study validation shows CORS warnings but allows progression
 - Demo mode is available as alternative to real study setup
-- All redirects include 2-second delays for better UX 
+- All redirects include 2-second delays for better UX

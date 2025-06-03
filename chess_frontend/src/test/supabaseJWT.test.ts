@@ -9,7 +9,7 @@ describe('Supabase JWT Helper', () => {
 
   it('should sign a valid JWT with required claims', () => {
     const payload = {
-      sub: 'user123',
+      sub: 'b84ac9f8-66be-41c1-af30-665e3600953c',
       email: 'test@example.com',
       role: 'authenticated' as const,
       lichess_username: 'testuser',
@@ -24,7 +24,7 @@ describe('Supabase JWT Helper', () => {
 
   it('should verify a signed JWT and return correct payload', () => {
     const payload = {
-      sub: 'user456',
+      sub: 'b84ac9f8-66be-41c1-af30-665e3600953c',
       email: 'verify@example.com',
       role: 'authenticated' as const,
       lichess_username: 'verifyuser',
@@ -47,7 +47,7 @@ describe('Supabase JWT Helper', () => {
 
     expect(() => {
       signSupabaseJWT({
-        sub: 'user789',
+        sub: 'b84ac9f8-66be-41c1-af30-665e3600953c',
         role: 'authenticated',
       });
     }).toThrow('SUPABASE_JWT_SECRET is not configured');
@@ -60,7 +60,7 @@ describe('Supabase JWT Helper', () => {
     const beforeSign = Math.floor(Date.now() / 1000);
 
     const token = signSupabaseJWT({
-      sub: 'user999',
+      sub: 'b84ac9f8-66be-41c1-af30-665e3600953c',
       role: 'authenticated',
     });
 

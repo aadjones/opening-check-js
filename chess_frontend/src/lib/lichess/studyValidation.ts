@@ -1,12 +1,12 @@
 /**
  * Lichess Study Validation Module
- * 
+ *
  * This module handles validation of Lichess study URLs by:
  * 1. Checking if the study exists (public endpoint)
  * 2. Checking if the user has access (with their Lichess token)
  * 3. Providing detailed error messages for different scenarios
  * 4. Caching results to avoid repeated API calls
- * 
+ *
  * NOTE: Direct browser requests to Lichess API are blocked by CORS.
  * This module is prepared for backend/serverless proxy implementation.
  */
@@ -55,9 +55,17 @@ const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
  * - https://lichess.org/study/abc123/chapter-id
  */
 export function extractStudyId(url: string): string | null {
-  const pattern = /lichess\.org\/study\/([a-zA-Z0-9]+)/;
-  const match = url.match(pattern);
-  return match ? match[1] : null;
+  if (!url) return null;
+
+  // Match proxy URLs: /proxy/api/study/abc123 or /proxy/api/study/abc123/chapter-xyz
+  let match = url.match(/\/proxy\/api\/study\/([a-zA-Z0-9]+)/);
+  if (match) return match[1];
+
+  // Match standard Lichess URLs: https://lichess.org/study/abc123 or https://lichess.org/study/abc123/chapter-xyz
+  match = url.match(/lichess\.org\/study\/([a-zA-Z0-9]+)/);
+  if (match) return match[1];
+
+  return null;
 }
 
 /**
@@ -66,13 +74,13 @@ export function extractStudyId(url: string): string | null {
 function getCachedResult(studyId: string): StudyValidationResult | null {
   const cached = validationCache.get(studyId);
   if (!cached) return null;
-  
+
   const isExpired = Date.now() - cached.timestamp > CACHE_TTL;
   if (isExpired) {
     validationCache.delete(studyId);
     return null;
   }
-  
+
   return cached.result;
 }
 
@@ -82,7 +90,7 @@ function getCachedResult(studyId: string): StudyValidationResult | null {
 function cacheResult(studyId: string, result: StudyValidationResult): void {
   validationCache.set(studyId, {
     result,
-    timestamp: Date.now()
+    timestamp: Date.now(),
   });
 }
 
@@ -90,6 +98,9 @@ function cacheResult(studyId: string, result: StudyValidationResult): void {
  * Detect if we're running in a browser environment
  */
 function isBrowserEnvironment(): boolean {
+  if (typeof process !== 'undefined' && process.env && process.env.NODE_ENV === 'test') {
+    return false;
+  }
   return typeof window !== 'undefined' && typeof fetch !== 'undefined';
 }
 
@@ -99,10 +110,10 @@ function isBrowserEnvironment(): boolean {
  */
 async function checkStudyExists(studyId: string): Promise<LichessStudyInfo | null> {
   try {
-    const response = await fetch(`https://lichess.org/api/study/${studyId}`, {
+    const response = await fetch(`/proxy/api/study/${studyId}`, {
       method: 'GET',
       headers: {
-        'Accept': 'application/json',
+        Accept: 'application/json',
       },
     });
 
@@ -139,11 +150,11 @@ async function checkStudyExists(studyId: string): Promise<LichessStudyInfo | nul
  */
 async function checkStudyAccess(studyId: string, accessToken: string): Promise<LichessStudyInfo | null> {
   try {
-    const response = await fetch(`https://lichess.org/api/study/${studyId}`, {
+    const response = await fetch(`/proxy/api/study/${studyId}`, {
       method: 'GET',
       headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${accessToken}`,
+        Accept: 'application/json',
+        Authorization: `Bearer ${accessToken}`,
       },
     });
 
@@ -183,7 +194,7 @@ function validateUrlFormatOnly(studyUrl: string): StudyValidationResult {
   if (!studyId) {
     return {
       isValid: false,
-      error: 'Invalid study URL format. Please use a valid Lichess study URL like: https://lichess.org/study/abc123'
+      error: 'Invalid study URL format. Please use a valid Lichess study URL like: https://lichess.org/study/abc123',
     };
   }
 
@@ -195,27 +206,24 @@ function validateUrlFormatOnly(studyUrl: string): StudyValidationResult {
     isPublic: undefined, // Unknown without API access
     chapterCount: undefined, // Unknown without API access
     studyId,
-    corsBlocked: true
+    corsBlocked: true,
   };
 }
 
 /**
  * Main validation function - validates study access via Lichess API
- * 
+ *
  * @param studyUrl - The Lichess study URL to validate
  * @param accessToken - Optional user's Lichess access token for private studies
  * @returns Promise<StudyValidationResult> - Detailed validation result
  */
-export async function validateStudyAccess(
-  studyUrl: string, 
-  accessToken?: string
-): Promise<StudyValidationResult> {
+export async function validateStudyAccess(studyUrl: string, accessToken?: string): Promise<StudyValidationResult> {
   // Extract study ID from URL
   const studyId = extractStudyId(studyUrl);
   if (!studyId) {
     return {
       isValid: false,
-      error: 'Invalid study URL format. Please use a valid Lichess study URL like: https://lichess.org/study/abc123'
+      error: 'Invalid study URL format. Please use a valid Lichess study URL like: https://lichess.org/study/abc123',
     };
   }
 
@@ -230,11 +238,12 @@ export async function validateStudyAccess(
     console.warn('🚫 CORS Limitation: Cannot validate Lichess studies directly from browser');
     console.warn('📝 Study URL format appears valid:', studyUrl);
     console.warn('🔧 Backend proxy needed for full validation');
-    
+
     // Return format-only validation with CORS warning
     const result = validateUrlFormatOnly(studyUrl);
-    result.error = '⚠️ Study validation temporarily limited due to browser security (CORS). URL format is valid, but we cannot verify the study exists until backend validation is implemented.';
-    
+    result.error =
+      '⚠️ Study validation temporarily limited due to browser security (CORS). URL format is valid, but we cannot verify the study exists until backend validation is implemented.';
+
     cacheResult(studyId, result);
     return result;
   }
@@ -252,20 +261,21 @@ export async function validateStudyAccess(
           if (error.message === 'CORS_BLOCKED') {
             const result: StudyValidationResult = {
               isValid: false,
-              error: '🚫 Browser security (CORS) prevents direct validation of Lichess studies. This feature requires a backend server to work properly.',
+              error:
+                '🚫 Browser security (CORS) prevents direct validation of Lichess studies. This feature requires a backend server to work properly.',
               studyId,
-              corsBlocked: true
+              corsBlocked: true,
             };
             cacheResult(studyId, result);
             return result;
           }
-          
+
           // If access denied with token, the study exists but user can't access it
           if (error.message === 'ACCESS_DENIED') {
             const result: StudyValidationResult = {
               isValid: false,
-              error: 'This study is private and you don\'t have access to it. Please check with the study owner.',
-              studyId
+              error: "This study is private and you don't have access to it. Please check with the study owner.",
+              studyId,
             };
             cacheResult(studyId, result);
             return result;
@@ -283,15 +293,16 @@ export async function validateStudyAccess(
         if (error instanceof Error) {
           let errorMessage: string;
           let corsBlocked = false;
-          
+
           switch (error.message) {
             case 'CORS_BLOCKED':
-              errorMessage = '🚫 Browser security (CORS) prevents direct validation of Lichess studies. The URL format looks correct, but we cannot verify the study exists without a backend server.';
+              errorMessage =
+                '🚫 Browser security (CORS) prevents direct validation of Lichess studies. The URL format looks correct, but we cannot verify the study exists without a backend server.';
               corsBlocked = true;
               break;
             case 'PRIVATE_STUDY':
-              errorMessage = accessToken 
-                ? 'This study is private and you don\'t have access to it.'
+              errorMessage = accessToken
+                ? "This study is private and you don't have access to it."
                 : 'This study is private. Please log in with Lichess to check if you have access.';
               break;
             case 'NETWORK_ERROR':
@@ -311,9 +322,9 @@ export async function validateStudyAccess(
             isValid: false,
             error: errorMessage,
             studyId,
-            corsBlocked
+            corsBlocked,
           };
-          
+
           // Don't cache CORS errors for too long
           if (!corsBlocked) {
             cacheResult(studyId, result);
@@ -328,7 +339,7 @@ export async function validateStudyAccess(
       const result: StudyValidationResult = {
         isValid: false,
         error: 'Study not found. Please check the URL and make sure the study exists.',
-        studyId
+        studyId,
       };
       cacheResult(studyId, result);
       return result;
@@ -340,18 +351,17 @@ export async function validateStudyAccess(
       studyName: studyInfo.name,
       isPublic: studyInfo.visibility === 'public',
       chapterCount: studyInfo.chapters.length,
-      studyId: studyInfo.id
+      studyId: studyInfo.id,
     };
 
     cacheResult(studyId, result);
     return result;
-
-  } catch (error) {
+  } catch {
     // Catch-all for unexpected errors
     const result: StudyValidationResult = {
       isValid: false,
       error: 'An unexpected error occurred while validating the study. Please try again.',
-      studyId
+      studyId,
     };
     return result;
   }
@@ -370,6 +380,6 @@ export function clearValidationCache(): void {
 export function getCacheStats(): { size: number; entries: string[] } {
   return {
     size: validationCache.size,
-    entries: Array.from(validationCache.keys())
+    entries: Array.from(validationCache.keys()),
   };
-} 
+}

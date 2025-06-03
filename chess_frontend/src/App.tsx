@@ -1,7 +1,16 @@
 // src/App.tsx
 import { Routes, Route } from 'react-router-dom';
 import { Layout, ProtectedRoute } from './components';
-import { LandingPage, Dashboard, DeviationDetail, Settings, Analysis, Demo, AuthCallback, OnboardingPage } from './pages';
+import {
+  LandingPage,
+  Dashboard,
+  DeviationDetail,
+  Settings,
+  Analysis,
+  Demo,
+  AuthCallback,
+  OnboardingPage,
+} from './pages';
 import { AuthProvider } from './contexts/AuthJSContext';
 import './styles/index.css';
 

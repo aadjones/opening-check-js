@@ -1,6 +1,8 @@
+import logging
 from typing import List, Optional, Tuple
 
-from fastapi import FastAPI, HTTPException
+import httpx
+from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, HttpUrl
 
@@ -37,6 +39,7 @@ app = FastAPI()
 origins = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
+    # Add any other URLs here, such as production URLs
 ]
 
 app.add_middleware(
@@ -46,6 +49,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
 
 
 @app.get("/")
@@ -109,4 +115,22 @@ async def analyze_games_endpoint(request: AnalysisRequest) -> List[Optional[ApiD
 
     except Exception as e:
         print(f"An unexpected error occurred during analysis: {e}")
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+
+
+@app.get("/proxy/{path:path}")
+async def proxy(request: Request, path: str) -> Response:
+    url = f"https://lichess.org/{path}"
+    logging.info(f"Proxying request to: {url} with params: {request.query_params}")
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(url, params=request.query_params)
+            response.raise_for_status()
+            logging.info(f"Received response with status: {response.status_code}")
+            return Response(content=response.text, media_type="text/plain")
+    except httpx.HTTPStatusError as exc:
+        logging.error(f"HTTP error occurred: {exc.response.status_code} - {exc.response.text}")
+        raise HTTPException(status_code=exc.response.status_code, detail=f"Error from Lichess: {exc.response.text}")
+    except Exception as e:
+        logging.error(f"Unexpected error: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")

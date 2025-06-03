@@ -22,20 +22,19 @@ interface AuthProviderProps {
  * Creates an Auth.js compatible session from Lichess user data
  */
 function createSessionFromLichessUser(lichessUser: LichessUser, accessToken: string): Session {
+  // Expect lichessUser.id to be the UUID (resolved in AuthCallback)
   const user: User = {
-    id: lichessUser.id,
+    id: lichessUser.id, // This is now the UUID
     name: lichessUser.username,
     email: lichessUser.email,
-    image: `https://lichess1.org/assets/_Qk9Aqz/logo/lichess-favicon-32.png`, // Default Lichess avatar
+    image: `https://lichess1.org/assets/_Qk9Aqz/logo/lichess-favicon-32.png`,
     lichessUsername: lichessUser.username,
   };
-
   const session: Session = {
     user,
-    expires: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(), // 1 year from now
+    expires: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
     accessToken,
   };
-
   return session;
 }
 

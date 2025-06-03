@@ -41,11 +41,13 @@ SUPABASE_JWT_SECRET=your_supabase_jwt_secret
 Run one of these commands to generate a secure secret:
 
 **Mac/Linux (using OpenSSL):**
+
 ```bash
 openssl rand -base64 32 | tr '+/' '-_' | tr -d '='
 ```
 
 **Windows (using PowerShell):**
+
 ```powershell
 $bytes = New-Object byte[] 32; [System.Security.Cryptography.RNGCryptoServiceProvider]::Create().GetBytes($bytes); [Convert]::ToBase64String($bytes) -replace '\+', '-' -replace '/', '_' -replace '=', ''
 ```

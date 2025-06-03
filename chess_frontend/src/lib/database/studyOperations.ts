@@ -19,14 +19,14 @@ export interface LichessStudy {
 /**
  * Get or create a user profile based on Lichess username
  * Returns the UUID for the user profile
- * 
+ *
  * Note: For development, we're bypassing RLS by using the anon key directly
  * In production, this would use proper authentication
  */
 async function getOrCreateUserProfile(lichessUsername: string): Promise<string> {
   try {
     console.log('🔍 Looking for profile with username:', lichessUsername);
-    
+
     // First, try to find existing profile by username
     const { data: existingProfile, error: selectError } = await supabase
       .from('profiles')
@@ -53,20 +53,23 @@ async function getOrCreateUserProfile(lichessUsername: string): Promise<string> 
       .insert({
         id: newUserId, // Explicitly provide the UUID
         username: lichessUsername,
-        email: `${lichessUsername}@lichess.org` // Temporary email
+        email: `${lichessUsername}@lichess.org`, // Temporary email
+        onboarding_completed: false, // Set to false by default for new users
       })
       .select('id')
       .single();
 
     if (insertError) {
       console.error('❌ Error creating profile:', insertError);
-      
+
       // If RLS is blocking us, provide helpful error message
       if (insertError.message?.includes('RLS') || insertError.message?.includes('policy')) {
         console.error('🚨 RLS Policy Error: You may need to disable RLS for development');
-        console.error('💡 In Supabase dashboard, go to Authentication > Policies and temporarily disable RLS on the profiles table');
+        console.error(
+          '💡 In Supabase dashboard, go to Authentication > Policies and temporarily disable RLS on the profiles table'
+        );
       }
-      
+
       throw new Error('Failed to create user profile');
     }
 
@@ -90,7 +93,7 @@ export async function saveUserStudySelections(
   try {
     // Determine if userIdentifier is a UUID or username
     const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(userIdentifier);
-    
+
     let userId: string;
     if (isUUID) {
       userId = userIdentifier;
@@ -135,9 +138,7 @@ export async function saveUserStudySelections(
 
     // Insert new studies if any
     if (studiesToInsert.length > 0) {
-      const { error: insertError } = await supabase
-        .from('lichess_studies')
-        .insert(studiesToInsert);
+      const { error: insertError } = await supabase.from('lichess_studies').insert(studiesToInsert);
 
       if (insertError) {
         console.error('Error inserting studies:', insertError);
@@ -150,7 +151,7 @@ export async function saveUserStudySelections(
       userId,
       whiteStudyId,
       blackStudyId,
-      studiesCount: studiesToInsert.length
+      studiesCount: studiesToInsert.length,
     });
   } catch (error) {
     console.error('Error in saveUserStudySelections:', error);
@@ -165,7 +166,7 @@ export async function getUserStudySelections(userIdentifier: string): Promise<St
   try {
     // Determine if userIdentifier is a UUID or username
     const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(userIdentifier);
-    
+
     let userId: string;
     if (isUUID) {
       userId = userIdentifier;
@@ -219,7 +220,7 @@ export async function hasCompletedOnboarding(userIdentifier: string): Promise<bo
   try {
     // Determine if userIdentifier is a UUID or username
     const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(userIdentifier);
-    
+
     let userId: string;
     if (isUUID) {
       userId = userIdentifier;
@@ -245,4 +246,6 @@ export async function hasCompletedOnboarding(userIdentifier: string): Promise<bo
     console.error('Error in hasCompletedOnboarding:', error);
     return false;
   }
-} 
+}
+
+export { getOrCreateUserProfile };

@@ -13,7 +13,7 @@ const Settings: React.FC = () => {
   const [originalStudies, setOriginalStudies] = useState<UserStudies | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-  
+
   const [timeControls, setTimeControls] = useState({
     bullet: true,
     blitz: true,
@@ -32,6 +32,7 @@ const Settings: React.FC = () => {
   // Load user's studies on component mount
   useEffect(() => {
     if (session?.user?.id) {
+      // session.user.id is always the UUID
       const userStudies = getUserStudies(session.user.id);
       if (userStudies) {
         setOriginalStudies(userStudies);
@@ -123,29 +124,23 @@ const Settings: React.FC = () => {
   // Check if studies have been modified
   const hasStudyChanges = () => {
     if (!originalStudies) return whiteStudy || blackStudy;
-    
+
     const currentWhiteId = whiteStudy ? extractStudyId(whiteStudy) : null;
     const currentBlackId = blackStudy ? extractStudyId(blackStudy) : null;
-    
-    return currentWhiteId !== originalStudies.whiteStudyId || 
-           currentBlackId !== originalStudies.blackStudyId;
+
+    return currentWhiteId !== originalStudies.whiteStudyId || currentBlackId !== originalStudies.blackStudyId;
   };
 
   const formatStudyDisplay = (studyUrl: string) => {
     if (!studyUrl) return null;
-    
+
     const studyId = extractStudyId(studyUrl);
     if (!studyId) return null;
 
     return (
       <div className={styles.studyInfo}>
         <span className={styles.studyId}>Study ID: {studyId}</span>
-        <a 
-          href={studyUrl} 
-          target="_blank" 
-          rel="noopener noreferrer"
-          className={styles.studyLink}
-        >
+        <a href={studyUrl} target="_blank" rel="noopener noreferrer" className={styles.studyLink}>
           View on Lichess →
         </a>
       </div>
@@ -207,11 +202,7 @@ const Settings: React.FC = () => {
             </div>
           </div>
 
-          {saveMessage && (
-            <div className={`${styles.saveMessage} ${styles[saveMessage.type]}`}>
-              {saveMessage.text}
-            </div>
-          )}
+          {saveMessage && <div className={`${styles.saveMessage} ${styles[saveMessage.type]}`}>{saveMessage.text}</div>}
         </div>
       </section>
 
@@ -311,14 +302,10 @@ const Settings: React.FC = () => {
         </div>
 
         <div className={styles.actions}>
-          <button 
-            className={styles.cancelButton} 
-            onClick={handleCancel}
-            disabled={isLoading}
-          >
+          <button className={styles.cancelButton} onClick={handleCancel} disabled={isLoading}>
             Cancel
           </button>
-          <button 
+          <button
             className={`${styles.saveButton} ${hasStudyChanges() ? styles.saveButtonActive : ''}`}
             onClick={handleSave}
             disabled={isLoading || !hasStudyChanges()}
