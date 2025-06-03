@@ -26,7 +26,9 @@ const makeQueryBuilder = (rows: ApiDeviationResult[], throwErr: boolean = false,
     order: vi.fn(() => builder),
     limit: vi.fn(() => builder),
     range: vi.fn(() =>
-      throwErr ? Promise.reject(new Error('Test error')) : Promise.resolve({ data: rows, error: null, count: total })
+      throwErr
+        ? Promise.reject(new Error('Test error'))
+        : Promise.resolve({ data: rows.map(row => ({ ...row })), error: null, count: total })
     ),
   };
 
@@ -43,26 +45,26 @@ vi.mock('../lib/supabase', () => ({
   },
 }));
 
-const mockDeviation: ApiDeviationResult = {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const mockDeviation: any = {
   id: 'test-id-1',
   whole_move_number: 10,
-  deviation_san: 'e4',
-  reference_san: 'd4',
-  player_color: 'white',
-  board_fen_before_deviation: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
-  reference_uci: 'd2d4',
-  deviation_uci: 'e2e4',
-  pgn: '1. e4',
-  opening_name: 'Sicilian Defense',
-  move_number: 1,
-  played_move: 'e4',
-  expected_move: 'd4',
-  created_at: '2024-03-20T12:00:00Z',
-  opponent: 'TestOpponent',
-  game_url: 'https://lichess.org/test-game',
+  deviation_san: '', // will be filled by hook mapping
+  reference_san: '', // will be filled by hook mapping
+  player_color: '', // will be filled by hook mapping
+  board_fen_before_deviation: '', // will be filled by hook mapping
+  reference_uci: null,
+  deviation_uci: null,
+  pgn: '',
+  opening_name: null,
+  move_number: 10,
+  played_move: '', // will be filled by hook mapping
+  created_at: '', // will be filled by hook mapping
+  opponent: null,
+  game_url: '',
   game_id: 'test-game-1',
-  time_control: 'Blitz 5+3',
-  game_result: '1-0',
+  time_control: null,
+  game_result: null,
   reviewed: false,
   review_count: 0,
   ease_factor: 2.5,
@@ -70,6 +72,15 @@ const mockDeviation: ApiDeviationResult = {
   next_review_date: null,
   last_reviewed: null,
   is_resolved: false,
+  // DB fields expected by the hook
+  actual_move: 'e4',
+  expected_move: 'd4', // only the DB field, not the ApiDeviationResult field
+  color: 'white',
+  position_fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  detected_at: '2024-03-20T12:00:00Z',
+  review_result: 'not_reviewed',
+  reviewed_at: null,
+  // Some ApiDeviationResult fields are omitted or left blank because the hook fills them
 };
 
 /* ------------------------------------------------------------------ */
