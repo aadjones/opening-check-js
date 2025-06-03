@@ -10,13 +10,13 @@ describe('Configuration Tests', () => {
       expectedTables.forEach(tableName => {
         // Table names should be lowercase with underscores
         expect(tableName).toMatch(/^[a-z_]+$/);
-        
+
         // Table names should not start or end with underscore
         expect(tableName).not.toMatch(/^_|_$/);
-        
+
         // Table names should not have consecutive underscores
         expect(tableName).not.toMatch(/__/);
-        
+
         // Table names should be descriptive
         expect(tableName.length).toBeGreaterThan(2);
       });

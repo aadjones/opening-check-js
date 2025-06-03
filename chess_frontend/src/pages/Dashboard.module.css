@@ -292,12 +292,17 @@
   margin-bottom: var(--spacing-lg);
 }
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* Activity/Game item hover */
-.activityItem:hover, .gameItem:hover {
+.activityItem:hover,
+.gameItem:hover {
   background: #f3f6fa;
   transition: background 0.2s;
 }

@@ -29,8 +29,11 @@ export function useSupabaseSession() {
         }
 
         // Get current Supabase session
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-        
+        const {
+          data: { session },
+          error: sessionError,
+        } = await supabase.auth.getSession();
+
         if (sessionError) {
           throw sessionError;
         }
@@ -40,7 +43,10 @@ export function useSupabaseSession() {
         if (!session || session.user.id !== authSession.user.id) {
           // In a real implementation, this would call a serverless function to get a signed JWT
           // For now, we'll just use the Auth.js session directly
-          const { data: { session: newSession }, error: updateError } = await supabase.auth.setSession({
+          const {
+            data: { session: newSession },
+            error: updateError,
+          } = await supabase.auth.setSession({
             access_token: authSession.accessToken || '',
             refresh_token: '', // We don't use refresh tokens with Auth.js
           });
@@ -70,7 +76,9 @@ export function useSupabaseSession() {
     syncSession();
 
     // Listen for auth state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       if (mounted) {
         setSupabaseSession(session);
       }
@@ -87,4 +95,4 @@ export function useSupabaseSession() {
     loading,
     error,
   };
-} 
+}

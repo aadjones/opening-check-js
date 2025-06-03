@@ -18,11 +18,7 @@ vi.mock('../hooks/useAuth', () => ({
 /* ------------------------------------------------------------------ */
 /* 2. helper to make a fake query builder                              */
 /* ------------------------------------------------------------------ */
-const makeQueryBuilder = (
-  rows: ApiDeviationResult[],
-  throwErr: boolean = false,
-  total: number = rows.length,
-) => {
+const makeQueryBuilder = (rows: ApiDeviationResult[], throwErr: boolean = false, total: number = rows.length) => {
   // Build a chainable object; every step returns itself.
   const builder = {
     select: vi.fn(() => builder),
@@ -30,9 +26,7 @@ const makeQueryBuilder = (
     order: vi.fn(() => builder),
     limit: vi.fn(() => builder),
     range: vi.fn(() =>
-      throwErr
-        ? Promise.reject(new Error('Test error'))
-        : Promise.resolve({ data: rows, error: null, count: total }),
+      throwErr ? Promise.reject(new Error('Test error')) : Promise.resolve({ data: rows, error: null, count: total })
     ),
   };
 
@@ -75,7 +69,7 @@ const mockDeviation: ApiDeviationResult = {
   interval_days: 1,
   next_review_date: null,
   last_reviewed: null,
-  is_resolved: false
+  is_resolved: false,
 };
 
 /* ------------------------------------------------------------------ */
@@ -102,9 +96,7 @@ describe('useDeviations', () => {
 
   it('propagates Supabase errors', async () => {
     // next call: throw
-    (supabase.from as Mock).mockReturnValueOnce(
-      makeQueryBuilder([], true),
-    );
+    (supabase.from as Mock).mockReturnValueOnce(makeQueryBuilder([], true));
 
     const { result } = renderHook(() => useDeviations());
 

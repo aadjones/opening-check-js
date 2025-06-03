@@ -30,13 +30,8 @@ const DeviationDetail: React.FC = () => {
     return (
       <div className={styles.errorState}>
         <div className={styles.errorIcon}>⚠️</div>
-        <div className={styles.errorText}>
-          {error.message || 'Failed to load deviation'}
-        </div>
-        <button 
-          className={styles.retryButton}
-          onClick={() => refetch()}
-        >
+        <div className={styles.errorText}>{error.message || 'Failed to load deviation'}</div>
+        <button className={styles.retryButton} onClick={() => refetch()}>
           Try Again
         </button>
       </div>
@@ -49,10 +44,7 @@ const DeviationDetail: React.FC = () => {
       <div className={styles.errorState}>
         <div className={styles.errorIcon}>🔍</div>
         <div className={styles.errorText}>Deviation not found</div>
-        <button 
-          className={styles.retryButton}
-          onClick={() => navigate('/dashboard')}
-        >
+        <button className={styles.retryButton} onClick={() => navigate('/dashboard')}>
           Back to Dashboard
         </button>
       </div>
@@ -66,12 +58,10 @@ const DeviationDetail: React.FC = () => {
           ❌ You deviated from your prep on move {deviation.move_number}
         </div>
         <div className={styles.gameInfo}>
-          <div className={styles.openingInfo}>
-            📖 Opening: {deviation.opening_name || 'Unknown Opening'}
-          </div>
+          <div className={styles.openingInfo}>📖 Opening: {deviation.opening_name || 'Unknown Opening'}</div>
           <div className={styles.opponentInfo}>
-            🤝 vs. {deviation.opponent || 'Unknown'} 
-            {deviation.time_control ? ` — ${deviation.time_control}` : ''} 
+            🤝 vs. {deviation.opponent || 'Unknown'}
+            {deviation.time_control ? ` — ${deviation.time_control}` : ''}
             {deviation.game_result ? ` — Result: ${deviation.game_result}` : ''}
           </div>
         </div>
@@ -94,7 +84,9 @@ const DeviationDetail: React.FC = () => {
 
       <div className={styles.chessboardPlaceholder}>
         <div className={styles.boardContainer}>
-          <p>[Chessboard view at move {deviation.move_number} — {deviation.player_color.toLowerCase()} to move]</p>
+          <p>
+            [Chessboard view at move {deviation.move_number} — {deviation.player_color.toLowerCase()} to move]
+          </p>
         </div>
       </div>
 
@@ -106,10 +98,7 @@ const DeviationDetail: React.FC = () => {
 
         <div className={styles.mainActions}>
           <button className={styles.primaryAction}>▶️ Replay My Prep Line</button>
-          <button 
-            className={styles.secondaryAction}
-            disabled={deviation.reviewed}
-          >
+          <button className={styles.secondaryAction} disabled={deviation.reviewed}>
             {deviation.reviewed ? '✅ Reviewed' : 'Mark as Reviewed'}
           </button>
         </div>

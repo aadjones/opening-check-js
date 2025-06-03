@@ -7,13 +7,13 @@ import styles from './Dashboard.module.css';
 const Dashboard: React.FC = () => {
   usePageTitle('Dashboard');
   const { user, loading: authLoading, signOut } = useAuth();
-  const { 
-    deviations, 
-    loading: deviationsLoading, 
+  const {
+    deviations,
+    loading: deviationsLoading,
     error: deviationsError,
     hasMore,
     loadMore,
-    refetch 
+    refetch,
   } = useDeviations({ limit: 5 });
 
   // Show loading state while auth or data is loading
@@ -31,13 +31,8 @@ const Dashboard: React.FC = () => {
     return (
       <div className={styles.errorState}>
         <div className={styles.errorIcon}>⚠️</div>
-        <div className={styles.errorText}>
-          {deviationsError.message || 'Failed to load deviations'}
-        </div>
-        <button 
-          className={styles.retryButton}
-          onClick={() => refetch()}
-        >
+        <div className={styles.errorText}>{deviationsError.message || 'Failed to load deviations'}</div>
+        <button className={styles.retryButton} onClick={() => refetch()}>
           Try Again
         </button>
       </div>
@@ -133,10 +128,7 @@ const Dashboard: React.FC = () => {
           <div className={styles.sectionHeader}>
             <h2 className={styles.sectionTitle}>Recent Activity</h2>
             {hasMore && (
-              <button 
-                className={styles.loadMoreButton}
-                onClick={() => loadMore()}
-              >
+              <button className={styles.loadMoreButton} onClick={() => loadMore()}>
                 Load More
               </button>
             )}
@@ -154,12 +146,7 @@ const Dashboard: React.FC = () => {
                       <div className={styles.activityMeta}>
                         vs {activity.opponent} • {activity.time}
                       </div>
-                      <a 
-                        href={activity.gameUrl} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className={styles.gameLink}
-                      >
+                      <a href={activity.gameUrl} target="_blank" rel="noopener noreferrer" className={styles.gameLink}>
                         View Game on Lichess →
                       </a>
                     </div>
