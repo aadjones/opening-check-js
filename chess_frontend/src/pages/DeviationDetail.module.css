@@ -331,3 +331,35 @@
     padding: var(--spacing-xl);
   }
 }
+
+.errorState {
+  background: #fff6f6;
+  border: 1px solid #ffb3b3;
+  color: #b91c1c;
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-3xl) var(--spacing-2xl);
+  margin: var(--spacing-2xl) 0;
+  text-align: center;
+  box-shadow: 0 2px 8px 0 rgba(255, 0, 0, 0.04);
+}
+
+.errorIcon {
+  font-size: 2.5rem;
+  margin-bottom: var(--spacing-lg);
+}
+
+.retryButton {
+  background: #ff6b6b;
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 0.6em 1.4em;
+  font-size: 1rem;
+  font-weight: 500;
+  margin-top: var(--spacing-lg);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.retryButton:hover {
+  background: #e53e3e;
+}

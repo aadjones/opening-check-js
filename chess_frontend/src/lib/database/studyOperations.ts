@@ -27,11 +27,11 @@ async function getOrCreateUserProfile(lichessUsername: string): Promise<string> 
   try {
     console.log('🔍 Looking for profile with username:', lichessUsername);
 
-    // First, try to find existing profile by username
+    // First, try to find existing profile by lichess_username
     const { data: existingProfile, error: selectError } = await supabase
       .from('profiles')
       .select('id')
-      .eq('username', lichessUsername)
+      .eq('lichess_username', lichessUsername)
       .single();
 
     if (existingProfile && !selectError) {
@@ -52,8 +52,7 @@ async function getOrCreateUserProfile(lichessUsername: string): Promise<string> 
       .from('profiles')
       .insert({
         id: newUserId, // Explicitly provide the UUID
-        username: lichessUsername,
-        email: `${lichessUsername}@lichess.org`, // Temporary email
+        lichess_username: lichessUsername,
         onboarding_completed: false, // Set to false by default for new users
       })
       .select('id')

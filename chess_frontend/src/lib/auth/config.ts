@@ -24,7 +24,6 @@ const LichessProvider = {
     return {
       id: profile.id,
       name: profile.username,
-      email: profile.email || `${profile.username}@lichess.org`, // Lichess doesn't always provide email
       image: `https://lichess1.org/assets/_${profile.id}/logo/64.png`,
       lichessUsername: profile.username,
     };

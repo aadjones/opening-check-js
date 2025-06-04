@@ -186,14 +186,14 @@ Breaking down the OutOfBook frontend architecture into small, isolated, testable
 - [x] **Estimated Time**: 1.5 hours
 
 ### Task 9: SETUP - Update Database Schema for Auth.js
-- [ ] **Goal**: Create users table compatible with Auth.js
-- [ ] **Files**: Database migration, `src/lib/database.types.ts`
-- [ ] **Success Criteria**:
-  - [ ] Users table with lichess_username, access_token fields
-  - [ ] RLS policies updated for new JWT structure
-  - [ ] TypeScript types generated
-- [ ] **Tests**: Database schema validation
-- [ ] **Estimated Time**: 1 hour
+- [x] **Goal**: Create users table compatible with Auth.js
+- [x] **Files**: Database migration, `src/lib/database.types.ts`
+- [x] **Success Criteria**:
+  - [x] Users table with lichess_username, access_token fields
+  - [x] RLS policies updated for new JWT structure
+  - [x] TypeScript types generated
+- [x] **Tests**: Database schema validation
+- [x] **Estimated Time**: 1 hour
 
 ### Task 9.5: BACKEND - Lichess Game Ingestion & Deviation Analysis
 - [ ] **Goal**: Automatically fetch recent Lichess games, analyze for deviations, and insert results into Supabase for the authenticated user.

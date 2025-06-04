@@ -3,8 +3,8 @@ import React from 'react';
 import styles from './AnalysisForm.module.css';
 
 interface AnalysisFormProps {
-  username: string;
-  setUsername: (value: string) => void;
+  lichessUsername: string;
+  setLichessUsername: (value: string) => void;
   maxGames: string;
   setMaxGames: (value: string) => void;
   studyUrlWhite: string;
@@ -16,8 +16,8 @@ interface AnalysisFormProps {
 }
 
 const AnalysisForm: React.FC<AnalysisFormProps> = ({
-  username,
-  setUsername,
+  lichessUsername,
+  setLichessUsername,
   maxGames,
   setMaxGames,
   studyUrlWhite,
@@ -30,15 +30,15 @@ const AnalysisForm: React.FC<AnalysisFormProps> = ({
   return (
     <form className={styles.form} onSubmit={handleSubmit}>
       <div className={styles.formGroup}>
-        <label htmlFor="username" className={styles.label}>
+        <label htmlFor="lichessUsername" className={styles.label}>
           Enter your Lichess username
         </label>
         <input
           type="text"
-          id="username"
+          id="lichessUsername"
           className={styles.input}
-          value={username}
-          onChange={e => setUsername(e.target.value)}
+          value={lichessUsername}
+          onChange={e => setLichessUsername(e.target.value)}
           placeholder="e.g., Magnus_Carlsen"
           required
           disabled={isLoading}
