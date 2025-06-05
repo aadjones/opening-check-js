@@ -101,7 +101,7 @@ describe('useDeviations', () => {
 
     expect(result.current.error).toBeNull();
     expect(result.current.deviations).toHaveLength(1);
-    expect(result.current.deviations[0].deviation_san).toBe('e4');
+    expect(result.current.deviations[0].actual_move).toBe('e4');
     expect(result.current.hasMore).toBe(false);
   });
 

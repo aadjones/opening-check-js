@@ -4,6 +4,7 @@ import { usePageTitle } from '../hooks/usePageTitle';
 import { useDeviationById } from '../hooks/useDeviations';
 import styles from './DeviationDetail.module.css';
 import DeviationDisplay from '../components/chess/DeviationDisplay';
+import { parsePgnHeaders } from '../utils/pgn';
 
 const DeviationDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -49,6 +50,23 @@ const DeviationDetail: React.FC = () => {
     );
   }
 
+  // Parse PGN headers for inferred fields
+  const headers = parsePgnHeaders(deviation.pgn || '');
+  const openingName = headers.Opening || 'Unknown Opening';
+  const timeControl = headers.TimeControl || 'Unknown';
+  const gameResult = headers.Result || '';
+  const userColor = deviation.color;
+  const whitePlayer = headers.White || 'White';
+  const blackPlayer = headers.Black || 'Black';
+  // Infer opponent name (the non-user player)
+  const opponent = userColor.toLowerCase() === 'white' ? blackPlayer : whitePlayer;
+  // Construct game URL (assuming Lichess)
+  const gameUrl = deviation.game_id ? `https://lichess.org/${deviation.game_id}` : '';
+  // Use actual_move for played move
+  const playedMove = deviation.actual_move;
+  // Use detected_at for created_at
+  const createdAt = deviation.detected_at;
+
   return (
     <div className={styles.deviationDetail}>
       <div className={styles.deviationHeader}>
@@ -56,11 +74,11 @@ const DeviationDetail: React.FC = () => {
           ❌ You deviated from your prep on move {deviation.move_number}
         </div>
         <div className={styles.gameInfo}>
-          <div className={styles.openingInfo}>📖 Opening: {deviation.opening_name || 'Unknown Opening'}</div>
+          <div className={styles.openingInfo}>📖 Opening: {openingName}</div>
           <div className={styles.opponentInfo}>
-            🤝 vs. {deviation.opponent || 'Unknown'}
-            {deviation.time_control ? ` — ${deviation.time_control}` : ''}
-            {deviation.game_result ? ` — Result: ${deviation.game_result}` : ''}
+            🤝 vs. {opponent}
+            {timeControl ? ` — ${timeControl}` : ''}
+            {gameResult ? ` — Result: ${gameResult}` : ''}
           </div>
         </div>
       </div>
@@ -69,7 +87,7 @@ const DeviationDetail: React.FC = () => {
         <div className={styles.moves}>
           <div className={`${styles.move} ${styles.played}`}>
             <span className={styles.label}>You played:</span>
-            <span className={styles.moveText}>{deviation.played_move}</span>
+            <span className={styles.moveText}>{playedMove}</span>
             <span className={styles.status}>❌</span>
           </div>
           <div className={`${styles.move} ${styles.expected}`}>
@@ -92,9 +110,6 @@ const DeviationDetail: React.FC = () => {
 
         <div className={styles.mainActions}>
           <button className={styles.primaryAction}>▶️ Replay My Prep Line</button>
-          <button className={styles.secondaryAction} disabled={deviation.reviewed}>
-            {deviation.reviewed ? '✅ Reviewed' : 'Mark as Reviewed'}
-          </button>
         </div>
 
         <div className={styles.moreOptions}>
@@ -102,37 +117,27 @@ const DeviationDetail: React.FC = () => {
             <summary>More Options</summary>
             <ul>
               <li>
-                <button>I meant to play {deviation.played_move} (Adopt it)</button>
+                <button>I meant to play {playedMove} (Adopt it)</button>
               </li>
               <li>
                 <button>Ignore this chapter in the future</button>
               </li>
-              <li>
-                <a href={deviation.game_url} target="_blank" rel="noopener noreferrer">
-                  View full game on Lichess →
-                </a>
-              </li>
+              {gameUrl && (
+                <li>
+                  <a href={gameUrl} target="_blank" rel="noopener noreferrer">
+                    View full game on Lichess →
+                  </a>
+                </li>
+              )}
             </ul>
           </details>
         </div>
       </div>
 
-      {deviation.review_count > 0 && (
-        <div className={styles.patternNotice}>
-          <div className={styles.noticeCard}>
-            🔄 You've reviewed this deviation {deviation.review_count} times.
-            {deviation.next_review_date && (
-              <> Next review: {new Date(deviation.next_review_date).toLocaleDateString()}</>
-            )}
-            <button className={styles.remindBtn}>Remind Me</button>
-          </div>
-        </div>
-      )}
-
       <div className={styles.deviationMeta}>
         <p>Deviation ID: {deviation.id}</p>
         <p>Game ID: {deviation.game_id}</p>
-        <p>Created: {new Date(deviation.created_at).toLocaleString()}</p>
+        <p>Created: {new Date(createdAt).toLocaleString()}</p>
       </div>
     </div>
   );

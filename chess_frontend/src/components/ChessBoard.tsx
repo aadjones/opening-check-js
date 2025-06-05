@@ -27,9 +27,16 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
       boardOrientation={orientation}
       boardWidth={boardWidth}
       arePiecesDraggable={arePiecesDraggable}
-      onPieceDrop={onMove ? ((from, to) => { onMove(from, to); return true; }) : undefined}
+      onPieceDrop={
+        onMove
+          ? (from, to) => {
+              onMove(from, to);
+              return true;
+            }
+          : undefined
+      }
     />
   );
 };
 
-export default ChessBoard; 
+export default ChessBoard;

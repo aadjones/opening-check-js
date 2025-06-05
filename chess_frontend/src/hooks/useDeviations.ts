@@ -46,7 +46,10 @@ export function useDeviations(options: UseDeviationsOptions = {}): UseDeviations
         // Build query
         let query = supabase
           .from('opening_deviations')
-          .select('*', { count: 'exact' })
+          .select(
+            'id, user_id, study_id, game_id, position_fen, expected_move, actual_move, move_number, color, detected_at, reviewed_at, review_result, pgn',
+            { count: 'exact' }
+          )
           .eq('user_id', session.user.id)
           .order('detected_at', { ascending: false })
           .limit(options.limit || 10)
@@ -71,31 +74,18 @@ export function useDeviations(options: UseDeviationsOptions = {}): UseDeviations
           const r = row as Record<string, unknown>;
           return {
             id: r.id as string,
-            whole_move_number: r.move_number as number,
-            deviation_san: r.actual_move as string,
-            reference_san: r.expected_move as string,
-            player_color: r.color as string,
-            board_fen_before_deviation: r.position_fen as string,
-            reference_uci: '', // fill if you have it
-            deviation_uci: '', // fill if you have it
-            pgn: '', // fill if you have it
-            opening_name: '', // fill if you have it
-            move_number: r.move_number as number,
-            played_move: r.actual_move as string,
-            expected_move: r.expected_move as string,
-            created_at: r.detected_at as string,
-            opponent: '', // fill if you have it
-            game_url: '', // fill if you have it
+            user_id: r.user_id as string,
+            study_id: r.study_id as string,
             game_id: r.game_id as string,
-            time_control: '', // fill if you have it
-            game_result: '', // fill if you have it
-            reviewed: r.review_result === 'reviewed',
-            review_count: 0, // fill if you have it
-            ease_factor: 2.5, // fill if you have it
-            interval_days: 1, // fill if you have it
-            next_review_date: null, // fill if you have it
-            last_reviewed: r.reviewed_at as string,
-            is_resolved: false, // fill if you have it
+            position_fen: r.position_fen as string,
+            expected_move: r.expected_move as string,
+            actual_move: r.actual_move as string,
+            move_number: r.move_number as number,
+            color: r.color as string,
+            detected_at: r.detected_at as string,
+            reviewed_at: r.reviewed_at as string | null,
+            review_result: r.review_result as string | null,
+            pgn: r.pgn as string | null,
           };
         });
 
@@ -157,11 +147,7 @@ export function useDeviationById(id: string | undefined) {
     setLoading(true);
     setError(null);
     try {
-      const { data, error: supaError } = await supabase
-        .from('opening_deviations')
-        .select('*')
-        .eq('id', id)
-        .single();
+      const { data, error: supaError } = await supabase.from('opening_deviations').select('*').eq('id', id).single();
       if (supaError) throw supaError;
       setDeviation(data as ApiDeviationResult);
     } catch (err) {

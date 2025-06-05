@@ -55,9 +55,7 @@ const GamesList: React.FC<GamesListProps> = ({ games, isLoading, onGameClick }) 
       <div className={styles.emptyState}>
         <div className={styles.emptyStateIcon}>🎮</div>
         <div className={styles.emptyStateTitle}>No recent games found</div>
-        <div className={styles.emptyStateText}>
-          Play some games on Lichess and they'll appear here for analysis!
-        </div>
+        <div className={styles.emptyStateText}>Play some games on Lichess and they'll appear here for analysis!</div>
       </div>
     );
   }
@@ -95,11 +93,9 @@ const GamesList: React.FC<GamesListProps> = ({ games, isLoading, onGameClick }) 
             <span className={styles.timeControl}>{formatTimeControl(game.timeControl)}</span>
             <span className={styles.gameResult}>{formatResult(game.gameResult, game.hasDeviation)}</span>
           </div>
-          
+
           <div className={styles.gameContent}>
-            <div className={styles.opponent}>
-              vs {game.opponent}
-            </div>
+            <div className={styles.opponent}>vs {game.opponent}</div>
             <div className={styles.gameMeta}>
               <time dateTime={game.playedAt}>{new Date(game.playedAt).toLocaleDateString()}</time>
             </div>
@@ -131,4 +127,4 @@ const GamesList: React.FC<GamesListProps> = ({ games, isLoading, onGameClick }) 
   );
 };
 
-export default GamesList; 
+export default GamesList;

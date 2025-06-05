@@ -4,6 +4,7 @@ import { useAuth } from '../hooks/useAuth';
 import { useDeviations } from '../hooks/useDeviations';
 import styles from './Dashboard.module.css';
 import GamesList, { type GameListItem } from '../components/GamesList';
+import { parsePgnHeaders } from '../utils/pgn';
 
 const Dashboard: React.FC = () => {
   usePageTitle('Dashboard');
@@ -18,17 +19,29 @@ const Dashboard: React.FC = () => {
   } = useDeviations({ limit: 5 });
 
   // Transform deviations into game list items
-  const recentGames: GameListItem[] = deviations.map(deviation => ({
-    id: deviation.id,
-    gameId: deviation.game_id,
-    gameUrl: deviation.game_url,
-    opponent: deviation.opponent || 'Unknown',
-    timeControl: deviation.time_control || '600', // Default to 10+0 if not specified
-    gameResult: deviation.game_result || '1/2-1/2',
-    playedAt: deviation.created_at,
-    hasDeviation: true,
-    deviation,
-  }));
+  const recentGames: GameListItem[] = deviations.map(deviation => {
+    const headers = parsePgnHeaders(deviation.pgn || '');
+    const userColor = deviation.color;
+    const whitePlayer = headers.White || 'White';
+    const blackPlayer = headers.Black || 'Black';
+    const opponent = userColor.toLowerCase() === 'white' ? blackPlayer : whitePlayer;
+    const timeControl = headers.TimeControl || '600';
+    const gameResult = headers.Result || '1/2-1/2';
+    const playedAt = deviation.detected_at;
+    const gameUrl = deviation.game_id ? `https://lichess.org/${deviation.game_id}` : '';
+
+    return {
+      id: deviation.id,
+      gameId: deviation.game_id,
+      gameUrl,
+      opponent,
+      timeControl,
+      gameResult,
+      playedAt,
+      hasDeviation: true,
+      deviation,
+    };
+  });
 
   // Show loading state while auth or data is loading
   if (authLoading || deviationsLoading) {

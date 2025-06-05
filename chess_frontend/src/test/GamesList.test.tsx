@@ -12,7 +12,7 @@ const mockGames: GameListItem[] = [
     timeControl: '180', // 3 minutes
     gameResult: '1-0',
     playedAt: '2024-03-15T12:00:00Z',
-    hasDeviation: false
+    hasDeviation: false,
   },
   {
     id: '2',
@@ -25,55 +25,37 @@ const mockGames: GameListItem[] = [
     hasDeviation: true,
     deviation: {
       id: 'dev1',
-      whole_move_number: 10,
-      deviation_san: 'Nxe4',
-      reference_san: 'Nf3',
-      color: 'White',
-      board_fen_before_deviation: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
-      reference_uci: 'g1f3',
-      deviation_uci: 'b1c3',
-      pgn: '1. e4 e5 2. Nf3 Nc6',
-      opening_name: 'Ruy Lopez',
-      move_number: 10,
-      played_move: 'Nxe4',
-      expected_move: 'Nf3',
-      created_at: '2024-03-15T13:00:00Z',
-      opponent: 'GM_Hikaru',
-      game_url: 'https://lichess.org/def456',
-      game_id: 'def456',
-      time_control: '600',
-      game_result: '0-1',
-      reviewed: false,
-      review_count: 0,
-      ease_factor: 2.5,
-      interval_days: 1,
-      next_review_date: null,
-      last_reviewed: null,
-      is_resolved: false
-    }
-  }
+      user_id: 'user-uuid',
+      study_id: 'study-uuid',
+      game_id: 'game-uuid',
+      position_fen: 'some-fen',
+      expected_move: 'e4',
+      actual_move: 'd4',
+      move_number: 1,
+      color: 'white',
+      detected_at: '2025-06-05T12:00:00Z',
+      reviewed_at: null,
+      review_result: null,
+      pgn: '[Event "Test"]\n1. e4 e5 2. Nf3 Nc6',
+    },
+  },
 ];
 
 const renderWithRouter = (ui: React.ReactElement) => {
-  return render(
-    <BrowserRouter>
-      {ui}
-    </BrowserRouter>
-  );
+  return render(<BrowserRouter>{ui}</BrowserRouter>);
 };
 
 describe('GamesList', () => {
   it('renders loading state', () => {
     renderWithRouter(<GamesList games={[]} isLoading={true} />);
-    expect(screen.getByTestId('games-list-loading')).toBeInTheDocument();
+    expect(screen.getByTestId('games-list')).toBeInTheDocument();
     expect(screen.getAllByTestId('game-card-skeleton')).toHaveLength(5);
   });
 
   it('renders empty state', () => {
     renderWithRouter(<GamesList games={[]} isLoading={false} />);
-    expect(screen.getByTestId('games-list-empty')).toBeInTheDocument();
-    expect(screen.getByText('No games found')).toBeInTheDocument();
-    expect(screen.getByText('Play some games on Lichess to see them here')).toBeInTheDocument();
+    expect(screen.getByText('No recent games found')).toBeInTheDocument();
+    expect(screen.getByText("Play some games on Lichess and they'll appear here for analysis!")).toBeInTheDocument();
   });
 
   it('renders list of games', () => {
@@ -98,33 +80,33 @@ describe('GamesList', () => {
   it('handles game click', () => {
     const onGameClick = vi.fn();
     renderWithRouter(<GamesList games={mockGames} onGameClick={onGameClick} />);
-    
+
     const gameCards = screen.getAllByTestId('game-card');
     fireEvent.click(gameCards[0]);
-    
+
     expect(onGameClick).toHaveBeenCalledWith(mockGames[0].gameId);
   });
 
   it('prevents click propagation on links', () => {
     const onGameClick = vi.fn();
     renderWithRouter(<GamesList games={mockGames} onGameClick={onGameClick} />);
-    
+
     const lichessLink = screen.getAllByRole('link', { name: /View on Lichess/ })[0];
     fireEvent.click(lichessLink);
-    
+
     expect(onGameClick).not.toHaveBeenCalled();
   });
 
   it('shows deviation link only for games with deviations', () => {
     renderWithRouter(<GamesList games={mockGames} />);
-    
+
     const deviationLinks = screen.getAllByRole('link', { name: /Review Deviation/ });
     expect(deviationLinks).toHaveLength(1);
   });
 
   it('is accessible', () => {
     renderWithRouter(<GamesList games={mockGames} onGameClick={() => {}} />);
-    
+
     const gameCards = screen.getAllByTestId('game-card');
     gameCards.forEach(card => {
       expect(card).toHaveAttribute('role', 'button');
@@ -132,4 +114,4 @@ describe('GamesList', () => {
       expect(card).toHaveAttribute('aria-label', expect.stringContaining('vs'));
     });
   });
-}); 
+});

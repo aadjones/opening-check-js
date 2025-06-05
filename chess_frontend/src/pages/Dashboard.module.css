@@ -353,7 +353,9 @@
   font-weight: 500;
   cursor: pointer;
   box-shadow: 0 2px 8px rgba(59, 130, 246, 0.08);
-  transition: background 0.2s, transform 0.1s;
+  transition:
+    background 0.2s,
+    transform 0.1s;
 }
 .loadMoreButton:hover {
   background: var(--color-primary-hover, #2563eb);

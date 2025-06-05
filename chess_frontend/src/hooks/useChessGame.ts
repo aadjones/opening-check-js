@@ -52,4 +52,4 @@ export function useChessGame(pgn: string | null): ChessGameInfo {
   }, [pgn]);
 
   return { fens, moves, whitePlayer, blackPlayer };
-} 
+}
