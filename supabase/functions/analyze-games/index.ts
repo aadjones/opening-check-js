@@ -16,6 +16,9 @@ interface Deviation {
   deviation_san?: string;
   whole_move_number?: number;
   player_color?: string | null;
+  pgn?: string | null;
+  deviation_uci?: string | null;
+  reference_uci?: string | null;
 }
 
 interface DeviationRow {
@@ -28,6 +31,9 @@ interface DeviationRow {
   move_number: number;
   color: string | null;
   detected_at: string;
+  pgn: string | null;
+  deviation_uci?: string | null;
+  reference_uci?: string | null;
 }
 
 // ── env ────────────────────────────────────────────────────────
@@ -94,6 +100,9 @@ async function analyseUserGames(userId: string) {
     move_number:   d?.whole_move_number ?? 0,
     color:         normaliseColor(d?.player_color),
     detected_at:   new Date().toISOString(),
+    pgn:           d?.pgn ?? null,
+    deviation_uci: d?.deviation_uci ?? null,
+    reference_uci: d?.reference_uci ?? null,
   })) as DeviationRow[];
 
   if (rows.length) {

@@ -104,7 +104,7 @@ async def analyze_games_endpoint(request: AnalysisRequest) -> List[Optional[ApiD
                         board_fen_before_deviation=board_before_deviation.fen(),
                         reference_uci=ref_uci,
                         deviation_uci=dev_uci,
-                        pgn=deviation_result.pgn,
+                        pgn=pgn_string,
                     )
                 )
             else:
