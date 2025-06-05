@@ -27,7 +27,9 @@ class Study:
         url = f"https://lichess.org/api/study/{study_id}.pgn"
         response: requests.Response = requests.get(url)
         if response.status_code != 200:
-            raise Exception("Failed to fetch study. Status code: {response.status_code}")
+            raise Exception(
+                f"Failed to fetch study. Status code: {response.status_code}"
+            )
         return Study(chapters=pgn_utils.pgn_to_pgn_list(response.text))
 
     @staticmethod
