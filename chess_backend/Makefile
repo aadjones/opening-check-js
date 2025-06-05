@@ -1,5 +1,8 @@
 .PHONY: start dev install setup test clean format lint type-check check-all
 
+# Use bash for shell commands so that 'source' is available
+SHELL := /bin/bash
+
 # Start the development server
 start:
 	@echo "Starting Chess Backend Server..."
