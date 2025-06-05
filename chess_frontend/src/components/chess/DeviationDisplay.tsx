@@ -1,6 +1,6 @@
 // src/DeviationDisplay.tsx
 import React, { useState, useEffect, useCallback } from 'react';
-import type { Arrow } from 'react-chessboard/dist/chessboard/types';
+import type { Arrow, Square } from 'react-chessboard/dist/chessboard/types';
 import type { ApiDeviationResult } from '../../types';
 import ChessBoard from '../ChessBoard';
 import MoveNavigation from '../MoveNavigation';
@@ -18,7 +18,16 @@ const DeviationDisplay: React.FC<DeviationDisplayProps> = ({ result, gameNumber 
   const [isFocused, setIsFocused] = useState(false);
 
   // Deviation move index
-  const deviationMoveIndex = result ? (result.move_number - 1) * 2 + (result.color === 'Black' ? 1 : 0) : 0;
+  const deviationMoveIndex = result
+    ? (result.move_number - 1) * 2 + (result.color?.toLowerCase() === 'black' ? 1 : 0)
+    : 0;
+
+  // Debug logging
+  console.log('DeviationDisplay Debug:');
+  console.log('PGN:', pgn);
+  console.log('FENs:', fens);
+  console.log('Deviation index:', deviationMoveIndex);
+  console.log('position_fen from DB:', result?.position_fen);
 
   // The move played at the deviation index (from DB)
   const playedMove = result?.actual_move || '[unknown]';
@@ -91,7 +100,16 @@ const DeviationDisplay: React.FC<DeviationDisplayProps> = ({ result, gameNumber 
 
   // Arrows only at deviation position
   const customArrows: Arrow[] = [];
-  // (Optional) Add arrows if you have UCI fields in your schema
+  if (result?.deviation_uci && result.deviation_uci.length === 4) {
+    customArrows.push([result.deviation_uci.slice(0, 2) as Square, result.deviation_uci.slice(2, 4) as Square, 'red']);
+  }
+  if (result?.reference_uci && result.reference_uci.length === 4) {
+    customArrows.push([
+      result.reference_uci.slice(0, 2) as Square,
+      result.reference_uci.slice(2, 4) as Square,
+      'green',
+    ]);
+  }
 
   const opponentName = result.color === 'White' ? blackPlayer : whitePlayer;
 

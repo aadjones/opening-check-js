@@ -12,8 +12,9 @@ export interface ApiDeviationResult {
   detected_at: string;
   reviewed_at: string | null;
   review_result?: string | null;
-  pgn: string | null;
-  // Add any other fields from the schema as needed
+  pgn: string | null; // This is the complete game PGN
+  deviation_uci?: string | null;
+  reference_uci?: string | null;
 }
 
 // UI types
