@@ -1,11 +1,34 @@
 // functions/analyze-games/index.ts
 //---------------------------------------------------------------
-//  Supabase Edge Function – Analyze Games
+//  Supabase Edge Function - Analyze Games
 //---------------------------------------------------------------
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { jwtVerify }   from "https://deno.land/x/jose@v4.14.4/index.ts";
 import { corsHeaders } from "../_shared/cors.ts";
+
+// ── types ─────────────────────────────────────────────────────
+interface Deviation {
+  study_id?: string | null;
+  game_id?: string | null;
+  board_fen_before_deviation?: string;
+  reference_san?: string;
+  deviation_san?: string;
+  whole_move_number?: number;
+  player_color?: string | null;
+}
+
+interface DeviationRow {
+  user_id: string;
+  study_id: string | null;
+  game_id: string | null;
+  position_fen: string;
+  expected_move: string;
+  actual_move: string;
+  move_number: number;
+  color: string | null;
+  detected_at: string;
+}
 
 // ── env ────────────────────────────────────────────────────────
 const BACKEND_URL               = Deno.env.get("BACKEND_URL")!;         // set by Makefile
@@ -58,20 +81,20 @@ async function analyseUserGames(userId: string) {
     const txt = await engineResp.text().catch(() => "");
     throw new Error(`Backend API ${engineResp.status} – ${txt}`);
   }
-  const deviations = await engineResp.json() as any[];
+  const deviations = await engineResp.json() as Deviation[];
 
   // 4) upsert deviations
   const rows = deviations.filter(Boolean).map(d => ({
     user_id:       userId,
     study_id:      d?.study_id ?? null,
     game_id:       d?.game_id  ?? null,
-    position_fen:  d?.board_fen_before_deviation,
-    expected_move: d?.reference_san,
-    actual_move:   d?.deviation_san,
-    move_number:   d?.whole_move_number,
+    position_fen:  d?.board_fen_before_deviation ?? '',
+    expected_move: d?.reference_san ?? '',
+    actual_move:   d?.deviation_san ?? '',
+    move_number:   d?.whole_move_number ?? 0,
     color:         normaliseColor(d?.player_color),
     detected_at:   new Date().toISOString(),
-  }));
+  })) as DeviationRow[];
 
   if (rows.length) {
     const { error: upsertErr } = await supabase
@@ -113,10 +136,11 @@ Deno.serve(async (req) => {
       JSON.stringify({ message: "Analysis completed successfully" }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("analyze-games:", err);
+    const errorMessage = err instanceof Error ? err.message : "Unknown error";
     return new Response(
-      JSON.stringify({ error: err.message ?? "Unknown error" }),
+      JSON.stringify({ error: errorMessage }),
       { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   }

@@ -26,7 +26,7 @@ const Analysis: React.FC = () => {
   const [analysisError, setAnalysisError] = useState<string | null>(null);
   const [analysisSuccess, setAnalysisSuccess] = useState<string | null>(null);
   // Cache the JWT in memory for 1 hour
-  const jwtCache = React.useRef<{ token: string, exp: number } | null>(null);
+  const jwtCache = React.useRef<{ token: string; exp: number } | null>(null);
 
   // Mock data - in real app this would come from API
   const recentGames: GameResult[] = [
@@ -100,16 +100,13 @@ const Analysis: React.FC = () => {
       setAnalyzingRecent(true);
       try {
         const supabaseJwt = await getSupabaseJWT();
-        const res = await fetch(
-          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/analyze-games`,
-          {
-            method: 'POST',
-            headers: {
-              Authorization: `Bearer ${supabaseJwt}`,
-              'Content-Type': 'application/json',
-            },
-          }
-        );
+        const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/analyze-games`, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${supabaseJwt}`,
+            'Content-Type': 'application/json',
+          },
+        });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Analysis failed');
         setAnalysisSuccess('Analysis completed!');

@@ -30,8 +30,12 @@ echo -e "\n🔗  PUBLIC URL → $URL"
 echo "▶︎ updating BACKEND_URL secret…"
 supabase secrets set BACKEND_URL="$URL" >/dev/null
 echo "▶︎ redeploying edge functions…"
-supabase functions deploy sign-jwt analyze-games >/dev/null
-echo "🚀  edge functions deployed with new BACKEND_URL"
+supabase functions deploy --project-ref "${PROJECT_REF}" sign-jwt analyze-games >/dev/null
+echo "✅  Edge functions deployed successfully!"
+echo "   • sign-jwt: Ready to authenticate users"
+echo "   • analyze-games: Ready to process game analysis"
+echo "   • BACKEND_URL: $URL"
+echo "🚀  Server is ready! Press Ctrl+C to stop"
 
 # ───────────────────────────────────────────────
 # Wait until user hits Ctrl‑C
