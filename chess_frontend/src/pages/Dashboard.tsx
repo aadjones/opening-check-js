@@ -4,6 +4,7 @@ import { useAuth } from '../hooks/useAuth';
 import { useDeviations } from '../hooks/useDeviations';
 import styles from './Dashboard.module.css';
 import DeviationCard from '../components/DeviationCard';
+import GamesList, { type GameListItem } from '../components/GamesList';
 
 const Dashboard: React.FC = () => {
   usePageTitle('Dashboard');
@@ -16,6 +17,30 @@ const Dashboard: React.FC = () => {
     loadMore,
     refetch,
   } = useDeviations({ limit: 5 });
+
+  // Transform deviations into activity items
+  const recentActivity = deviations.map(deviation => ({
+    id: deviation.id,
+    type: 'deviation' as const,
+    title: `Deviation in ${deviation.opening_name || 'Unknown Opening'}`,
+    description: `Move ${deviation.move_number}: played ${deviation.played_move} instead of ${deviation.expected_move}`,
+    time: new Date(deviation.created_at).toLocaleString(),
+    opponent: deviation.opponent || 'Unknown',
+    gameUrl: deviation.game_url,
+  }));
+
+  // Transform deviations into game list items
+  const recentGames: GameListItem[] = deviations.map(deviation => ({
+    id: deviation.id,
+    gameId: deviation.game_id,
+    gameUrl: deviation.game_url,
+    opponent: deviation.opponent || 'Unknown',
+    timeControl: deviation.time_control || '600', // Default to 10+0 if not specified
+    gameResult: deviation.game_result || '1/2-1/2',
+    playedAt: deviation.created_at,
+    hasDeviation: true,
+    deviation,
+  }));
 
   // Show loading state while auth or data is loading
   if (authLoading || deviationsLoading) {
@@ -40,47 +65,6 @@ const Dashboard: React.FC = () => {
     );
   }
 
-  // Transform deviations into activity items
-  const recentActivity = deviations.map(deviation => ({
-    id: deviation.id,
-    type: 'deviation' as const,
-    title: `Deviation in ${deviation.opening_name || 'Unknown Opening'}`,
-    description: `Move ${deviation.move_number}: played ${deviation.played_move} instead of ${deviation.expected_move}`,
-    time: new Date(deviation.created_at).toLocaleString(),
-    opponent: deviation.opponent || 'Unknown',
-    gameUrl: deviation.game_url,
-  }));
-
-  const recentGames = [
-    {
-      id: 1,
-      opponent: 'ChessMaster2000',
-      rating: 1650,
-      timeControl: 'Blitz 5+3',
-      result: 'Loss',
-      status: 'deviation',
-      time: '2 hours ago',
-    },
-    {
-      id: 2,
-      opponent: 'BlitzKing99',
-      rating: 1580,
-      timeControl: 'Blitz 3+2',
-      result: 'Win',
-      status: 'clean',
-      time: '1 day ago',
-    },
-    {
-      id: 3,
-      opponent: 'PawnStorm',
-      rating: 1720,
-      timeControl: 'Rapid 10+0',
-      result: 'Draw',
-      status: 'clean',
-      time: '2 days ago',
-    },
-  ];
-
   return (
     <div className={styles.dashboard}>
       <header className={styles.header}>
@@ -89,16 +73,8 @@ const Dashboard: React.FC = () => {
           {user ? `Welcome back, ${user.name}!` : 'Welcome back!'} Here's your recent chess activity.
         </p>
 
-        {/* Auth Status Display - you can see the AuthContext working! */}
-        <div
-          style={{
-            background: '#f0f0f0',
-            padding: '10px',
-            borderRadius: '5px',
-            margin: '10px 0',
-            fontSize: '14px',
-          }}
-        >
+        {/* Auth Status Display */}
+        <div className={styles.authStatus}>
           <strong>🔐 Auth Status:</strong>
           <br />
           Loading: {authLoading ? 'Yes' : 'No'}
@@ -106,18 +82,7 @@ const Dashboard: React.FC = () => {
           User: {user ? `Logged in as ${user.name} (Lichess)` : 'Not logged in'}
           <br />
           {user && (
-            <button
-              onClick={signOut}
-              style={{
-                marginTop: '5px',
-                padding: '5px 10px',
-                background: '#ff6b6b',
-                color: 'white',
-                border: 'none',
-                borderRadius: '3px',
-                cursor: 'pointer',
-              }}
-            >
+            <button onClick={signOut} className={styles.signOutButton}>
               Sign Out
             </button>
           )}
@@ -158,33 +123,14 @@ const Dashboard: React.FC = () => {
             <h2 className={styles.sectionTitle}>Recent Games</h2>
           </div>
           <div className={styles.sectionContent}>
-            {recentGames.length > 0 ? (
-              <ul className={styles.gamesList}>
-                {recentGames.map(game => (
-                  <li key={game.id} className={styles.gameItem}>
-                    <div className={styles.gameInfo}>
-                      <div className={styles.gameOpponent}>
-                        {game.opponent} ({game.rating})
-                      </div>
-                      <div className={styles.gameMeta}>
-                        {game.timeControl} • {game.time}
-                      </div>
-                    </div>
-                    <div className={`${styles.gameStatus} ${styles[game.status]}`}>
-                      {game.status === 'clean' ? '✅' : '❌'}
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <div className={styles.emptyState}>
-                <div className={styles.emptyStateIcon}>♟️</div>
-                <div className={styles.emptyStateText}>No games yet</div>
-                <div className={styles.emptyStateSubtext}>
-                  Your recent games will appear here once you start playing.
-                </div>
-              </div>
-            )}
+            <GamesList
+              games={recentGames}
+              isLoading={deviationsLoading}
+              onGameClick={gameId => {
+                // Navigate to game details or open in new tab
+                window.open(`https://lichess.org/${gameId}`, '_blank');
+              }}
+            />
           </div>
         </section>
       </div>

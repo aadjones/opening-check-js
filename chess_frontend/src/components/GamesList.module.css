@@ -1,0 +1,144 @@
+.gamesList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.gameCard {
+  background: white;
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+  cursor: pointer;
+  border: 1px solid #e5e7eb;
+}
+
+.gameCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.gameCard.hasDeviation {
+  border-left: 4px solid #ef4444;
+}
+
+.gameHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.timeControl {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #6b7280;
+  background: #f3f4f6;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+}
+
+.gameResult {
+  font-weight: 500;
+}
+
+.gameContent {
+  margin-bottom: 1rem;
+}
+
+.opponent {
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: #111827;
+  margin-bottom: 0.25rem;
+}
+
+.gameMeta {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.gameActions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.lichessLink,
+.deviationLink {
+  font-size: 0.875rem;
+  color: #2563eb;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.lichessLink:hover,
+.deviationLink:hover {
+  text-decoration: underline;
+}
+
+.deviationLink {
+  color: #dc2626;
+}
+
+/* Loading state */
+.gameCardSkeleton {
+  background: white;
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+}
+
+.skeletonHeader {
+  height: 1.5rem;
+  background: #f3f4f6;
+  border-radius: 4px;
+  margin-bottom: 0.75rem;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.skeletonContent {
+  height: 2rem;
+  background: #f3f4f6;
+  border-radius: 4px;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Empty state */
+.emptyState {
+  text-align: center;
+  padding: 3rem 1rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+}
+
+.emptyState p {
+  margin: 0;
+  color: #111827;
+}
+
+.emptyStateSubtext {
+  margin-top: 0.5rem !important;
+  color: #6b7280 !important;
+  font-size: 0.875rem;
+} 

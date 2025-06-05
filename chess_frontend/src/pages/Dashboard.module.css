@@ -317,3 +317,26 @@
   color: #1d4ed8;
   text-decoration: underline;
 }
+
+.authStatus {
+  background: #f0f0f0;
+  padding: 10px;
+  border-radius: 5px;
+  margin: 10px 0;
+  font-size: 14px;
+}
+
+.signOutButton {
+  margin-top: 5px;
+  padding: 5px 10px;
+  background: #ff6b6b;
+  color: white;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.signOutButton:hover {
+  background: #e53e3e;
+}
