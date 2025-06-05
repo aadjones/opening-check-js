@@ -3,6 +3,7 @@
 
 .PHONY: start dev install setup test clean format lint type-check check-all help
 
+
 # Detect operating system
 ifeq ($(OS),Windows_NT)
     # Windows detected
@@ -20,6 +21,11 @@ else
     ECHO := echo
     RM_DIR := rm -rf $$1
 endif
+
+# Chess Backend
+BACKEND_PORT ?= 8000          # change if you don't use 8000
+NGROK_BIN    ?= ngrok         # or full path if it isn't on PATH
+PROJECT_REF  ?= fsmtmtconngujlhmkqgp   # your project id
 
 # Help
 help:
@@ -71,14 +77,16 @@ else
 	@echo "Setup complete! Run 'make start' to start the server."
 endif
 
-# Start the development server
+# ------------------------------------------------------------------
+# Start FastAPI + ngrok, push new URL to Supabase, redeploy function
+# ------------------------------------------------------------------
 start:
 ifeq ($(OS),Windows_NT)
-	$(ECHO) "Starting Chess Backend Server..."
-	$(VENV_ACTIVATE); uvicorn main:app --reload
+	$(ECHO) "▶︎ This auto‑update flow is Bash‑only for now.\
+Use the PowerShell block above or run WSL."
 else
-	@echo "Starting Chess Backend Server..."
-	@$(VENV_ACTIVATE) && uvicorn main:app --reload
+	@chmod +x start.sh
+	@$(VENV_ACTIVATE) && ./start.sh
 endif
 
 # Start with external access

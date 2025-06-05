@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { usePageTitle } from '../hooks/usePageTitle';
 import styles from './Analysis.module.css';
+import { useAuth } from '../hooks/useAuth';
+import { fetchSupabaseJWT } from '../lib/auth/fetchSupabaseJWT';
 
 interface GameResult {
   id: string;
@@ -16,10 +18,15 @@ interface GameResult {
 
 const Analysis: React.FC = () => {
   usePageTitle('Live Analysis');
+  const { session } = useAuth();
   const [autoAnalysisEnabled, setAutoAnalysisEnabled] = useState(true);
   const [analyzingRecent, setAnalyzingRecent] = useState(false);
   const [analyzingToday, setAnalyzingToday] = useState(false);
-  const [lastSyncTime] = useState('2 minutes ago');
+  const [lastSyncTime, setLastSyncTime] = useState('2 minutes ago');
+  const [analysisError, setAnalysisError] = useState<string | null>(null);
+  const [analysisSuccess, setAnalysisSuccess] = useState<string | null>(null);
+  // Cache the JWT in memory for 1 hour
+  const jwtCache = React.useRef<{ token: string, exp: number } | null>(null);
 
   // Mock data - in real app this would come from API
   const recentGames: GameResult[] = [
@@ -63,14 +70,61 @@ const Analysis: React.FC = () => {
     },
   ];
 
+  const getSupabaseJWT = async () => {
+    if (
+      jwtCache.current &&
+      jwtCache.current.exp > Math.floor(Date.now() / 1000) + 60 // 1 min leeway
+    ) {
+      return jwtCache.current.token;
+    }
+    if (!session?.user?.id) throw new Error('Not logged in');
+    const token = await fetchSupabaseJWT({
+      sub: session.user.id,
+      email: session.user.email || undefined,
+      lichess_username: session.user.lichessUsername || undefined,
+    });
+    // Decode exp from JWT (payload is the 2nd part, base64url encoded)
+    const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+    jwtCache.current = { token, exp: payload.exp };
+    return token;
+  };
+
   const handleManualAnalysis = async (scope: string) => {
+    setAnalysisError(null);
+    setAnalysisSuccess(null);
+    if (!session?.user?.id) {
+      setAnalysisError('You must be logged in to analyze games.');
+      return;
+    }
     if (scope === 'recent') {
       setAnalyzingRecent(true);
-      setTimeout(() => {
+      try {
+        const supabaseJwt = await getSupabaseJWT();
+        const res = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/analyze-games`,
+          {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${supabaseJwt}`,
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Analysis failed');
+        setAnalysisSuccess('Analysis completed!');
+        setLastSyncTime('just now');
+      } catch (err: unknown) {
+        let message = 'Analysis failed';
+        if (err instanceof Error) message = err.message;
+        else if (typeof err === 'string') message = err;
+        setAnalysisError(message);
+      } finally {
         setAnalyzingRecent(false);
-      }, 2000);
+      }
     } else if (scope === 'today') {
       setAnalyzingToday(true);
+      // TODO: Implement analysis for today's games if supported by backend
       setTimeout(() => {
         setAnalyzingToday(false);
       }, 2000);
@@ -113,6 +167,11 @@ const Analysis: React.FC = () => {
                 : 'Enable to automatically monitor your games for deviations'}
             </div>
           </div>
+        </div>
+
+        <div style={{ marginBottom: 12 }}>
+          {analysisError && <div style={{ color: 'red' }}>{analysisError}</div>}
+          {analysisSuccess && <div style={{ color: 'green' }}>{analysisSuccess}</div>}
         </div>
 
         <div className={styles.manualControls}>
