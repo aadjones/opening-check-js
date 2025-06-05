@@ -1,10 +1,12 @@
 # Cross-platform Makefile for Chess Backend
 # Automatically detects Windows vs Unix and uses appropriate commands
 
+# Force bash as the shell
+SHELL := /bin/bash
+.SHELLFLAGS := -c
+
 .PHONY: start dev install setup test clean format lint type-check check-all help
 
-# Use bash for shell commands so that 'source' is available
-SHELL := /bin/bash
 # Detect operating system
 ifeq ($(OS),Windows_NT)
     # Windows detected
@@ -16,9 +18,8 @@ ifeq ($(OS),Windows_NT)
     RM_DIR := if (Test-Path $$1) { Remove-Item -Recurse -Force $$1 }
 else
     # Unix-like system (Mac/Linux)
-    SHELL := /bin/bash
     PYTHON := python3
-    VENV_ACTIVATE := source env/bin/activate
+    VENV_ACTIVATE := . env/bin/activate
     ECHO := echo
     RM_DIR := rm -rf $$1
 endif
@@ -73,8 +74,8 @@ else
 	@echo "Setting up virtual environment for Unix..."
 	@$(PYTHON) -m venv env
 	@echo "Installing dependencies..."
-	@$(VENV_ACTIVATE) && pip install -r requirements.txt
-	@$(VENV_ACTIVATE) && pip install -e .
+	@. env/bin/activate && pip install -r requirements.txt
+	@. env/bin/activate && pip install -e .
 	@echo "Setup complete! Run 'make start' to start the server."
 endif
 
