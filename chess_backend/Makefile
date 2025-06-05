@@ -3,7 +3,8 @@
 
 .PHONY: start dev install setup test clean format lint type-check check-all help
 
-
+# Use bash for shell commands so that 'source' is available
+SHELL := /bin/bash
 # Detect operating system
 ifeq ($(OS),Windows_NT)
     # Windows detected
