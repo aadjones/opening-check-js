@@ -146,3 +146,35 @@ export function useDeviations(options: UseDeviationsOptions = {}): UseDeviations
     loadMore,
   };
 }
+
+export function useDeviationById(id: string | undefined) {
+  const [deviation, setDeviation] = useState<ApiDeviationResult | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+
+  const fetchDeviation = useCallback(async () => {
+    if (!id) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const { data, error: supaError } = await supabase
+        .from('opening_deviations')
+        .select('*')
+        .eq('id', id)
+        .single();
+      if (supaError) throw supaError;
+      setDeviation(data as ApiDeviationResult);
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Failed to fetch deviation'));
+      setDeviation(null);
+    } finally {
+      setLoading(false);
+    }
+  }, [id]);
+
+  useEffect(() => {
+    fetchDeviation();
+  }, [fetchDeviation]);
+
+  return { deviation, loading, error, refetch: fetchDeviation };
+}

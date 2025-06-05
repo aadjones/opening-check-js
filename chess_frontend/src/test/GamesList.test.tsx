@@ -28,7 +28,7 @@ const mockGames: GameListItem[] = [
       whole_move_number: 10,
       deviation_san: 'Nxe4',
       reference_san: 'Nf3',
-      player_color: 'White',
+      color: 'White',
       board_fen_before_deviation: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
       reference_uci: 'g1f3',
       deviation_uci: 'b1c3',

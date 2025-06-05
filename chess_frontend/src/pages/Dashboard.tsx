@@ -3,7 +3,6 @@ import { usePageTitle } from '../hooks/usePageTitle';
 import { useAuth } from '../hooks/useAuth';
 import { useDeviations } from '../hooks/useDeviations';
 import styles from './Dashboard.module.css';
-import DeviationCard from '../components/DeviationCard';
 import GamesList, { type GameListItem } from '../components/GamesList';
 
 const Dashboard: React.FC = () => {
@@ -17,17 +16,6 @@ const Dashboard: React.FC = () => {
     loadMore,
     refetch,
   } = useDeviations({ limit: 5 });
-
-  // Transform deviations into activity items
-  const recentActivity = deviations.map(deviation => ({
-    id: deviation.id,
-    type: 'deviation' as const,
-    title: `Deviation in ${deviation.opening_name || 'Unknown Opening'}`,
-    description: `Move ${deviation.move_number}: played ${deviation.played_move} instead of ${deviation.expected_move}`,
-    time: new Date(deviation.created_at).toLocaleString(),
-    opponent: deviation.opponent || 'Unknown',
-    gameUrl: deviation.game_url,
-  }));
 
   // Transform deviations into game list items
   const recentGames: GameListItem[] = deviations.map(deviation => ({
@@ -90,34 +78,6 @@ const Dashboard: React.FC = () => {
       </header>
 
       <div className={styles.grid}>
-        <section className={`${styles.section} ${styles.recentActivity}`}>
-          <div className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>Recent Activity</h2>
-            {hasMore && (
-              <button className={styles.loadMoreButton} onClick={() => loadMore()}>
-                Load More
-              </button>
-            )}
-          </div>
-          <div className={styles.sectionContent}>
-            {recentActivity.length > 0 ? (
-              <ul className={styles.activityList}>
-                {recentActivity.map(activity => (
-                  <DeviationCard key={activity.id} {...activity} />
-                ))}
-              </ul>
-            ) : (
-              <div className={styles.emptyState}>
-                <div className={styles.emptyStateIcon}>🎯</div>
-                <div className={styles.emptyStateText}>No recent activity</div>
-                <div className={styles.emptyStateSubtext}>
-                  Play some games on Lichess to see your prep tracking here!
-                </div>
-              </div>
-            )}
-          </div>
-        </section>
-
         <section className={styles.section}>
           <div className={styles.sectionHeader}>
             <h2 className={styles.sectionTitle}>Recent Games</h2>
@@ -131,6 +91,11 @@ const Dashboard: React.FC = () => {
                 window.open(`https://lichess.org/${gameId}`, '_blank');
               }}
             />
+            {hasMore && (
+              <button className={styles.loadMoreButton} onClick={() => loadMore()}>
+                Load More
+              </button>
+            )}
           </div>
         </section>
       </div>

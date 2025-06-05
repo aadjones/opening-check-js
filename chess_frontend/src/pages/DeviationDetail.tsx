@@ -1,16 +1,14 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { usePageTitle } from '../hooks/usePageTitle';
-import { useDeviations } from '../hooks/useDeviations';
+import { useDeviationById } from '../hooks/useDeviations';
 import styles from './DeviationDetail.module.css';
+import DeviationDisplay from '../components/chess/DeviationDisplay';
 
 const DeviationDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { deviations, loading, error, refetch } = useDeviations({ limit: 1 });
-
-  // Find the specific deviation
-  const deviation = deviations.find(d => d.id === id);
+  const { deviation, loading, error, refetch } = useDeviationById(id);
 
   // Always call usePageTitle at the top level
   usePageTitle(deviation ? `Deviation ${deviation.move_number}` : 'Deviation Details');
@@ -82,12 +80,8 @@ const DeviationDetail: React.FC = () => {
         </div>
       </div>
 
-      <div className={styles.chessboardPlaceholder}>
-        <div className={styles.boardContainer}>
-          <p>
-            [Chessboard view at move {deviation.move_number} — {deviation.player_color.toLowerCase()} to move]
-          </p>
-        </div>
+      <div className={styles.chessboardSection}>
+        <DeviationDisplay result={deviation} gameNumber={1} />
       </div>
 
       <div className={styles.actionButtons}>

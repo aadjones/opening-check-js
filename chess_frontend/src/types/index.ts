@@ -4,7 +4,7 @@ export interface ApiDeviationResult {
   whole_move_number: number;
   deviation_san: string;
   reference_san: string;
-  player_color: string;
+  color: string;
   board_fen_before_deviation: string;
   reference_uci: string | null;
   deviation_uci: string | null;

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import styles from './GamesList.module.css';
 import type { ApiDeviationResult } from '../types';
 
@@ -15,54 +15,48 @@ export interface GameListItem {
   deviation?: ApiDeviationResult;
 }
 
-interface GamesListProps {
+export interface GamesListProps {
   games: GameListItem[];
   isLoading?: boolean;
   onGameClick?: (gameId: string) => void;
 }
 
-const formatTimeControl = (timeControl: string): string => {
-  const minutes = parseInt(timeControl) / 60;
-  if (minutes < 3) return 'Bullet';
-  if (minutes < 10) return 'Blitz';
-  if (minutes < 30) return 'Rapid';
-  return 'Classical';
-};
+function formatTimeControl(tc: string) {
+  if (tc === '1+0' || tc === '60') return 'Bullet';
+  if (tc === '3+0' || tc === '180') return 'Blitz';
+  if (tc === '10+0' || tc === '600') return 'Rapid';
+  if (tc === '30+0' || tc === '1800') return 'Classical';
+  return tc;
+}
 
-const formatResult = (result: string, hasDeviation: boolean): string => {
+function formatResult(result: string, hasDeviation: boolean) {
   if (hasDeviation) return '❌ Deviation';
-  switch (result) {
-    case '1-0':
-      return '✅ White won';
-    case '0-1':
-      return '✅ Black won';
-    case '1/2-1/2':
-      return '🤝 Draw';
-    default:
-      return result;
-  }
-};
+  if (result === '1-0') return '✅ White won';
+  if (result === '0-1') return '✅ Black won';
+  if (result === '1/2-1/2') return '½-½ Draw';
+  return result;
+}
 
-const GamesList: React.FC<GamesListProps> = ({ games, isLoading = false, onGameClick }) => {
+const GamesList: React.FC<GamesListProps> = ({ games, isLoading, onGameClick }) => {
+  const navigate = useNavigate();
+
   if (isLoading) {
     return (
-      <div className={styles.gamesList} data-testid="games-list-loading">
+      <div className={styles.gamesList} data-testid="games-list">
         {[...Array(5)].map((_, i) => (
-          <div key={i} className={styles.gameCardSkeleton} data-testid="game-card-skeleton">
-            <div className={styles.skeletonHeader} />
-            <div className={styles.skeletonContent} />
-          </div>
+          <div key={i} className={styles.gameCardSkeleton} data-testid="game-card-skeleton" />
         ))}
       </div>
     );
   }
 
-  if (games.length === 0) {
+  if (!games.length) {
     return (
-      <div className={styles.gamesList} data-testid="games-list-empty">
-        <div className={styles.emptyState}>
-          <p>No games found</p>
-          <p className={styles.emptyStateSubtext}>Play some games on Lichess to see them here</p>
+      <div className={styles.emptyState}>
+        <div className={styles.emptyStateIcon}>🎮</div>
+        <div className={styles.emptyStateTitle}>No recent games found</div>
+        <div className={styles.emptyStateText}>
+          Play some games on Lichess and they'll appear here for analysis!
         </div>
       </div>
     );
@@ -74,15 +68,26 @@ const GamesList: React.FC<GamesListProps> = ({ games, isLoading = false, onGameC
         <div
           key={game.id}
           className={`${styles.gameCard} ${game.hasDeviation ? styles.hasDeviation : ''}`}
-          onClick={() => onGameClick?.(game.gameId)}
           role="button"
           tabIndex={0}
           aria-label={`Game vs ${game.opponent} - ${formatTimeControl(game.timeControl)} - ${formatResult(game.gameResult, game.hasDeviation)}`}
           data-testid="game-card"
-          onKeyDown={(e) => {
+          onClick={e => {
+            if (game.hasDeviation && game.deviation) {
+              e.preventDefault();
+              navigate(`/deviation/${game.deviation.id}`);
+            } else {
+              onGameClick?.(game.gameId);
+            }
+          }}
+          onKeyDown={e => {
             if (e.key === 'Enter' || e.key === ' ') {
               e.preventDefault();
-              onGameClick?.(game.gameId);
+              if (game.hasDeviation && game.deviation) {
+                navigate(`/deviation/${game.deviation.id}`);
+              } else {
+                onGameClick?.(game.gameId);
+              }
             }
           }}
         >
