@@ -1,0 +1,50 @@
+.card {
+  display: flex;
+  align-items: flex-start;
+  padding: 1rem;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  margin-bottom: 1rem;
+}
+
+.icon {
+  font-size: 2rem;
+  margin-right: 1rem;
+}
+
+.content {
+  flex: 1;
+}
+
+.title {
+  font-weight: bold;
+  margin-bottom: 0.25rem;
+}
+
+.description {
+  color: #555;
+  margin-bottom: 0.25rem;
+}
+
+.meta {
+  font-size: 0.9rem;
+  color: #888;
+  margin-bottom: 0.5rem;
+}
+
+.link {
+  color: #3b82f6;
+  text-decoration: none;
+  font-size: 0.95rem;
+}
+.link:hover {
+  text-decoration: underline;
+}
+
+.deviation {
+  color: #e53e3e;
+}
+.success {
+  color: #22c55e;
+}

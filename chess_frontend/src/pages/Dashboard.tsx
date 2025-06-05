@@ -3,6 +3,7 @@ import { usePageTitle } from '../hooks/usePageTitle';
 import { useAuth } from '../hooks/useAuth';
 import { useDeviations } from '../hooks/useDeviations';
 import styles from './Dashboard.module.css';
+import DeviationCard from '../components/DeviationCard';
 
 const Dashboard: React.FC = () => {
   usePageTitle('Dashboard');
@@ -42,7 +43,7 @@ const Dashboard: React.FC = () => {
   // Transform deviations into activity items
   const recentActivity = deviations.map(deviation => ({
     id: deviation.id,
-    type: 'deviation',
+    type: 'deviation' as const,
     title: `Deviation in ${deviation.opening_name || 'Unknown Opening'}`,
     description: `Move ${deviation.move_number}: played ${deviation.played_move} instead of ${deviation.expected_move}`,
     time: new Date(deviation.created_at).toLocaleString(),
@@ -137,20 +138,7 @@ const Dashboard: React.FC = () => {
             {recentActivity.length > 0 ? (
               <ul className={styles.activityList}>
                 {recentActivity.map(activity => (
-                  <li key={activity.id} className={styles.activityItem}>
-                    <div className={`${styles.activityIcon} ${styles[activity.type]}`}>
-                      {activity.type === 'deviation' ? '❌' : '✅'}
-                    </div>
-                    <div className={styles.activityContent}>
-                      <div className={styles.activityTitle}>{activity.title}</div>
-                      <div className={styles.activityMeta}>
-                        vs {activity.opponent} • {activity.time}
-                      </div>
-                      <a href={activity.gameUrl} target="_blank" rel="noopener noreferrer" className={styles.gameLink}>
-                        View Game on Lichess →
-                      </a>
-                    </div>
-                  </li>
+                  <DeviationCard key={activity.id} {...activity} />
                 ))}
               </ul>
             ) : (
