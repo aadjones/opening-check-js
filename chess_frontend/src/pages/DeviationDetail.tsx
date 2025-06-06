@@ -69,76 +69,65 @@ const DeviationDetail: React.FC = () => {
 
   return (
     <div className={styles.deviationDetail}>
-      <div className={styles.deviationHeader}>
-        <div className={`${styles.statusBanner} ${styles.error}`}>
-          ❌ You deviated from your prep on move {deviation.move_number}
+      {/* Status Banner */}
+      <div className={styles.statusBanner}>
+        <span role="img" aria-label="deviation">❌</span> You deviated from your prep on move {deviation.move_number}
+      </div>
+
+      {/* Game Info Card */}
+      <div className={styles.gameInfoCard}>
+        <div className={styles.openingInfo}>📖 Opening: {openingName}</div>
+        <div className={styles.opponentInfo}>
+          🤝 vs. {opponent}
+          {timeControl ? ` — ${timeControl}` : ''}
+          {gameResult ? ` — Result: ${gameResult}` : ''}
         </div>
-        <div className={styles.gameInfo}>
-          <div className={styles.openingInfo}>📖 Opening: {openingName}</div>
-          <div className={styles.opponentInfo}>
-            🤝 vs. {opponent}
-            {timeControl ? ` — ${timeControl}` : ''}
-            {gameResult ? ` — Result: ${gameResult}` : ''}
+      </div>
+
+      {/* Move Comparison Section */}
+      <div className={styles.moveComparisonPanel}>
+        <div className={styles.moveComparisonCards}>
+          <div className={styles.moveCardPlayed}>
+            <div className={styles.moveCardIcon}>❌</div>
+            <div className={styles.moveCardLabel}>You played</div>
+            <div className={styles.moveCardMove}>{playedMove}</div>
+          </div>
+          <div className={styles.moveCardExpected}>
+            <div className={styles.moveCardIcon}>✅</div>
+            <div className={styles.moveCardLabel}>Expected</div>
+            <div className={styles.moveCardMove}>{deviation.expected_move}</div>
           </div>
         </div>
       </div>
 
-      <div className={styles.moveComparison}>
-        <div className={styles.moves}>
-          <div className={`${styles.move} ${styles.played}`}>
-            <span className={styles.label}>You played:</span>
-            <span className={styles.moveText}>{playedMove}</span>
-            <span className={styles.status}>❌</span>
-          </div>
-          <div className={`${styles.move} ${styles.expected}`}>
-            <span className={styles.label}>Expected:</span>
-            <span className={styles.moveText}>{deviation.expected_move}</span>
-            <span className={styles.status}>✅</span>
-          </div>
-        </div>
-      </div>
-
-      <div className={styles.chessboardSection}>
+      {/* Chessboard Section */}
+      <div className={styles.chessboardSectionCentered}>
         <DeviationDisplay result={deviation} gameNumber={1} />
       </div>
 
-      <div className={styles.actionButtons}>
-        <div className={styles.viewButtons}>
-          <button className={styles.actionBtn}>View My Move</button>
-          <button className={styles.actionBtn}>View My Prep</button>
-        </div>
-
-        <div className={styles.mainActions}>
-          <button className={styles.primaryAction}>▶️ Replay My Prep Line</button>
-        </div>
-
-        <div className={styles.moreOptions}>
-          <details>
-            <summary>More Options</summary>
-            <ul>
-              <li>
-                <button>I meant to play {playedMove} (Adopt it)</button>
-              </li>
-              <li>
-                <button>Ignore this chapter in the future</button>
-              </li>
-              {gameUrl && (
-                <li>
-                  <a href={gameUrl} target="_blank" rel="noopener noreferrer">
-                    View full game on Lichess →
-                  </a>
-                </li>
-              )}
-            </ul>
-          </details>
+      {/* Actions Section */}
+      <div className={styles.actionButtonsPanel}>
+        <button className={styles.primaryAction}>▶️ Replay My Prep Line</button>
+        <div className={styles.secondaryActionsGroup}>
+          <button className={styles.secondaryAction}>View My Move</button>
+          <button className={styles.secondaryAction}>View My Prep</button>
+          <button className={styles.secondaryAction}>I meant to play {playedMove} (Adopt it)</button>
+          <button className={styles.secondaryAction}>Ignore this chapter in the future</button>
+          {gameUrl && (
+            <a href={gameUrl} target="_blank" rel="noopener noreferrer" className={styles.secondaryAction}>
+              View full game on Lichess →
+            </a>
+          )}
         </div>
       </div>
 
-      <div className={styles.deviationMeta}>
+      {/* Meta Info (Collapsible) */}
+      <details className={styles.metaInfoDetails}>
+        <summary>Details</summary>
         <p>Deviation ID: {deviation.id}</p>
         <p>Game ID: {deviation.game_id}</p>
         <p>Created: {new Date(createdAt).toLocaleString()}</p>
-      </div>
+      </details>
     </div>
   );
 };

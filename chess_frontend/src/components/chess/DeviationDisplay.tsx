@@ -29,11 +29,6 @@ const DeviationDisplay: React.FC<DeviationDisplayProps> = ({ result, gameNumber 
   console.log('Deviation index:', deviationMoveIndex);
   console.log('position_fen from DB:', result?.position_fen);
 
-  // The move played at the deviation index (from DB)
-  const playedMove = result?.actual_move || '[unknown]';
-  // The expected move (from DB/prep)
-  const expectedMove = result?.expected_move || '[unknown]';
-
   // Set initial move index to deviation when result changes
   useEffect(() => {
     if (result && fens.length > 0) {
@@ -111,8 +106,13 @@ const DeviationDisplay: React.FC<DeviationDisplayProps> = ({ result, gameNumber 
     ]);
   }
 
+  // Only show arrows at the deviation position
+  const showArrows = currentMoveIndex === deviationMoveIndex;
+  const arrows = showArrows ? customArrows : [];
+
   const opponentName = result.color === 'White' ? blackPlayer : whitePlayer;
 
+  // Only show the chessboard and navigation (no move comparison)
   return (
     <div
       className={`result-card ${isFocused ? 'focused' : ''}`}
@@ -123,39 +123,10 @@ const DeviationDisplay: React.FC<DeviationDisplayProps> = ({ result, gameNumber 
     >
       <h3>Game {gameNumber}</h3>
       <div className="opponent-name">{opponentName}</div>
-      {/* Move Comparison Section */}
-      <div style={{ display: 'flex', gap: 24, margin: '24px 0', justifyContent: 'center' }}>
-        <div
-          style={{
-            flex: 1,
-            background: '#fee2e2',
-            border: '2px solid #ef4444',
-            borderRadius: 12,
-            padding: 24,
-            textAlign: 'center',
-          }}
-        >
-          <div style={{ fontWeight: 600, marginBottom: 8, color: '#991b1b' }}>You Played:</div>
-          <div style={{ fontSize: 32, fontWeight: 700, color: '#ef4444' }}>{playedMove}</div>
-        </div>
-        <div
-          style={{
-            flex: 1,
-            background: '#dcfce7',
-            border: '2px solid #22c55e',
-            borderRadius: 12,
-            padding: 24,
-            textAlign: 'center',
-          }}
-        >
-          <div style={{ fontWeight: 600, marginBottom: 8, color: '#166534' }}>Expected:</div>
-          <div style={{ fontSize: 32, fontWeight: 700, color: '#22c55e' }}>{expectedMove}</div>
-        </div>
-      </div>
       <div className="chess-board-container">
         <ChessBoard
           fen={fens[currentMoveIndex]}
-          arrows={customArrows}
+          arrows={arrows}
           orientation={typeof result.color === 'string' ? (result.color.toLowerCase() as 'white' | 'black') : 'white'}
           boardWidth={300}
           arePiecesDraggable={false}
