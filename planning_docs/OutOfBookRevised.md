@@ -24,6 +24,22 @@ OutOfBook is no longer just a tattletale for prep mistakes. It's a personal **me
 
 ---
 
+## **🕓 Sync & Scan Frequency Control**
+
+Users can manage how often OutOfBook checks for new games and updates the deviation database. This gives users control over:
+
+- ⏱ Sync Frequency: Options include every 10 minutes, hourly, or manual only
+
+- 🔕 Quiet Hours: Set time ranges where the app won’t scan or send notifications
+
+- 🔄 Manual Sync: Button to force a game scan (e.g., right after a blitz session)
+
+- 📅 Review Cutoff: Option to ignore games older than X days for review purposes
+
+Default behavior: auto-scan every hour, with smart batching to avoid spam.
+
+---
+
 ## **🧱 Frontend Structure (Simplified and Cleaned)**
 
 ### **1\. Dashboard (default landing)**
