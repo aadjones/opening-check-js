@@ -10,6 +10,7 @@ import {
   Demo,
   AuthCallback,
   OnboardingPage,
+  ReviewQueue,
 } from './pages';
 import { AuthProvider } from './contexts/AuthJSContext';
 import './styles/index.css';
@@ -68,6 +69,14 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <Analysis />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/review-queue"
+                  element={
+                    <ProtectedRoute>
+                      <ReviewQueue />
                     </ProtectedRoute>
                   }
                 />

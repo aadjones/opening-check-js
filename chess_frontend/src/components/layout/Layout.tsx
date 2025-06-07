@@ -29,6 +29,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               </li>
               <li>
                 <Link
+                  to="/review-queue"
+                  className={`${styles.navLink} ${location.pathname === '/review-queue' ? styles.active : ''}`}
+                >
+                  Review Queue
+                </Link>
+              </li>
+              <li>
+                <Link
                   to="/analysis"
                   className={`${styles.navLink} ${location.pathname === '/analysis' ? styles.active : ''}`}
                 >
