@@ -1,0 +1,70 @@
+.prepScoreWidget {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  padding: 1.5rem 2rem;
+  margin-bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 1rem;
+}
+
+.scoresRow {
+  display: flex;
+  gap: 2.5rem;
+  justify-content: center;
+}
+
+.scoreItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.scoreCount {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0.25rem 0;
+}
+
+.scoreLabel {
+  font-size: 0.95rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.heldIcon {
+  color: #22c55e;
+  font-size: 1.5rem;
+}
+
+.deviatedIcon {
+  color: #ef4444;
+  font-size: 1.5rem;
+}
+
+.untrackedIcon {
+  color: #a1a1aa;
+  font-size: 1.5rem;
+}
+
+@media (max-width: 600px) {
+  .prepScoreWidget {
+    padding: 1rem;
+  }
+  .scoresRow {
+    gap: 1.25rem;
+  }
+  .scoreCount {
+    font-size: 1.3rem;
+  }
+} 

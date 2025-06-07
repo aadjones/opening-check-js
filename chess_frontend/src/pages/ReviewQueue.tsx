@@ -66,7 +66,7 @@ const ReviewQueue: React.FC = () => {
                   </div>
                   <div className={styles.moveCard}>
                     <div className={styles.moveLabel}>Expected</div>
-                    <div className={styles.moveValue}>{deviation.expectedMove}</div>
+                    <div className={styles.moveValue}>{getMoveNotation(deviation.moveNumber, deviation.color, deviation.expectedMove)}</div>
                   </div>
                 </div>
               </div>
