@@ -87,9 +87,14 @@ async function analyseUserGames(userId: string) {
     const txt = await engineResp.text().catch(() => "");
     throw new Error(`Backend API ${engineResp.status} – ${txt}`);
   }
-  const deviations = await engineResp.json() as Deviation[];
-
-  // 4) upsert deviations
+  const result = await engineResp.json();
+  if (!Array.isArray(result)) {
+    // The backend now returns an object, not an array
+    console.log(result.message || "No deviations found.");
+    // Optionally, you could return early or handle as needed
+    return;
+  }
+  const deviations = result;
   const rows = deviations.filter(Boolean).map(d => ({
     user_id:       userId,
     study_id:      d?.study_id ?? null,

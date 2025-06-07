@@ -5,6 +5,9 @@ import { useDeviationById } from '../hooks/useDeviations';
 import styles from './DeviationDetail.module.css';
 import DeviationDisplay from '../components/chess/DeviationDisplay';
 import { parsePgnHeaders } from '../utils/pgn';
+import type { Database } from '../types/supabase';
+
+type Deviation = Database['public']['Tables']['opening_deviations']['Row'];
 
 const DeviationDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -59,19 +62,30 @@ const DeviationDetail: React.FC = () => {
   const whitePlayer = headers.White || 'White';
   const blackPlayer = headers.Black || 'Black';
   // Infer opponent name (the non-user player)
-  const opponent = userColor.toLowerCase() === 'white' ? blackPlayer : whitePlayer;
+  const opponent = userColor && userColor.toLowerCase() === 'white' ? blackPlayer : whitePlayer;
   // Construct game URL (assuming Lichess)
-  const gameUrl = deviation.game_id ? `https://lichess.org/${deviation.game_id}` : '';
+  const gameUrl = deviation.game_id
+    ? `https://lichess.org/${deviation.game_id}/${userColor?.toLowerCase() || 'white'}#${(deviation.move_number - 1) * 2 + (deviation.color?.toLowerCase() === 'black' ? 1 : 0)}`
+    : '';
   // Use actual_move for played move
   const playedMove = deviation.actual_move;
   // Use detected_at for created_at
-  const createdAt = deviation.detected_at;
+  const createdAt = new Date(deviation.detected_at ?? '');
+
+  // When determining userColor, add a null check before using it
+  const safeUserColor = userColor ?? '';
+  if (safeUserColor.toLowerCase() === 'white') {
+    // ...
+  }
 
   return (
     <div className={styles.deviationDetail}>
       {/* Status Banner */}
       <div className={styles.statusBanner}>
-        <span role="img" aria-label="deviation">❌</span> You deviated from your prep on move {deviation.move_number}
+        <span role="img" aria-label="deviation">
+          ❌
+        </span>{' '}
+        You deviated from your prep on move {deviation.move_number}
       </div>
 
       {/* Game Info Card */}
@@ -102,7 +116,7 @@ const DeviationDetail: React.FC = () => {
 
       {/* Chessboard Section */}
       <div className={styles.chessboardSectionCentered}>
-        <DeviationDisplay result={deviation} gameNumber={1} />
+        <DeviationDisplay result={deviation as Deviation} gameNumber={1} />
       </div>
 
       {/* Actions Section */}
@@ -126,7 +140,7 @@ const DeviationDetail: React.FC = () => {
         <summary>Details</summary>
         <p>Deviation ID: {deviation.id}</p>
         <p>Game ID: {deviation.game_id}</p>
-        <p>Created: {new Date(createdAt).toLocaleString()}</p>
+        <p>Created: {createdAt.toLocaleString()}</p>
       </details>
     </div>
   );

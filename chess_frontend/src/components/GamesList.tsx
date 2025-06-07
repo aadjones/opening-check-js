@@ -1,7 +1,9 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import styles from './GamesList.module.css';
-import type { ApiDeviationResult } from '../types';
+import type { Database } from '../types/supabase';
+
+type Deviation = Database['public']['Tables']['opening_deviations']['Row'];
 
 export interface GameListItem {
   id: string;
@@ -12,7 +14,7 @@ export interface GameListItem {
   gameResult: string;
   playedAt: string;
   hasDeviation: boolean;
-  deviation?: ApiDeviationResult;
+  deviation?: Deviation;
 }
 
 export interface GamesListProps {
@@ -40,6 +42,27 @@ function formatResult(result: string, hasDeviation: boolean) {
 const GamesList: React.FC<GamesListProps> = ({ games, isLoading, onGameClick }) => {
   const navigate = useNavigate();
 
+  // Debug log to inspect keys and data
+  const ids = games.map(g => g.id);
+  const uniqueIds = new Set(ids);
+  console.log('All IDs:', ids);
+  console.log('Unique IDs:', uniqueIds.size, 'of', ids.length);
+  console.log(
+    'Any undefined IDs:',
+    ids.some(id => !id)
+  );
+
+  // Helper function to construct game URL with orientation and ply
+  const constructGameUrl = (game: GameListItem) => {
+    if (!game.gameId) return '';
+    const baseUrl = `https://lichess.org/${game.gameId}`;
+    if (!game.hasDeviation || !game.deviation) return baseUrl;
+
+    const userColor = game.deviation.color?.toLowerCase() || 'white';
+    const plyNumber = (game.deviation.move_number - 1) * 2 + (game.deviation.color?.toLowerCase() === 'black' ? 1 : 0);
+    return `${baseUrl}/${userColor}#${plyNumber}`;
+  };
+
   if (isLoading) {
     return (
       <div className={styles.gamesList} data-testid="games-list">
@@ -64,7 +87,7 @@ const GamesList: React.FC<GamesListProps> = ({ games, isLoading, onGameClick }) 
     <div className={styles.gamesList} data-testid="games-list">
       {games.map(game => (
         <div
-          key={game.id}
+          key={game.gameId}
           className={`${styles.gameCard} ${game.hasDeviation ? styles.hasDeviation : ''}`}
           role="button"
           tabIndex={0}
@@ -103,7 +126,7 @@ const GamesList: React.FC<GamesListProps> = ({ games, isLoading, onGameClick }) 
 
           <div className={styles.gameActions}>
             <a
-              href={game.gameUrl}
+              href={constructGameUrl(game)}
               target="_blank"
               rel="noopener noreferrer"
               className={styles.lichessLink}
@@ -113,7 +136,7 @@ const GamesList: React.FC<GamesListProps> = ({ games, isLoading, onGameClick }) 
             </a>
             {game.hasDeviation && (
               <Link
-                to={`/deviation/${game.deviation?.id}`}
+                to={`/deviation/${game.deviation?.id ?? game.id}`}
                 className={styles.deviationLink}
                 onClick={e => e.stopPropagation()}
               >

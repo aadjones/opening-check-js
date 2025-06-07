@@ -1,21 +1,31 @@
 // src/DeviationDisplay.tsx
 import React, { useState, useEffect, useCallback } from 'react';
 import type { Arrow, Square } from 'react-chessboard/dist/chessboard/types';
-import type { ApiDeviationResult } from '../../types';
+import type { Database } from '../../types/supabase';
+type Deviation = Database['public']['Tables']['opening_deviations']['Row'];
 import ChessBoard from '../ChessBoard';
 import MoveNavigation from '../MoveNavigation';
 import { useChessGame } from '../../hooks/useChessGame';
+import { useAuth } from '../../hooks/useAuth';
 
 interface DeviationDisplayProps {
-  result: ApiDeviationResult | null;
+  result: Deviation | null;
   gameNumber: number;
 }
 
 const DeviationDisplay: React.FC<DeviationDisplayProps> = ({ result, gameNumber }) => {
+  const { user } = useAuth();
+  const username = user?.lichessUsername || user?.name || '';
   const pgn = result && typeof (result as { pgn?: string }).pgn === 'string' ? (result as { pgn: string }).pgn : null;
   const { fens, whitePlayer, blackPlayer } = useChessGame(pgn);
   const [currentMoveIndex, setCurrentMoveIndex] = useState(0);
   const [isFocused, setIsFocused] = useState(false);
+
+  // Determine user's color in this game
+  const userColor = username === whitePlayer ? 'white' : username === blackPlayer ? 'black' : null;
+
+  // Only show deviation if the user made the move
+  const deviationIsUsersMove = result && userColor && result.color?.toLowerCase() === userColor;
 
   // Deviation move index
   const deviationMoveIndex = result
@@ -85,10 +95,10 @@ const DeviationDisplay: React.FC<DeviationDisplayProps> = ({ result, gameNumber 
     return () => document.removeEventListener('keydown', handleKeyPress);
   }, [handleKeyPress]);
 
-  if (!result) {
+  if (!result || !deviationIsUsersMove) {
     return (
       <div className="result-card">
-        <h3>Game {gameNumber}: No deviation found.</h3>
+        <h3>Game {gameNumber}: No user deviation found.</h3>
       </div>
     );
   }

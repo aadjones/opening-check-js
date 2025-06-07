@@ -18,26 +18,29 @@ const Dashboard: React.FC = () => {
     refetch,
   } = useDeviations({ limit: 5 });
 
+  console.log('deviations:', deviations);
   // Transform deviations into game list items
   const recentGames: GameListItem[] = deviations.map(deviation => {
     const headers = parsePgnHeaders(deviation.pgn || '');
     const userColor = deviation.color;
     const whitePlayer = headers.White || 'White';
     const blackPlayer = headers.Black || 'Black';
-    const opponent = userColor.toLowerCase() === 'white' ? blackPlayer : whitePlayer;
+    const opponent =
+      userColor && typeof userColor === 'string' && userColor.toLowerCase() === 'white' ? blackPlayer : whitePlayer;
     const timeControl = headers.TimeControl || '600';
     const gameResult = headers.Result || '1/2-1/2';
-    const playedAt = deviation.detected_at;
+    const playedAt = deviation.detected_at ?? '';
     const gameUrl = deviation.game_id ? `https://lichess.org/${deviation.game_id}` : '';
+    console.log('deviation.game_id:', deviation.game_id, 'gameUrl:', gameUrl);
 
     return {
-      id: deviation.id,
-      gameId: deviation.game_id,
+      id: deviation.id ?? '',
+      gameId: deviation.game_id ?? '',
       gameUrl,
-      opponent,
-      timeControl,
-      gameResult,
-      playedAt,
+      opponent: opponent ?? '',
+      timeControl: timeControl ?? '',
+      gameResult: gameResult ?? '',
+      playedAt: playedAt ?? '',
       hasDeviation: true,
       deviation,
     };

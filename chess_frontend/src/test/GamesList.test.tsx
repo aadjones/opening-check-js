@@ -37,6 +37,8 @@ const mockGames: GameListItem[] = [
       reviewed_at: null,
       review_result: null,
       pgn: '[Event "Test"]\n1. e4 e5 2. Nf3 Nc6',
+      deviation_uci: null,
+      reference_uci: null,
     },
   },
 ];

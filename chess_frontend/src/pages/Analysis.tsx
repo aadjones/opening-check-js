@@ -109,7 +109,11 @@ const Analysis: React.FC = () => {
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Analysis failed');
-        setAnalysisSuccess('Analysis completed!');
+        if (data.message) {
+          setAnalysisSuccess(data.message);
+        } else {
+          setAnalysisError('Unexpected response from server.');
+        }
         setLastSyncTime('just now');
       } catch (err: unknown) {
         let message = 'Analysis failed';

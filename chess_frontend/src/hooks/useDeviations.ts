@@ -1,7 +1,8 @@
 import { useEffect, useState, useCallback } from 'react';
-import { supabase } from '../lib/supabase';
 import { useAuth } from './useAuth';
-import type { ApiDeviationResult } from '../types';
+import type { Database } from '../types/supabase';
+
+type Deviation = Database['public']['Tables']['opening_deviations']['Row'];
 
 interface UseDeviationsOptions {
   limit?: number;
@@ -11,7 +12,7 @@ interface UseDeviationsOptions {
 }
 
 interface UseDeviationsResult {
-  deviations: ApiDeviationResult[];
+  deviations: Deviation[];
   loading: boolean;
   error: Error | null;
   hasMore: boolean;
@@ -21,11 +22,12 @@ interface UseDeviationsResult {
 
 /**
  * Hook for fetching and managing user deviations
- * Integrates with Auth.js and Supabase RLS
+ * Now uses the backend /api/deviations endpoint.
+ * TODO: Remove user_id param when backend auth is ready.
  */
 export function useDeviations(options: UseDeviationsOptions = {}): UseDeviationsResult {
   const { session } = useAuth();
-  const [deviations, setDeviations] = useState<ApiDeviationResult[]>([]);
+  const [deviations, setDeviations] = useState<Deviation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const [hasMore, setHasMore] = useState(true);
@@ -43,62 +45,25 @@ export function useDeviations(options: UseDeviationsOptions = {}): UseDeviations
         setLoading(true);
         setError(null);
 
-        // Build query
-        let query = supabase
-          .from('opening_deviations')
-          .select(
-            'id, user_id, study_id, game_id, position_fen, expected_move, actual_move, move_number, color, detected_at, reviewed_at, review_result, pgn',
-            { count: 'exact' }
-          )
-          .eq('user_id', session.user.id)
-          .order('detected_at', { ascending: false })
-          .limit(options.limit || 10)
-          .range(currentOffset, currentOffset + (options.limit || 10) - 1);
-
-        // Apply filters
-        if (options.timeControl) {
-          query = query.eq('time_control', options.timeControl);
-        }
-        if (options.reviewed !== undefined) {
-          query = query.eq('review_result', options.reviewed ? 'reviewed' : 'not_reviewed');
-        }
-
-        const { data, error: queryError, count } = await query;
-
-        if (queryError) {
-          throw queryError;
-        }
-
-        // Map DB fields to ApiDeviationResult
-        const mappedData: ApiDeviationResult[] = (data || []).map((row: unknown) => {
-          const r = row as Record<string, unknown>;
-          return {
-            id: r.id as string,
-            user_id: r.user_id as string,
-            study_id: r.study_id as string,
-            game_id: r.game_id as string,
-            position_fen: r.position_fen as string,
-            expected_move: r.expected_move as string,
-            actual_move: r.actual_move as string,
-            move_number: r.move_number as number,
-            color: r.color as string,
-            detected_at: r.detected_at as string,
-            reviewed_at: r.reviewed_at as string | null,
-            review_result: r.review_result as string | null,
-            pgn: r.pgn as string | null,
-          };
+        // Build query params
+        const params = new URLSearchParams({
+          user_id: session.user.id, // TODO: Remove when backend uses auth context
+          limit: String(options.limit || 10),
+          offset: String(currentOffset),
         });
+        // (Optional) Add filters here if supported by backend
 
-        // Update state
+        const res = await fetch(`/api/deviations?${params.toString()}`);
+        if (!res.ok) throw new Error(`Failed to fetch deviations: ${res.status}`);
+        const data: Deviation[] = await res.json();
+
         if (append) {
-          setDeviations(prev => [...prev, ...mappedData]);
+          setDeviations(prev => [...prev, ...data]);
         } else {
-          setDeviations(mappedData);
+          setDeviations(data);
         }
-
-        // Check if we have more results
-        setHasMore((count || 0) > currentOffset + (data?.length || 0));
-        setOffset(currentOffset + (data?.length || 0));
+        setHasMore(data.length === (options.limit || 10));
+        setOffset(currentOffset + data.length);
       } catch (err) {
         console.error('Error fetching deviations:', err);
         setError(err instanceof Error ? err : new Error('Failed to fetch deviations'));
@@ -106,26 +71,20 @@ export function useDeviations(options: UseDeviationsOptions = {}): UseDeviations
         setLoading(false);
       }
     },
-    [session?.user?.id, options.limit, options.timeControl, options.reviewed]
+    [session?.user?.id, options.limit]
   );
 
   // Initial fetch
   useEffect(() => {
     fetchDeviations(0, false);
-  }, [fetchDeviations]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session?.user?.id, options.limit]);
 
   // Load more function
-  const loadMore = useCallback(async () => {
-    if (!loading && hasMore) {
-      await fetchDeviations(offset, true);
-    }
-  }, [fetchDeviations, loading, hasMore, offset]);
+  const loadMore = useCallback(() => fetchDeviations(offset, true), [fetchDeviations, offset]);
 
   // Refetch function
-  const refetch = useCallback(async () => {
-    setOffset(0);
-    await fetchDeviations(0, false);
-  }, [fetchDeviations]);
+  const refetch = useCallback(() => fetchDeviations(0, false), [fetchDeviations]);
 
   return {
     deviations,
@@ -138,7 +97,7 @@ export function useDeviations(options: UseDeviationsOptions = {}): UseDeviations
 }
 
 export function useDeviationById(id: string | undefined) {
-  const [deviation, setDeviation] = useState<ApiDeviationResult | null>(null);
+  const [deviation, setDeviation] = useState<Deviation | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
@@ -147,9 +106,15 @@ export function useDeviationById(id: string | undefined) {
     setLoading(true);
     setError(null);
     try {
-      const { data, error: supaError } = await supabase.from('opening_deviations').select('*').eq('id', id).single();
-      if (supaError) throw supaError;
-      setDeviation(data as ApiDeviationResult);
+      const res = await fetch(`/api/deviations/${id}`);
+      if (!res.ok) {
+        if (res.status === 404) {
+          setDeviation(null);
+        }
+        throw new Error(`Failed to fetch deviation: ${res.status}`);
+      }
+      const data: Deviation = await res.json();
+      setDeviation(data);
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Failed to fetch deviation'));
       setDeviation(null);

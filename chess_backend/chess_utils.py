@@ -18,7 +18,7 @@ def compare_moves(
     recent_move: chess.Move,
     player_color: str,
     my_color: str,
-    whole_move_number: int,
+    move_number: int,
 ) -> Optional[DeviationResult]:
     """
     Compares a pair of moves from recent and repertoire games, checking for deviations.
@@ -29,21 +29,32 @@ def compare_moves(
     :param recent_move: chess.Move, the current move from the recent game.
     :param player_color: str, the color of the player making the current move.
     :param my_color: str, the color the user is playing in the recent game.
-    :param whole_move_number: int, the whole move number for display.
+    :param move_number: int, the whole move number for display.
     :return: DeviationResult, or None if there's no deviation.
     """
     illegal_msg = f"Illegal move: {recent_move} at position {recent_board.fen()}"
     assert recent_move in recent_board.legal_moves, illegal_msg
     if my_color != player_color:  # If the opponent was first to deviate, return None
+        print(
+            f"[compare_moves] Skipping deviation: my_color={my_color}, player_color={player_color} (opponent deviated first)"
+        )
         return None
     deviation_san = recent_board.san(recent_move)
     reference_san = repertoire_board.san(rep_move)
+    deviation_uci = recent_move.uci() if recent_move else None
+    reference_uci = rep_move.uci() if rep_move else None
+    print(
+        f"[compare_moves] Deviation found: my_color={my_color}, player_color={player_color}, move={deviation_san}, expected={reference_san}, move_number={move_number}"
+    )
     return DeviationResult(
-        whole_move_number,
+        move_number,
         deviation_san,
         reference_san,
         player_color,
         recent_board,
+        pgn="",
+        deviation_uci=deviation_uci,
+        reference_uci=reference_uci,
     )
 
 
@@ -71,7 +82,7 @@ def find_deviation(
     for half_move_number, (rep_move, recent_move) in moves_list:
         player_color = "White" if recent_board.turn else "Black"
         # Whole move count for display; move_number will be measured in ply (half-moves)
-        whole_move_number = (half_move_number + 1) // 2
+        move_number = (half_move_number + 1) // 2
 
         # Compare moves before pushing them to the board
         if rep_move != recent_move:
@@ -82,7 +93,7 @@ def find_deviation(
                 recent_move,
                 player_color,
                 my_color,
-                whole_move_number,
+                move_number,
             )
         # If the moves are the same, then push them to their respective boards
         recent_board.push(recent_move)
@@ -153,10 +164,14 @@ def get_player_color(recent_game: chess.pgn.Game, player_name: str) -> str:
     white_player = recent_game.headers["White"]
     black_player = recent_game.headers["Black"]
 
+    print(f"[get_player_color] player_name: '{player_name}' | White: '{white_player}' | Black: '{black_player}'")
     if player_name.strip().lower() == white_player.strip().lower():
+        print("[get_player_color] Matched as White")
         return "White"
     if player_name.strip().lower() == black_player.strip().lower():
+        print("[get_player_color] Matched as Black")
         return "Black"
+    print(f"[get_player_color] No match for player_name: '{player_name}'")
     # Else:
     raise Exception(f"Could not find match {player_name} to the game!")
 

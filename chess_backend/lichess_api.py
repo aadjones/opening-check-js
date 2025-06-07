@@ -27,9 +27,7 @@ class Study:
         url = f"https://lichess.org/api/study/{study_id}.pgn"
         response: requests.Response = requests.get(url)
         if response.status_code != 200:
-            raise Exception(
-                f"Failed to fetch study. Status code: {response.status_code}"
-            )
+            raise Exception(f"Failed to fetch study. Status code: {response.status_code}")
         return Study(chapters=pgn_utils.pgn_to_pgn_list(response.text))
 
     @staticmethod
@@ -70,9 +68,14 @@ def get_last_games_pgn(
     LOG.info("Fetching %s games for %s", max_games, username)
 
     try:
+        params: dict[str, str | int] = {
+            "max": max_games,
+            "moves": "true",  # We need the moves
+            "pgnInJson": "false",  # We want raw PGN
+        }
         response = session.get(
             f"https://lichess.org/api/games/user/{username}",
-            params={"max": max_games},
+            params=params,
             timeout=timeout,
         )
         # Will raise an HTTPError if the HTTP request returned an unsuccessful status code

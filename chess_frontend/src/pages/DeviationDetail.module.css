@@ -64,7 +64,8 @@
   max-width: 500px;
 }
 
-.moveCardPlayed, .moveCardExpected {
+.moveCardPlayed,
+.moveCardExpected {
   flex: 1;
   display: flex;
   flex-direction: column;

@@ -5,7 +5,7 @@
 SHELL := /bin/bash
 .SHELLFLAGS := -c
 
-.PHONY: start dev install setup test clean format lint type-check check-all help
+.PHONY: start dev install setup test clean format lint type-check check-all help gen-pytypes
 
 # Detect operating system
 ifeq ($(OS),Windows_NT)
@@ -44,6 +44,7 @@ ifeq ($(OS),Windows_NT)
 	$(ECHO) "  make type-check - Type check with mypy"
 	$(ECHO) "  make check-all  - Run all checks"
 	$(ECHO) "  make clean      - Clean up virtual environment and cache"
+	$(ECHO) "  make gen-pytypes - Generate Pydantic models from Supabase types"
 	$(ECHO) ""
 else
 	@echo ""
@@ -58,6 +59,7 @@ else
 	@echo "  make type-check - Type check with mypy"
 	@echo "  make check-all  - Run all checks"
 	@echo "  make clean      - Clean up virtual environment and cache"
+	@echo "  make gen-pytypes - Generate Pydantic models from Supabase types"
 	@echo ""
 endif
 
@@ -179,4 +181,9 @@ else
 	@$(call RM_DIR,.pytest_cache/)
 	@$(call RM_DIR,chess_backend.egg-info/)
 	@echo "Cleanup complete!"
-endif 
+endif
+
+# Generate Pydantic models from Supabase types
+gen-pytypes:
+	@echo "Generating Pydantic models from Supabase types..."
+	python3 scripts/gen_pydantic_from_supabase.py 
