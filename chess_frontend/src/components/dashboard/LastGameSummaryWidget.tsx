@@ -17,11 +17,23 @@ const mockLastGame = {
 
 function getStatusBadge(status: string) {
   if (status === 'followed') {
-    return <span className={styles.statusBadgeFollowed}><FaCheckCircle /> Followed</span>;
+    return (
+      <span className={styles.statusBadgeFollowed}>
+        <FaCheckCircle /> Followed
+      </span>
+    );
   } else if (status === 'deviation') {
-    return <span className={styles.statusBadgeDeviation}><FaTimesCircle /> Deviation</span>;
+    return (
+      <span className={styles.statusBadgeDeviation}>
+        <FaTimesCircle /> Deviation
+      </span>
+    );
   } else {
-    return <span className={styles.statusBadgeUntracked}><FaMinusCircle /> Untracked</span>;
+    return (
+      <span className={styles.statusBadgeUntracked}>
+        <FaMinusCircle /> Untracked
+      </span>
+    );
   }
 }
 
@@ -47,13 +59,16 @@ const LastGameSummaryWidget: React.FC = () => {
       {mockLastGame.status === 'deviation' && !mockLastGame.reviewed && (
         <div className={styles.reviewRow}>
           <span className={styles.deviationInfo}>
-            Deviation on move {mockLastGame.moveNumber}: played <b>{mockLastGame.deviationMove}</b>, expected <b>{mockLastGame.expectedMove}</b>
+            Deviation on move {mockLastGame.moveNumber}: played <b>{mockLastGame.deviationMove}</b>, expected{' '}
+            <b>{mockLastGame.expectedMove}</b>
           </span>
-          <button className={styles.reviewButton}><FaPlay style={{ marginRight: 6 }} /> Review Now</button>
+          <button className={styles.reviewButton}>
+            <FaPlay style={{ marginRight: 6 }} /> Review Now
+          </button>
         </div>
       )}
     </div>
   );
 };
 
-export default LastGameSummaryWidget; 
+export default LastGameSummaryWidget;

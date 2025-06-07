@@ -88,4 +88,4 @@ const DeviationMoveControls: React.FC<DeviationMoveControlState> = ({
   );
 };
 
-export default DeviationMoveControls; 
+export default DeviationMoveControls;

@@ -14,7 +14,7 @@ const mockInsights = [
   },
   {
     id: '2',
-    message: "20% of your White opponents played 3.Nf3 in the English Opening (not in your study).",
+    message: '20% of your White opponents played 3.Nf3 in the English Opening (not in your study).',
     actions: [
       { label: 'Add Variation', icon: <FaPlusCircle />, onClick: () => {} },
       { label: 'Ignore', icon: <FaBan />, onClick: () => {} },
@@ -47,4 +47,4 @@ const InsightsBlock: React.FC = () => {
   );
 };
 
-export default InsightsBlock; 
+export default InsightsBlock;

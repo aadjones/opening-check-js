@@ -2,19 +2,19 @@ import { supabase } from '../supabase';
 
 /**
  * Study Database Operations
- * 
+ *
  * This module runs in the browser and handles database operations for chess studies.
  * It uses the Supabase client (configured with anon key) to interact with the database.
- * 
+ *
  * 📝 Database Operations:
  * - getOrCreateUserProfile: Creates/finds user profiles in the database
  * - hasCompletedOnboarding: Checks if user has active studies
- * 
+ *
  * 🔐 Security:
  * - Uses RLS (Row Level Security) policies in Supabase
  * - For development, RLS may be disabled (see comments in code)
  * - In production, proper authentication will be required
- * 
+ *
  * 🏗️ Architecture:
  * Browser -> Supabase Client -> Database (with RLS)
  */

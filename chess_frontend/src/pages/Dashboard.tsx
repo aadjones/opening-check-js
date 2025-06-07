@@ -12,10 +12,7 @@ import InsightsBlock from '../components/dashboard/InsightsBlock';
 const Dashboard: React.FC = () => {
   usePageTitle('Dashboard');
   const { user } = useAuth();
-  const {
-    deviations,
-    loading: deviationsLoading,
-  } = useDeviations({ limit: 8 });
+  const { deviations, loading: deviationsLoading } = useDeviations({ limit: 8 });
 
   // Transform deviations into game list items
   const recentGames: GameListItem[] = deviations.map(deviation => {
@@ -49,7 +46,9 @@ const Dashboard: React.FC = () => {
     <div className={styles.dashboardOuter}>
       <div className={styles.dashboardInner}>
         <div className={styles.greetingBlock}>
-          <h1 className={styles.greetingTitle}>Welcome back, {username}! <span className={styles.wave}>👋</span></h1>
+          <h1 className={styles.greetingTitle}>
+            Welcome back, {username}! <span className={styles.wave}>👋</span>
+          </h1>
           <div className={styles.greetingSubtitle}>Here's your chess progress this week.</div>
         </div>
         <div className={styles.topRow}>

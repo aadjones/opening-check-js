@@ -4,8 +4,8 @@ import styles from './PrepScoreWidget.module.css';
 
 // Mock data for weekly prep score
 const mockPrepScore = {
-  held: 2,      // ✅
-  deviated: 3,  // ❌
+  held: 2, // ✅
+  deviated: 3, // ❌
   untracked: 1, // ➖
 };
 
@@ -34,4 +34,4 @@ const PrepScoreWidget: React.FC = () => {
   );
 };
 
-export default PrepScoreWidget; 
+export default PrepScoreWidget;

@@ -53,7 +53,9 @@ const ReviewQueue: React.FC = () => {
         {mockDeviations.map(deviation => (
           <div key={deviation.id} className={styles.deviationCard}>
             <div className={styles.deviationHeader}>
-              <span className={styles.statusBadge}><FaTimesCircle style={{ marginRight: 6, color: '#dc2626' }} /> Needs Review</span>
+              <span className={styles.statusBadge}>
+                <FaTimesCircle style={{ marginRight: 6, color: '#dc2626' }} /> Needs Review
+              </span>
               <span className={styles.openingName}>{deviation.opening}</span>
             </div>
 
@@ -62,11 +64,15 @@ const ReviewQueue: React.FC = () => {
                 <div className={styles.moveComparison}>
                   <div className={styles.moveCard}>
                     <div className={styles.moveLabel}>You played</div>
-                    <div className={styles.moveValue}>{getMoveNotation(deviation.moveNumber, deviation.color, deviation.playedMove)}</div>
+                    <div className={styles.moveValue}>
+                      {getMoveNotation(deviation.moveNumber, deviation.color, deviation.playedMove)}
+                    </div>
                   </div>
                   <div className={styles.moveCard}>
                     <div className={styles.moveLabel}>Expected</div>
-                    <div className={styles.moveValue}>{getMoveNotation(deviation.moveNumber, deviation.color, deviation.expectedMove)}</div>
+                    <div className={styles.moveValue}>
+                      {getMoveNotation(deviation.moveNumber, deviation.color, deviation.expectedMove)}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -79,10 +85,16 @@ const ReviewQueue: React.FC = () => {
             </div>
 
             <div className={styles.actions}>
-              <button className={styles.actionButton}><FaEye style={{ marginRight: 4 }} /> View</button>
-              <button className={styles.actionButton}><FaCheck style={{ marginRight: 4 }} /> Mark Reviewed</button>
+              <button className={styles.actionButton}>
+                <FaEye style={{ marginRight: 4 }} /> View
+              </button>
+              <button className={styles.actionButton}>
+                <FaCheck style={{ marginRight: 4 }} /> Mark Reviewed
+              </button>
               <button className={styles.actionButton}>⭐ Adopt Move</button>
-              <button className={styles.actionButton}><FaBan style={{ marginRight: 4 }} /> Ignore</button>
+              <button className={styles.actionButton}>
+                <FaBan style={{ marginRight: 4 }} /> Ignore
+              </button>
             </div>
           </div>
         ))}
@@ -91,4 +103,4 @@ const ReviewQueue: React.FC = () => {
   );
 };
 
-export default ReviewQueue; 
+export default ReviewQueue;

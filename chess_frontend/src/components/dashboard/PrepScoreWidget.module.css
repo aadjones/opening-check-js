@@ -1,7 +1,7 @@
 .prepScoreWidget {
   background: white;
   border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   padding: 1.5rem 2rem;
   margin-bottom: 2rem;
   display: flex;
@@ -67,4 +67,4 @@
   .scoreCount {
     font-size: 1.3rem;
   }
-} 
+}

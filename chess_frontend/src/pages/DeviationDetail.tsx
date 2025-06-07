@@ -98,7 +98,7 @@ const DeviationDetail: React.FC = () => {
               result={deviation as Deviation}
               gameNumber={1}
               renderControlsExternally={true}
-              onMoveControlState={(state) => setMoveControlState(state)}
+              onMoveControlState={state => setMoveControlState(state)}
             />
           </div>
           <div className={styles.chessboardControls}>
@@ -136,9 +136,7 @@ const DeviationDetail: React.FC = () => {
         )}
         {/* Actions Section */}
         <div className={styles.actionButtonsPanel}>
-          {SHOW_REPLAY_PREP_LINE_BUTTON && (
-            <button className={styles.primaryAction}>▶️ Replay My Prep Line</button>
-          )}
+          {SHOW_REPLAY_PREP_LINE_BUTTON && <button className={styles.primaryAction}>▶️ Replay My Prep Line</button>}
           <div className={styles.primaryActionsGroup}>
             <button className={styles.primaryAction}>✓ Mark Reviewed</button>
             <button className={styles.primaryAction}>⭐ Adopt Move</button>

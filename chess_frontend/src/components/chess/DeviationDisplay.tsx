@@ -27,7 +27,12 @@ interface DeviationDisplayProps {
   onMoveControlState?: (state: DeviationMoveControlState) => void;
 }
 
-const DeviationDisplay: React.FC<DeviationDisplayProps> = ({ result, gameNumber, renderControlsExternally = false, onMoveControlState }) => {
+const DeviationDisplay: React.FC<DeviationDisplayProps> = ({
+  result,
+  gameNumber,
+  renderControlsExternally = false,
+  onMoveControlState,
+}) => {
   const { user } = useAuth();
   const username = user?.lichessUsername || user?.name || '';
   const pgn = result && typeof (result as { pgn?: string }).pgn === 'string' ? (result as { pgn: string }).pgn : null;
@@ -125,7 +130,17 @@ const DeviationDisplay: React.FC<DeviationDisplayProps> = ({ result, gameNumber,
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentMoveIndex, fens.length, goToStart, goToPrevious, goToNext, goToEnd, goToDeviation, deviationMoveIndex, goToMove]);
+  }, [
+    currentMoveIndex,
+    fens.length,
+    goToStart,
+    goToPrevious,
+    goToNext,
+    goToEnd,
+    goToDeviation,
+    deviationMoveIndex,
+    goToMove,
+  ]);
 
   if (!result || !deviationIsUsersMove) {
     return (
