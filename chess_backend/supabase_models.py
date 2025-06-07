@@ -1,5 +1,5 @@
 # This file is auto-generated. Do not edit by hand!
-from typing import Optional
+from typing import Any, Optional
 
 from pydantic import BaseModel
 
@@ -17,6 +17,7 @@ class OpeningDeviation(BaseModel):
     position_fen: Optional[str] = None
     reference_uci: Optional[str] = None
     review_result: Optional[str] = None
+    review_status: Optional[Any] = None
     reviewed_at: Optional[str] = None
     study_id: Optional[str] = None
     user_id: Optional[str] = None

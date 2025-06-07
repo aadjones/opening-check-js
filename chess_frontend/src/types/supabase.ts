@@ -58,6 +58,7 @@ export type Database = {
           position_fen: string;
           reference_uci: string | null;
           review_result: string | null;
+          review_status: Database['public']['Enums']['review_status'] | null;
           reviewed_at: string | null;
           study_id: string | null;
           user_id: string | null;
@@ -75,6 +76,7 @@ export type Database = {
           position_fen: string;
           reference_uci?: string | null;
           review_result?: string | null;
+          review_status?: Database['public']['Enums']['review_status'] | null;
           reviewed_at?: string | null;
           study_id?: string | null;
           user_id?: string | null;
@@ -92,6 +94,7 @@ export type Database = {
           position_fen?: string;
           reference_uci?: string | null;
           review_result?: string | null;
+          review_status?: Database['public']['Enums']['review_status'] | null;
           reviewed_at?: string | null;
           study_id?: string | null;
           user_id?: string | null;
@@ -119,6 +122,7 @@ export type Database = {
           created_at: string | null;
           email: string | null;
           id: string;
+          last_synced_at: string | null;
           lichess_username: string | null;
           onboarding_completed: boolean | null;
           updated_at: string | null;
@@ -128,6 +132,7 @@ export type Database = {
           created_at?: string | null;
           email?: string | null;
           id?: string;
+          last_synced_at?: string | null;
           lichess_username?: string | null;
           onboarding_completed?: boolean | null;
           updated_at?: string | null;
@@ -137,6 +142,7 @@ export type Database = {
           created_at?: string | null;
           email?: string | null;
           id?: string;
+          last_synced_at?: string | null;
           lichess_username?: string | null;
           onboarding_completed?: boolean | null;
           updated_at?: string | null;
@@ -188,6 +194,41 @@ export type Database = {
           },
         ];
       };
+      sync_preferences: {
+        Row: {
+          created_at: string | null;
+          id: string;
+          is_auto_sync_enabled: boolean;
+          sync_frequency_minutes: number;
+          updated_at: string | null;
+          user_id: string | null;
+        };
+        Insert: {
+          created_at?: string | null;
+          id?: string;
+          is_auto_sync_enabled?: boolean;
+          sync_frequency_minutes?: number;
+          updated_at?: string | null;
+          user_id?: string | null;
+        };
+        Update: {
+          created_at?: string | null;
+          id?: string;
+          is_auto_sync_enabled?: boolean;
+          sync_frequency_minutes?: number;
+          updated_at?: string | null;
+          user_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'sync_preferences_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: true;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
     };
     Views: {
       [_ in never]: never;
@@ -201,7 +242,7 @@ export type Database = {
       };
     };
     Enums: {
-      [_ in never]: never;
+      review_status: 'needs_review' | 'reviewed' | 'adopted' | 'ignored';
     };
     CompositeTypes: {
       [_ in never]: never;
@@ -306,6 +347,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      review_status: ['needs_review', 'reviewed', 'adopted', 'ignored'],
+    },
   },
 } as const;
