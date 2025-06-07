@@ -1,0 +1,2 @@
+[functions.analyze-games]
+verify_jwt = true

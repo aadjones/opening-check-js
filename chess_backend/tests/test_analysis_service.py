@@ -82,6 +82,7 @@ def test_perform_analysis_deviation_found_user_as_white(mocker: Any) -> None:
     recent_game_pgn_deviation = create_pgn_string("1. d4 e5", USER_AS_WHITE, OPPONENT)
 
     mocker.patch("analysis_service.get_last_games_pgn", return_value=recent_game_pgn_deviation)
+    mocker.patch("analysis_service.insert_deviation_to_db", return_value=None)
 
     mock_study_object = actual_lichess_api_module.Study(chapters=[pgn_utils.pgn_string_to_game(repertoire_pgn_white)])
     mocker.patch("analysis_service.lichess_api.Study.fetch_url", return_value=mock_study_object)
@@ -96,7 +97,7 @@ def test_perform_analysis_deviation_found_user_as_white(mocker: Any) -> None:
     deviation_result, _ = results_with_pgn[0]
     assert isinstance(deviation_result, DeviationResult), "Expected a DeviationResult object for white"
     assert deviation_result.player_color == "White", "Deviating player should be White"
-    assert deviation_result.whole_move_number == 1, "Deviation should be on move 1"
+    assert deviation_result.move_number == 1, "Deviation should be on move 1"
     assert deviation_result.deviation_san == "d4", "Expected deviation SAN to be d4"
     assert deviation_result.reference_san == "e4", "Expected reference SAN to be e4"
 
@@ -109,6 +110,7 @@ def test_perform_analysis_deviation_found_user_as_black(mocker: Any) -> None:
     recent_game_pgn_deviation = create_pgn_string("1. e4 e5", OPPONENT, USER_AS_BLACK)
 
     mocker.patch("analysis_service.get_last_games_pgn", return_value=recent_game_pgn_deviation)
+    mocker.patch("analysis_service.insert_deviation_to_db", return_value=None)
 
     mock_study_object = actual_lichess_api_module.Study(chapters=[pgn_utils.pgn_string_to_game(repertoire_pgn_black)])
     mocker.patch("analysis_service.lichess_api.Study.fetch_url", return_value=mock_study_object)
@@ -123,7 +125,7 @@ def test_perform_analysis_deviation_found_user_as_black(mocker: Any) -> None:
     deviation_result, _ = results_with_pgn[0]
     assert isinstance(deviation_result, DeviationResult), "Expected a DeviationResult object for black"
     assert deviation_result.player_color == "Black", "Deviating player should be Black"
-    assert deviation_result.whole_move_number == 1, "Deviation should be on move 1 for Black"
+    assert deviation_result.move_number == 1, "Deviation should be on move 1 for Black"
     assert deviation_result.deviation_san == "e5", "Expected deviation SAN to be e5"
     assert deviation_result.reference_san == "c5", "Expected reference SAN to be c5"
 

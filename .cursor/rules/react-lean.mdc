@@ -1,0 +1,33 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# React - Lean Rules
+
+## Environment & Imports
+- Use Vite: `import.meta.env.VITE_SUPABASE_URL`
+- CSS Modules: `import styles from './Component.module.css'`
+- Components: `import { Component } from '../components'` (barrel exports)
+
+## Styling
+- Always use CSS Modules: `className={styles.elementName}`
+- Never use global CSS classes or inline styles
+
+## Chess Components
+- Use `react-chessboard` library, not custom implementations
+- Use `chess.js` for game logic
+- Import types: `import type { Arrow, Square } from 'react-chessboard/dist/chessboard/types'`
+
+## Testing
+- Use Vitest: `import { describe, it, expect } from 'vitest'`
+- Use React Testing Library: `import { render, screen } from '@testing-library/react'`
+
+## File Structure
+```
+components/
+  chess/
+  layout/
+  forms/
+  ui/
+```

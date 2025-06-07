@@ -1,0 +1,13 @@
+{
+  "imports": {
+    "jose": "https://deno.land/x/jose@v4.14.4/index.ts"
+  },
+  "tasks": {
+    "start": "deno run --allow-net --allow-env index.ts"
+  },
+  "compilerOptions": {
+    "allowJs": true,
+    "lib": ["deno.window"],
+    "strict": true
+  }
+} 

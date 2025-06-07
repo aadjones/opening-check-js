@@ -1,0 +1,161 @@
+// functions/analyze-games/index.ts
+//---------------------------------------------------------------
+//  Supabase Edge Function - Analyze Games
+//---------------------------------------------------------------
+import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { jwtVerify }   from "https://deno.land/x/jose@v4.14.4/index.ts";
+import { corsHeaders } from "../_shared/cors.ts";
+
+// ── types ─────────────────────────────────────────────────────
+interface Deviation {
+  study_id?: string | null;
+  game_id?: string | null;
+  board_fen_before_deviation?: string;
+  reference_san?: string;
+  deviation_san?: string;
+  whole_move_number?: number;
+  player_color?: string | null;
+  pgn?: string | null;
+  deviation_uci?: string | null;
+  reference_uci?: string | null;
+}
+
+interface DeviationRow {
+  user_id: string;
+  study_id: string | null;
+  game_id: string | null;
+  position_fen: string;
+  expected_move: string;
+  actual_move: string;
+  move_number: number;
+  color: string | null;
+  detected_at: string;
+  pgn: string | null;
+  deviation_uci?: string | null;
+  reference_uci?: string | null;
+}
+
+// ── env ────────────────────────────────────────────────────────
+const BACKEND_URL               = Deno.env.get("BACKEND_URL")!;         // set by Makefile
+const SUPABASE_URL              = Deno.env.get("SUPABASE_URL")!;
+const SERVICE_ROLE_KEY          = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+const SUPABASE_JWT_SECRET       = Deno.env.get("JWT_SECRET")!;
+
+// ── db client (service role) ───────────────────────────────────
+const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
+
+// ── util ───────────────────────────────────────────────────────
+const normaliseColor = (c?: string | null) =>
+  c?.toLowerCase().startsWith("w") ? "white" :
+  c?.toLowerCase().startsWith("b") ? "black" :
+  null;
+
+// ── main worker ────────────────────────────────────────────────
+async function analyseUserGames(userId: string) {
+  // 1) username
+  const { data: profile, error: pErr } = await supabase
+    .from("profiles")
+    .select("lichess_username")
+    .eq("id", userId)
+    .single();
+  if (pErr || !profile) throw pErr ?? new Error("profile missing");
+
+  // 2) studies
+  const { data: studies, error: sErr } = await supabase
+    .from("lichess_studies")
+    .select("study_url, study_name")
+    .eq("user_id", userId)
+    .eq("is_active", true);
+  if (sErr) throw sErr;
+
+  const whiteStudy = studies.find(s => /white/i.test(s.study_name))?.study_url;
+  const blackStudy = studies.find(s => /black/i.test(s.study_name))?.study_url;
+
+  // 3) call engine
+  const engineResp = await fetch(`${BACKEND_URL}/api/analyze_games`, {   // adjust path if needed
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      username:        profile.lichess_username,
+      study_url_white: whiteStudy,
+      study_url_black: blackStudy,
+      max_games:       10,
+    }),
+  });
+  if (!engineResp.ok) {
+    const txt = await engineResp.text().catch(() => "");
+    throw new Error(`Backend API ${engineResp.status} – ${txt}`);
+  }
+  const result = await engineResp.json();
+  if (!Array.isArray(result)) {
+    // The backend now returns an object, not an array
+    console.log(result.message || "No deviations found.");
+    // Optionally, you could return early or handle as needed
+    return;
+  }
+  const deviations = result;
+  const rows = deviations.filter(Boolean).map(d => ({
+    user_id:       userId,
+    study_id:      d?.study_id ?? null,
+    game_id:       d?.game_id  ?? null,
+    position_fen:  d?.board_fen_before_deviation ?? '',
+    expected_move: d?.reference_san ?? '',
+    actual_move:   d?.deviation_san ?? '',
+    move_number:   d?.whole_move_number ?? 0,
+    color:         normaliseColor(d?.player_color),
+    detected_at:   new Date().toISOString(),
+    pgn:           d?.pgn ?? null,
+    deviation_uci: d?.deviation_uci ?? null,
+    reference_uci: d?.reference_uci ?? null,
+  })) as DeviationRow[];
+
+  if (rows.length) {
+    const { error: upsertErr } = await supabase
+      .from("opening_deviations")
+      .upsert(rows, { onConflict: "user_id,game_id,move_number,color" });
+    if (upsertErr) throw upsertErr;
+  }
+
+  // 5) update last analysed timestamp
+  await supabase
+    .from("profiles")
+    .update({ last_analyzed_at: new Date().toISOString() })
+    .eq("id", userId);
+}
+
+// ── request handler ────────────────────────────────────────────
+Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const raw = req.headers.get("Authorization")?.replace("Bearer ", "");
+    if (!raw) throw new Error("No authorization header");
+
+    // local JWT verification
+    const { payload } = await jwtVerify(
+      raw,
+      new TextEncoder().encode(SUPABASE_JWT_SECRET),
+      { algorithms: ["HS256"], audience: "authenticated" },
+    );
+
+    const userId = payload.sub as string | undefined;
+    if (!userId) throw new Error("JWT missing sub claim");
+
+    await analyseUserGames(userId);
+
+    return new Response(
+      JSON.stringify({ message: "Analysis completed successfully" }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
+  } catch (err: unknown) {
+    console.error("analyze-games:", err);
+    const errorMessage = err instanceof Error ? err.message : "Unknown error";
+    return new Response(
+      JSON.stringify({ error: errorMessage }),
+      { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
+  }
+});

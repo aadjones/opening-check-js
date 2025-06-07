@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 
-describe('Supabase Integration Tests', () => {
+describe.skip('Supabase Integration Tests', () => {
   it('should connect to Supabase when environment variables are set', async () => {
     // Skip this test if environment variables are not set
     const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;

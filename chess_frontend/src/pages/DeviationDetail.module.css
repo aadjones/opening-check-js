@@ -1,0 +1,422 @@
+.deviationDetail {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-lg);
+}
+
+.deviationHeader {
+  margin-bottom: var(--spacing-4xl);
+}
+
+.statusBanner {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-xl);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--spacing-2xl);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+}
+
+.statusBanner.error {
+  background: var(--color-error-light);
+  color: var(--color-error);
+  border: 1px solid var(--color-error);
+}
+
+.statusBanner.success {
+  background: var(--color-success-light);
+  color: var(--color-success);
+  border: 1px solid var(--color-success);
+}
+
+.gameInfoCard {
+  background: var(--color-background-card);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+  padding: var(--spacing-2xl);
+  margin-bottom: var(--spacing-2xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.openingInfo,
+.opponentInfo {
+  font-size: var(--font-size-base);
+  color: var(--color-text);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.moveComparisonPanel {
+  margin-bottom: var(--spacing-2xl);
+  display: flex;
+  justify-content: center;
+}
+
+.moveComparisonCards {
+  display: flex;
+  gap: var(--spacing-2xl);
+  width: 100%;
+  max-width: 500px;
+}
+
+.moveCardPlayed,
+.moveCardExpected {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--spacing-2xl);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  background: var(--color-background-card);
+  border: 2px solid transparent;
+}
+
+.moveCardPlayed {
+  background: var(--color-error-light);
+  border-color: var(--color-error);
+  color: var(--color-error);
+}
+
+.moveCardExpected {
+  background: var(--color-success-light);
+  border-color: var(--color-success);
+  color: var(--color-success);
+}
+
+.moveCardIcon {
+  font-size: var(--font-size-2xl);
+  margin-bottom: var(--spacing-sm);
+}
+
+.moveCardLabel {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  margin-bottom: var(--spacing-xs);
+}
+
+.moveCardMove {
+  font-size: var(--font-size-3xl);
+  font-family: 'Courier New', monospace;
+  font-weight: var(--font-weight-bold);
+}
+
+.chessboardSectionCentered {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: var(--spacing-2xl);
+}
+
+.actionButtonsPanel {
+  background: var(--color-background-card);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+  padding: var(--spacing-2xl);
+  margin-bottom: var(--spacing-2xl);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xl);
+}
+
+.primaryAction {
+  padding: var(--spacing-xl) var(--spacing-2xl);
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  width: 100%;
+  max-width: 400px;
+  transition: all var(--transition-normal);
+}
+.primaryAction:hover {
+  background: var(--color-primary-hover);
+  box-shadow: var(--shadow-lg);
+}
+
+.secondaryActionsGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+  justify-content: center;
+  width: 100%;
+}
+
+.secondaryAction {
+  padding: var(--spacing-md) var(--spacing-lg);
+  background: var(--color-success);
+  color: white;
+  border: none;
+  border-radius: var(--radius-lg);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  font-size: var(--font-size-base);
+  transition: all var(--transition-normal);
+  margin-bottom: var(--spacing-xs);
+}
+.secondaryAction:hover {
+  background: var(--color-success-dark);
+}
+
+.metaInfoDetails {
+  margin-top: var(--spacing-xl);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  background: var(--color-background-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: var(--spacing-lg) var(--spacing-xl);
+  width: 100%;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.chessboardPlaceholder {
+  background: var(--color-background-card);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+  padding: var(--spacing-3xl);
+  margin-bottom: var(--spacing-4xl);
+}
+
+.boardContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  background: var(--color-neutral-50);
+  border: 2px dashed var(--color-border);
+  border-radius: var(--radius-lg);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-lg);
+  text-align: center;
+}
+
+.actionButtons {
+  background: var(--color-background-card);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+  padding: var(--spacing-3xl);
+  margin-bottom: var(--spacing-4xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2xl);
+}
+
+.viewButtons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-lg);
+}
+
+.actionBtn {
+  padding: var(--spacing-lg) var(--spacing-xl);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-background-card);
+  color: var(--color-text);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+}
+
+.actionBtn:hover {
+  background: var(--color-neutral-50);
+  border-color: var(--color-primary);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.mainActions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.moreOptions {
+  margin-top: var(--spacing-lg);
+}
+
+.moreOptions details {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.moreOptions summary {
+  padding: var(--spacing-lg);
+  background: var(--color-neutral-50);
+  cursor: pointer;
+  font-weight: var(--font-weight-medium);
+  transition: background-color var(--transition-normal);
+}
+
+.moreOptions summary:hover {
+  background: var(--color-neutral-100);
+}
+
+.moreOptions ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  background: var(--color-background-card);
+}
+
+.moreOptions li {
+  border-top: 1px solid var(--color-border);
+}
+
+.moreOptions button,
+.moreOptions a {
+  display: block;
+  width: 100%;
+  padding: var(--spacing-lg);
+  border: none;
+  background: none;
+  color: var(--color-text);
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color var(--transition-normal);
+}
+
+.moreOptions button:hover,
+.moreOptions a:hover {
+  background: var(--color-neutral-50);
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.patternNotice {
+  margin-bottom: var(--spacing-4xl);
+}
+
+.noticeCard {
+  background: var(--color-info-light);
+  border: 1px solid var(--color-info);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-2xl);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-lg);
+  color: var(--color-info-dark);
+}
+
+.remindBtn {
+  padding: var(--spacing-sm) var(--spacing-lg);
+  background: var(--color-info);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  flex-shrink: 0;
+}
+
+.remindBtn:hover {
+  background: var(--color-info-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.deviationMeta {
+  background: var(--color-neutral-50);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
+  .deviationDetail {
+    padding: 0 var(--spacing-md);
+  }
+
+  .moves {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-lg);
+  }
+
+  .viewButtons {
+    grid-template-columns: 1fr;
+  }
+
+  .noticeCard {
+    flex-direction: column;
+    text-align: center;
+    gap: var(--spacing-md);
+  }
+
+  .actionButtons,
+  .moveComparison,
+  .chessboardPlaceholder {
+    padding: var(--spacing-xl);
+  }
+
+  .moveComparisonCards {
+    flex-direction: column;
+    gap: var(--spacing-lg);
+    max-width: 100%;
+  }
+
+  .actionButtonsPanel {
+    padding: var(--spacing-lg);
+  }
+
+  .primaryAction {
+    max-width: 100%;
+  }
+
+  .metaInfoDetails {
+    max-width: 100%;
+    padding: var(--spacing-md);
+  }
+}
+
+.errorState {
+  background: #fff6f6;
+  border: 1px solid #ffb3b3;
+  color: #b91c1c;
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-3xl) var(--spacing-2xl);
+  margin: var(--spacing-2xl) 0;
+  text-align: center;
+  box-shadow: 0 2px 8px 0 rgba(255, 0, 0, 0.04);
+}
+
+.errorIcon {
+  font-size: 2.5rem;
+  margin-bottom: var(--spacing-lg);
+}
+
+.retryButton {
+  background: #ff6b6b;
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 0.6em 1.4em;
+  font-size: 1rem;
+  font-weight: 500;
+  margin-top: var(--spacing-lg);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.retryButton:hover {
+  background: #e53e3e;
+}

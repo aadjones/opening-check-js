@@ -6,6 +6,7 @@ import pgn_utils
 from chess_utils import find_deviation_in_entire_study_white_and_black
 from deviation_result import DeviationResult
 from lichess_api import get_last_games_pgn
+from supabase_client import insert_deviation_to_db
 
 # We're removing the Streamlit logger for now.
 # You can add standard Python logging later if you want.
@@ -51,6 +52,8 @@ def perform_game_analysis(
             # If we found a deviation, add the PGN to it
             if deviation_info:
                 deviation_info.pgn = pgn_string
+                # Insert into DB
+                insert_deviation_to_db(deviation_info, pgn_string, username)
             # Always append a tuple of (deviation result or None, pgn_string)
             results.append((deviation_info, pgn_string))
         except Exception as e:

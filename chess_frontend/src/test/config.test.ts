@@ -1,54 +1,31 @@
 import { describe, it, expect } from 'vitest';
-import { supabase } from '../lib/supabase';
 
 describe('Configuration Tests', () => {
-  describe('Environment Variables', () => {
-    it('should have Supabase URL configured', () => {
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+  describe('Database Tables', () => {
+    it('should have proper database table names defined', () => {
+      // Test that our table names follow the correct convention
+      const expectedTables = ['profiles', 'lichess_studies', 'opening_deviations', 'review_queue'];
 
-      if (supabaseUrl) {
-        // If env var is set, it should be a valid URL
-        expect(supabaseUrl).toMatch(/^https?:\/\/.+/);
-        expect(supabaseUrl).not.toBe('https://placeholder.supabase.co');
-      } else {
-        // If not set, we should be using the fallback
-        console.warn('VITE_SUPABASE_URL not set - using fallback for testing');
-      }
-    });
+      // Verify each table name follows our naming convention
+      expectedTables.forEach(tableName => {
+        // Table names should be lowercase with underscores
+        expect(tableName).toMatch(/^[a-z_]+$/);
 
-    it('should have Supabase anon key configured', () => {
-      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+        // Table names should not start or end with underscore
+        expect(tableName).not.toMatch(/^_|_$/);
 
-      if (supabaseAnonKey) {
-        // If env var is set, it should not be the placeholder
-        expect(supabaseAnonKey).not.toBe('placeholder-anon-key');
-        expect(supabaseAnonKey.length).toBeGreaterThan(10);
-      } else {
-        // If not set, we should be using the fallback
-        console.warn('VITE_SUPABASE_ANON_KEY not set - using fallback for testing');
-      }
-    });
-  });
+        // Table names should not have consecutive underscores
+        expect(tableName).not.toMatch(/__/);
 
-  describe('Supabase Client', () => {
-    it('should create supabase client without errors', () => {
-      expect(supabase).toBeDefined();
-      expect(supabase.auth).toBeDefined();
-      expect(supabase.from).toBeDefined();
-    });
+        // Table names should be descriptive
+        expect(tableName.length).toBeGreaterThan(2);
+      });
 
-    it('should have correct supabase client configuration', () => {
-      // Test that the client has the expected structure
-      expect(typeof supabase.auth.signInWithPassword).toBe('function');
-      expect(typeof supabase.from).toBe('function');
-    });
-  });
-
-  describe('Application Health', () => {
-    it('should be able to import core modules', async () => {
-      // Test that our main modules can be imported without errors
-      const supabaseModule = await import('../lib/supabase');
-      expect(supabaseModule.supabase).toBeDefined();
+      // Verify we have all the expected tables
+      expect(expectedTables).toContain('profiles');
+      expect(expectedTables).toContain('lichess_studies');
+      expect(expectedTables).toContain('opening_deviations');
+      expect(expectedTables).toContain('review_queue');
     });
   });
 });

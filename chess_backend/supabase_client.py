@@ -3,7 +3,8 @@ Supabase client configuration for the chess backend.
 """
 
 import os
-from typing import Optional
+import re
+from typing import Any, Dict, Optional
 
 from dotenv import load_dotenv
 from supabase import Client, create_client
@@ -81,6 +82,77 @@ def test_connection() -> bool:
     except Exception as e:
         print(f"❌ Supabase connection failed: {e}")
         return False
+
+
+def extract_game_id_from_pgn(pgn: str) -> Optional[str]:
+    match = re.search(r'Site "https://lichess.org/([a-zA-Z0-9]{8})"', pgn)
+    if match:
+        return match.group(1)
+    return None
+
+
+def get_user_id_from_username(username: str) -> str:
+    client = get_admin_client()
+    response = client.table("profiles").select("id").eq("lichess_username", username).limit(1).execute()
+    data = response.data
+    if data and len(data) > 0:
+        user_id: str = data[0]["id"]
+        return user_id
+    raise Exception(f"User not found for username: {username}")
+
+
+def insert_deviation_to_db(deviation: Any, pgn: str, username: str) -> None:
+    client = get_admin_client()
+    game_id = extract_game_id_from_pgn(pgn)
+    user_id = get_user_id_from_username(username)
+    # Construct a dict (or an OpeningDeviation instance) using the auto-generated model.
+    # Exclude id field to let the database generate it
+    data = {
+        "user_id": user_id,
+        "game_id": game_id,
+        "position_fen": deviation.board.fen(),
+        "expected_move": deviation.reference_san,
+        "actual_move": deviation.deviation_san,
+        "move_number": deviation.move_number,
+        "color": deviation.player_color,
+        "pgn": pgn,
+        "deviation_uci": getattr(deviation, "deviation_uci", None),
+        "reference_uci": getattr(deviation, "reference_uci", None),
+    }
+    # Convert to dict for upsert, letting the database generate the id
+    client.table("opening_deviations").upsert(data).execute()
+
+
+def get_deviations_for_user(user_id: str, limit: int = 10, offset: int = 0) -> list[Dict[str, Any]]:
+    """
+    Fetch deviations for a given user_id with pagination.
+    Returns a list of dicts, each representing a row from opening_deviations.
+    """
+    client = get_default_client()
+    response = (
+        client.table("opening_deviations")
+        .select("*")
+        .eq("user_id", user_id)
+        .order("id", desc=True)
+        .limit(limit)
+        .offset(offset)
+        .execute()
+    )
+    return response.data or []
+
+
+def get_deviation_by_id(deviation_id: str) -> Optional[Dict[str, Any]]:
+    """
+    Fetch a single deviation by its ID.
+    Returns a dict representing the row, or None if not found.
+    """
+    client = get_default_client()
+    response = client.table("opening_deviations").select("*").eq("id", deviation_id).limit(1).execute()
+    data = response.data
+    if data and len(data) > 0:
+        deviation: Dict[str, Any] = data[0]
+        return deviation
+    return None
 
 
 if __name__ == "__main__":
