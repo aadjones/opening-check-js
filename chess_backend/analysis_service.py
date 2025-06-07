@@ -12,6 +12,32 @@ from supabase_client import insert_deviation_to_db
 # You can add standard Python logging later if you want.
 # LOG = logger.get_logger(__name__)
 
+"""
+Chess Game Analysis Service
+
+This module runs on the server and handles the core game analysis logic.
+It coordinates fetching games from Lichess, comparing them against studies,
+and finding deviations.
+
+🏗️ Analysis Process:
+1. Fetch recent games from Lichess API
+2. Fetch opening studies (white/black)
+3. Compare each game against studies
+4. Find deviations and store results
+5. Return analysis results to API
+
+🔄 Data Flow:
+Lichess API -> Game PGNs
+            -> Study PGNs
+            -> Analysis
+            -> Supabase DB
+
+🔧 Dependencies:
+- lichess_api: Fetches games and studies
+- chess_utils: Core deviation finding logic
+- supabase_client: Stores results
+"""
+
 
 def perform_game_analysis(
     username: str,

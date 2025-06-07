@@ -1,5 +1,25 @@
 """
-Supabase client configuration for the chess backend.
+Supabase Database Client
+
+This module runs on the server and provides database access to Supabase.
+It manages two types of clients:
+1. Default client (anon key) - for regular operations
+2. Admin client (service role) - for privileged operations
+
+🏗️ Architecture:
+Server -> Supabase Client -> Database
+       -> Admin Client -> Database (with elevated privileges)
+
+🔐 Security:
+- Uses environment variables for credentials
+- Service role key for admin operations
+- Anon key for regular operations
+- RLS policies still apply based on client type
+
+📝 Database Operations:
+- User profile management
+- Deviation storage and retrieval
+- Study tracking
 """
 
 import os

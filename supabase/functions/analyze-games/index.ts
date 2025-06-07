@@ -1,3 +1,30 @@
+/**
+ * Analyze Games Edge Function
+ * 
+ * This function runs on Supabase Edge Functions (serverless) and coordinates game analysis.
+ * It acts as a bridge between the frontend and backend analysis service.
+ * 
+ * 🏗️ Architecture:
+ * Frontend -> Edge Function -> Backend API -> Lichess API
+ *                              -> Database
+ * 
+ * 🔄 Process Flow:
+ * 1. Receives JWT-authenticated request from frontend
+ * 2. Fetches user's active studies from database
+ * 3. Calls backend API to analyze games
+ * 4. Stores deviations in database
+ * 5. Updates user's last analyzed timestamp
+ * 
+ * 🔐 Security:
+ * - JWT verification required
+ * - Uses service role key for database access
+ * - CORS headers for frontend access
+ * 
+ * 📝 Database Operations:
+ * - Reads user profiles and studies
+ * - Writes deviations and analysis timestamps
+ */
+
 // functions/analyze-games/index.ts
 //---------------------------------------------------------------
 //  Supabase Edge Function - Analyze Games

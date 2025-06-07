@@ -1,3 +1,34 @@
+"""
+Chess Analysis Backend API
+
+This module runs on the server and provides the main API endpoints for the chess analysis service.
+It handles game analysis, deviation tracking, and Lichess API proxying.
+
+🏗️ Architecture:
+1. FastAPI Server (this file)
+   - Runs on port 8000 (configurable)
+   - Handles HTTP requests from frontend
+   - Proxies requests to Lichess API
+   - Coordinates game analysis
+
+2. API Endpoints:
+   /api/analyze_games    - Analyzes games for deviations
+   /api/deviations       - Lists user's deviations
+   /api/deviations/{id}  - Gets a specific deviation
+   /proxy/*             - Proxies requests to Lichess API
+   /health              - Health check endpoint
+
+3. Data Flow:
+   Frontend -> FastAPI -> Lichess API
+                -> Analysis Service
+                -> Supabase Database
+
+🔐 Security:
+- CORS enabled for frontend access
+- JWT validation for authenticated endpoints
+- Rate limiting on Lichess API calls
+"""
+
 import logging
 from typing import Any, Dict, List, Optional, Tuple
 
