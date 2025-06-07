@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import { AnalysisForm, DeviationDisplay, UnderConstruction } from '../components';
 import { usePageTitle } from '../hooks/usePageTitle';
-import type { ApiDeviationResult } from '../types';
+import type { Database } from '../types/supabase';
 import styles from './Demo.module.css';
+
+type ApiDeviationResult = Database['public']['Tables']['opening_deviations']['Row'];
 
 const Demo: React.FC = () => {
   usePageTitle('Demo');
   // State for form inputs
-  const [username, setUsername] = useState<string>('Jrjrjr4');
+  const [lichessUsername, setLichessUsername] = useState<string>('Jrjrjr4');
   const [maxGames, setMaxGames] = useState<string>('1');
   const [studyUrlWhite, setStudyUrlWhite] = useState<string>('https://lichess.org/study/14RZiFdX/fvGLXd1D');
   const [studyUrlBlack, setStudyUrlBlack] = useState<string>('https://lichess.org/study/bve0Qw48/7ZVSY8Po');
@@ -46,8 +48,8 @@ const Demo: React.FC = () => {
 
       <div className={styles.formCard}>
         <AnalysisForm
-          username={username}
-          setUsername={setUsername}
+          lichessUsername={lichessUsername}
+          setLichessUsername={setLichessUsername}
           maxGames={maxGames}
           setMaxGames={setMaxGames}
           studyUrlWhite={studyUrlWhite}
