@@ -14,6 +14,7 @@ import {
 } from './pages';
 import { AuthProvider } from './contexts/AuthJSContext';
 import './styles/index.css';
+import { SHOW_ANALYSIS_PAGE } from './featureFlags';
 
 function App() {
   return (
@@ -64,14 +65,16 @@ function App() {
                     </ProtectedRoute>
                   }
                 />
-                <Route
-                  path="/analysis"
-                  element={
-                    <ProtectedRoute>
-                      <Analysis />
-                    </ProtectedRoute>
-                  }
-                />
+                {SHOW_ANALYSIS_PAGE && (
+                  <Route
+                    path="/analysis"
+                    element={
+                      <ProtectedRoute>
+                        <Analysis />
+                      </ProtectedRoute>
+                    }
+                  />
+                )}
                 <Route
                   path="/review-queue"
                   element={

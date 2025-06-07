@@ -1,0 +1,64 @@
+.controlsRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 0.7rem 0 0.2rem 0;
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+
+.iconButton {
+  background: none;
+  border: none;
+  color: #334155;
+  font-size: 1.25rem;
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  display: flex;
+  align-items: center;
+}
+.iconButton:disabled {
+  color: #cbd5e1;
+  cursor: not-allowed;
+}
+.iconButton:hover:not(:disabled) {
+  background: #e0e7ef;
+  color: #2563eb;
+}
+
+.moveSlider {
+  width: 110px;
+  margin: 0 0.5rem;
+  accent-color: #2563eb;
+  vertical-align: middle;
+}
+
+.deviationButton {
+  background: #fee2e2;
+  color: #b91c1c;
+  border: none;
+  border-radius: 6px;
+  padding: 0.3rem 0.9rem;
+  font-size: 0.98rem;
+  font-weight: 500;
+  margin-left: 0.5rem;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.deviationButton:hover {
+  background: #fecaca;
+  color: #991b1b;
+}
+
+.moveIndicator {
+  margin-left: 0.7rem;
+  font-size: 1rem;
+  color: #64748b;
+  min-width: 48px;
+  text-align: right;
+} 

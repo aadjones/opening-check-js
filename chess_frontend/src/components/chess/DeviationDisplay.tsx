@@ -4,16 +4,30 @@ import type { Arrow, Square } from 'react-chessboard/dist/chessboard/types';
 import type { Database } from '../../types/supabase';
 type Deviation = Database['public']['Tables']['opening_deviations']['Row'];
 import ChessBoard from '../ChessBoard';
-import MoveNavigation from '../MoveNavigation';
 import { useChessGame } from '../../hooks/useChessGame';
 import { useAuth } from '../../hooks/useAuth';
+import DeviationMoveControls from './DeviationMoveControls';
+
+export interface DeviationMoveControlState {
+  currentMoveIndex: number;
+  moveCount: number;
+  onStart: () => void;
+  onPrev: () => void;
+  onNext: () => void;
+  onEnd: () => void;
+  onDeviation: () => void;
+  deviationIndex: number;
+  onMoveSlider: (moveIndex: number) => void;
+}
 
 interface DeviationDisplayProps {
   result: Deviation | null;
   gameNumber: number;
+  renderControlsExternally?: boolean;
+  onMoveControlState?: (state: DeviationMoveControlState) => void;
 }
 
-const DeviationDisplay: React.FC<DeviationDisplayProps> = ({ result, gameNumber }) => {
+const DeviationDisplay: React.FC<DeviationDisplayProps> = ({ result, gameNumber, renderControlsExternally = false, onMoveControlState }) => {
   const { user } = useAuth();
   const username = user?.lichessUsername || user?.name || '';
   const pgn = result && typeof (result as { pgn?: string }).pgn === 'string' ? (result as { pgn: string }).pgn : null;
@@ -95,6 +109,24 @@ const DeviationDisplay: React.FC<DeviationDisplayProps> = ({ result, gameNumber 
     return () => document.removeEventListener('keydown', handleKeyPress);
   }, [handleKeyPress]);
 
+  // Expose move control state/handlers to parent if requested
+  useEffect(() => {
+    if (onMoveControlState) {
+      onMoveControlState({
+        currentMoveIndex,
+        moveCount: fens.length,
+        onStart: goToStart,
+        onPrev: goToPrevious,
+        onNext: goToNext,
+        onEnd: goToEnd,
+        onDeviation: goToDeviation,
+        deviationIndex: deviationMoveIndex,
+        onMoveSlider: goToMove,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentMoveIndex, fens.length, goToStart, goToPrevious, goToNext, goToEnd, goToDeviation, deviationMoveIndex, goToMove]);
+
   if (!result || !deviationIsUsersMove) {
     return (
       <div className="result-card">
@@ -131,7 +163,6 @@ const DeviationDisplay: React.FC<DeviationDisplayProps> = ({ result, gameNumber 
       onBlur={() => setIsFocused(false)}
       onClick={() => setIsFocused(true)}
     >
-      <h3>Game {gameNumber}</h3>
       <div className="opponent-name">{opponentName}</div>
       <div className="chess-board-container">
         <ChessBoard
@@ -145,17 +176,20 @@ const DeviationDisplay: React.FC<DeviationDisplayProps> = ({ result, gameNumber 
       <div style={{ textAlign: 'center', margin: '12px 0', fontWeight: 500 }}>
         Move {currentMoveIndex}/{fens.length - 1}
       </div>
-      <MoveNavigation
-        currentMoveIndex={currentMoveIndex}
-        moveCount={fens.length}
-        onStart={goToStart}
-        onPrev={goToPrevious}
-        onNext={goToNext}
-        onEnd={goToEnd}
-        onDeviation={goToDeviation}
-        deviationIndex={deviationMoveIndex}
-        onMoveSlider={goToMove}
-      />
+      {/* Only render controls here if not rendering externally */}
+      {!renderControlsExternally && (
+        <DeviationMoveControls
+          currentMoveIndex={currentMoveIndex}
+          moveCount={fens.length}
+          onStart={goToStart}
+          onPrev={goToPrevious}
+          onNext={goToNext}
+          onEnd={goToEnd}
+          onDeviation={goToDeviation}
+          deviationIndex={deviationMoveIndex}
+          onMoveSlider={goToMove}
+        />
+      )}
     </div>
   );
 };

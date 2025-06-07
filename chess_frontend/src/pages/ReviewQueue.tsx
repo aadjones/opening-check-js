@@ -1,7 +1,7 @@
 import React from 'react';
 import { usePageTitle } from '../hooks/usePageTitle';
 import styles from './ReviewQueue.module.css';
-import { FaTimesCircle, FaCheck, FaRegCheckCircle, FaBan, FaEye } from 'react-icons/fa';
+import { FaTimesCircle, FaCheck, FaBan, FaEye } from 'react-icons/fa';
 
 // Mock data for development
 const mockDeviations = [
@@ -9,8 +9,8 @@ const mockDeviations = [
     id: '1',
     opening: "King's Indian",
     moveNumber: 8,
-    playedMove: 'a6',
-    expectedMove: 'Be2',
+    playedMove: 'e5',
+    expectedMove: 'Rb8',
     opponent: 'Forknado',
     timeControl: 'Rapid 10+0',
     playedAt: '2 days ago',
@@ -81,7 +81,7 @@ const ReviewQueue: React.FC = () => {
             <div className={styles.actions}>
               <button className={styles.actionButton}><FaEye style={{ marginRight: 4 }} /> View</button>
               <button className={styles.actionButton}><FaCheck style={{ marginRight: 4 }} /> Mark Reviewed</button>
-              <button className={styles.actionButton}><FaRegCheckCircle style={{ marginRight: 4 }} /> Adopt Move</button>
+              <button className={styles.actionButton}>⭐ Adopt Move</button>
               <button className={styles.actionButton}><FaBan style={{ marginRight: 4 }} /> Ignore</button>
             </div>
           </div>

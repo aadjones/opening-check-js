@@ -6,6 +6,9 @@ import styles from './DeviationDetail.module.css';
 import DeviationDisplay from '../components/chess/DeviationDisplay';
 import { parsePgnHeaders } from '../utils/pgn';
 import type { Database } from '../types/supabase';
+import { SHOW_MOVE_COMPARISON_CARDS, SHOW_REPLAY_PREP_LINE_BUTTON } from '../featureFlags';
+import DeviationMoveControls from '../components/chess/DeviationMoveControls';
+import type { DeviationMoveControlState } from '../components/chess/DeviationMoveControls';
 
 type Deviation = Database['public']['Tables']['opening_deviations']['Row'];
 
@@ -13,6 +16,7 @@ const DeviationDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { deviation, loading, error, refetch } = useDeviationById(id);
+  const [moveControlState, setMoveControlState] = React.useState<DeviationMoveControlState | null>(null);
 
   // Always call usePageTitle at the top level
   usePageTitle(deviation ? `Deviation ${deviation.move_number}` : 'Deviation Details');
@@ -79,69 +83,92 @@ const DeviationDetail: React.FC = () => {
   }
 
   return (
-    <div className={styles.deviationDetail}>
-      {/* Status Banner */}
-      <div className={styles.statusBanner}>
-        <span role="img" aria-label="deviation">
-          ❌
-        </span>{' '}
-        You deviated from your prep on move {deviation.move_number}
-      </div>
-
-      {/* Game Info Card */}
-      <div className={styles.gameInfoCard}>
-        <div className={styles.openingInfo}>📖 Opening: {openingName}</div>
-        <div className={styles.opponentInfo}>
-          🤝 vs. {opponent}
-          {timeControl ? ` — ${timeControl}` : ''}
-          {gameResult ? ` — Result: ${gameResult}` : ''}
+    <div className={styles.deviationDetailOuter}>
+      <div className={styles.deviationDetailCard}>
+        <div className={styles.deviationBanner}>
+          <span className={styles.deviationIcon}>❌</span>
+          <span className={styles.deviationBannerText}>
+            You deviated from your prep on move {deviation.move_number}
+          </span>
         </div>
-      </div>
-
-      {/* Move Comparison Section */}
-      <div className={styles.moveComparisonPanel}>
-        <div className={styles.moveComparisonCards}>
-          <div className={styles.moveCardPlayed}>
-            <div className={styles.moveCardIcon}>❌</div>
-            <div className={styles.moveCardLabel}>You played</div>
-            <div className={styles.moveCardMove}>{playedMove}</div>
+        {/* Chessboard Section - flex layout */}
+        <div className={styles.chessboardSectionCentered}>
+          <div className={styles.chessboardWrapper}>
+            <DeviationDisplay
+              result={deviation as Deviation}
+              gameNumber={1}
+              renderControlsExternally={true}
+              onMoveControlState={(state) => setMoveControlState(state)}
+            />
           </div>
-          <div className={styles.moveCardExpected}>
-            <div className={styles.moveCardIcon}>✅</div>
-            <div className={styles.moveCardLabel}>Expected</div>
-            <div className={styles.moveCardMove}>{deviation.expected_move}</div>
+          <div className={styles.chessboardControls}>
+            {moveControlState && (
+              <DeviationMoveControls
+                currentMoveIndex={moveControlState.currentMoveIndex}
+                moveCount={moveControlState.moveCount}
+                onStart={moveControlState.onStart}
+                onPrev={moveControlState.onPrev}
+                onNext={moveControlState.onNext}
+                onEnd={moveControlState.onEnd}
+                onDeviation={moveControlState.onDeviation}
+                deviationIndex={moveControlState.deviationIndex}
+                onMoveSlider={moveControlState.onMoveSlider}
+              />
+            )}
           </div>
         </div>
-      </div>
-
-      {/* Chessboard Section */}
-      <div className={styles.chessboardSectionCentered}>
-        <DeviationDisplay result={deviation as Deviation} gameNumber={1} />
-      </div>
-
-      {/* Actions Section */}
-      <div className={styles.actionButtonsPanel}>
-        <button className={styles.primaryAction}>▶️ Replay My Prep Line</button>
-        <div className={styles.secondaryActionsGroup}>
-          <button className={styles.secondaryAction}>View My Move</button>
-          <button className={styles.secondaryAction}>View My Prep</button>
-          <button className={styles.secondaryAction}>I meant to play {playedMove} (Adopt it)</button>
-          <button className={styles.secondaryAction}>Ignore this chapter in the future</button>
-          {gameUrl && (
-            <a href={gameUrl} target="_blank" rel="noopener noreferrer" className={styles.secondaryAction}>
-              View full game on Lichess →
-            </a>
+        {/* Move Comparison Section */}
+        {SHOW_MOVE_COMPARISON_CARDS && (
+          <div className={styles.moveComparisonPanel}>
+            <div className={styles.moveComparisonCards}>
+              <div className={styles.moveCardPlayed}>
+                <div className={styles.moveCardIcon}>❌</div>
+                <div className={styles.moveCardLabel}>You played</div>
+                <div className={styles.moveCardMove}>{playedMove}</div>
+              </div>
+              <div className={styles.moveCardExpected}>
+                <div className={styles.moveCardIcon}>✅</div>
+                <div className={styles.moveCardLabel}>Expected</div>
+                <div className={styles.moveCardMove}>{deviation.expected_move}</div>
+              </div>
+            </div>
+          </div>
+        )}
+        {/* Actions Section */}
+        <div className={styles.actionButtonsPanel}>
+          {SHOW_REPLAY_PREP_LINE_BUTTON && (
+            <button className={styles.primaryAction}>▶️ Replay My Prep Line</button>
           )}
+          <div className={styles.primaryActionsGroup}>
+            <button className={styles.primaryAction}>✓ Mark Reviewed</button>
+            <button className={styles.primaryAction}>⭐ Adopt Move</button>
+            <button className={styles.primaryAction}>🚫 Ignore Line</button>
+          </div>
+          <div className={styles.secondaryActionsGroup}>
+            {gameUrl && (
+              <a href={gameUrl} target="_blank" rel="noopener noreferrer" className={styles.secondaryAction}>
+                View full game on Lichess →
+              </a>
+            )}
+          </div>
         </div>
+        {/* Game Info Card */}
+        <div className={styles.gameInfoCard}>
+          <div className={styles.openingInfo}>📖 Opening: {openingName}</div>
+          <div className={styles.opponentInfo}>
+            🤝 vs. {opponent}
+            {timeControl ? ` — ${timeControl}` : ''}
+            {gameResult ? ` — Result: ${gameResult}` : ''}
+          </div>
+        </div>
+        {/* Meta Info (Collapsible) */}
+        <details className={styles.metaInfoDetails}>
+          <summary>Details</summary>
+          <p>Deviation ID: {deviation.id}</p>
+          <p>Game ID: {deviation.game_id}</p>
+          <p>Created: {createdAt.toLocaleString()}</p>
+        </details>
       </div>
-
-      {/* Meta Info (Collapsible) */}
-      <details className={styles.metaInfoDetails}>
-        <summary>Details</summary>
-        <p>Deviation ID: {deviation.id}</p>
-        <p>Game ID: {deviation.game_id}</p>
-        <p>Created: {createdAt.toLocaleString()}</p>
-      </details>
     </div>
   );
 };
