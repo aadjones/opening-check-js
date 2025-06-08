@@ -37,6 +37,7 @@ const Dashboard: React.FC = () => {
       playedAt: playedAt ?? '',
       hasDeviation: true,
       deviation,
+      firstDeviator: deviation.first_deviator as 'user' | 'opponent' | undefined,
     };
   });
 

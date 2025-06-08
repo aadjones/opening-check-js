@@ -42,12 +42,13 @@ export interface LichessStudy {
  * Note: For development, we're bypassing RLS by using the anon key directly
  * In production, this would use proper authentication
  */
-async function getOrCreateUserProfile(lichessUsername: string): Promise<string> {
+async function getOrCreateUserProfile(lichessUsername: string, supabaseClient?: typeof supabase): Promise<string> {
+  const client = supabaseClient || supabase;
   try {
     console.log('🔍 Looking for profile with username:', lichessUsername);
 
     // First, try to find existing profile by lichess_username
-    const { data: existingProfile, error: selectError } = await supabase
+    const { data: existingProfile, error: selectError } = await client
       .from('profiles')
       .select('id')
       .eq('lichess_username', lichessUsername)
@@ -61,33 +62,27 @@ async function getOrCreateUserProfile(lichessUsername: string): Promise<string> 
     console.log('👤 Profile not found, creating new one...');
 
     // Generate a UUID for the new profile
-    // Since we're not using Supabase auth, we need to create our own UUID
     const newUserId = crypto.randomUUID();
 
     // If no profile exists, create one
-    // Note: In a real app, this would be handled by the auth system
-    // For now, we'll create a temporary profile for testing
-    const { data: newProfile, error: insertError } = await supabase
+    const { data: newProfile, error: insertError } = await client
       .from('profiles')
       .insert({
-        id: newUserId, // Explicitly provide the UUID
+        id: newUserId,
         lichess_username: lichessUsername,
-        onboarding_completed: false, // Set to false by default for new users
+        onboarding_completed: false,
       })
       .select('id')
       .single();
 
     if (insertError) {
       console.error('❌ Error creating profile:', insertError);
-
-      // If RLS is blocking us, provide helpful error message
       if (insertError.message?.includes('RLS') || insertError.message?.includes('policy')) {
         console.error('🚨 RLS Policy Error: You may need to disable RLS for development');
         console.error(
           '💡 In Supabase dashboard, go to Authentication > Policies and temporarily disable RLS on the profiles table'
         );
       }
-
       throw new Error('Failed to create user profile');
     }
 
@@ -104,23 +99,19 @@ async function getOrCreateUserProfile(lichessUsername: string): Promise<string> 
  * This replaces the localStorage-based approach in onboardingUtils
  */
 export async function saveUserStudySelections(
-  userIdentifier: string, // This could be a UUID or Lichess username
+  userIdentifier: string,
   whiteStudyId: string | null,
   blackStudyId: string | null,
   supabaseClient?: typeof supabase
 ): Promise<void> {
   try {
-    // Determine if userIdentifier is a UUID or username
     const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(userIdentifier);
-
     let userId: string;
     if (isUUID) {
       userId = userIdentifier;
     } else {
-      // It's a Lichess username, get or create profile
-      userId = await getOrCreateUserProfile(userIdentifier);
+      userId = await getOrCreateUserProfile(userIdentifier, supabaseClient);
     }
-
     const client = supabaseClient || supabase;
     // First, deactivate any existing studies for this user
     const { error: deactivateError } = await client
@@ -200,20 +191,17 @@ export async function saveUserStudySelections(
 /**
  * Get user's active study selections
  */
-export async function getUserStudySelections(userIdentifier: string): Promise<StudySelection> {
+export async function getUserStudySelections(userIdentifier: string, supabaseClient?: typeof supabase): Promise<StudySelection> {
   try {
-    // Determine if userIdentifier is a UUID or username
     const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(userIdentifier);
-
     let userId: string;
     if (isUUID) {
       userId = userIdentifier;
     } else {
-      // It's a Lichess username, get profile
-      userId = await getOrCreateUserProfile(userIdentifier);
+      userId = await getOrCreateUserProfile(userIdentifier, supabaseClient);
     }
-
-    const { data: studies, error } = await supabase
+    const client = supabaseClient || supabase;
+    const { data: studies, error } = await client
       .from('lichess_studies')
       .select('lichess_study_id, study_name')
       .eq('user_id', userId)
@@ -254,20 +242,17 @@ export async function getUserStudySelections(userIdentifier: string): Promise<St
 /**
  * Check if user has completed onboarding (has active studies)
  */
-export async function hasCompletedOnboarding(userIdentifier: string): Promise<boolean> {
+export async function hasCompletedOnboarding(userIdentifier: string, supabaseClient?: typeof supabase): Promise<boolean> {
   try {
-    // Determine if userIdentifier is a UUID or username
     const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(userIdentifier);
-
     let userId: string;
     if (isUUID) {
       userId = userIdentifier;
     } else {
-      // It's a Lichess username, get profile
-      userId = await getOrCreateUserProfile(userIdentifier);
+      userId = await getOrCreateUserProfile(userIdentifier, supabaseClient);
     }
-
-    const { data: studies, error } = await supabase
+    const client = supabaseClient || supabase;
+    const { data: studies, error } = await client
       .from('lichess_studies')
       .select('id')
       .eq('user_id', userId)

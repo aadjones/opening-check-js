@@ -5,7 +5,6 @@ import { useAuth } from '../hooks/useAuth';
 import { saveUserStudySelections } from '../lib/database/studyOperations';
 import { extractStudyId } from '../lib/lichess/studyValidation';
 import styles from './OnboardingPage.module.css';
-import { supabase } from '../lib/supabase';
 import { fetchSupabaseJWT } from '../lib/auth/fetchSupabaseJWT';
 import { createClient } from '@supabase/supabase-js';
 
@@ -104,7 +103,7 @@ const OnboardingPage: React.FC = () => {
         error: onboardingError,
         status,
         statusText,
-      } = await supabase.from('profiles').update({ onboarding_completed: true }).eq('id', session.user.id).select(); // Get updated rows for debugging
+      } = await supabaseWithAuth.from('profiles').update({ onboarding_completed: true }).eq('id', session.user.id).select(); // Get updated rows for debugging
       console.log('[Onboarding] Supabase update result:', { onboardingData, onboardingError, status, statusText });
       if (onboardingError) {
         console.error('Error updating onboarding_completed flag:', onboardingError.message);

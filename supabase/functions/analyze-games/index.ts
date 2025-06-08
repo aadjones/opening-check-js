@@ -166,6 +166,7 @@ async function analyseUserGames(userId: string, scope: 'recent' | 'today') {
     pgn:           d?.pgn ?? null,
     deviation_uci: d?.deviation_uci ?? null,
     reference_uci: d?.reference_uci ?? null,
+    first_deviator: d?.first_deviator ?? null,
   })) as DeviationRow[];
 
   if (rows.length) {

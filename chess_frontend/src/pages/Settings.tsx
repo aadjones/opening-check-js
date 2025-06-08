@@ -4,8 +4,8 @@ import { useAuth } from '../hooks/useAuth';
 import { getUserStudies, saveUserStudies, type UserStudies } from '../lib/auth/onboardingUtils';
 import { extractStudyId } from '../lib/lichess/studyValidation';
 import styles from './Settings.module.css';
-import { supabase } from '../lib/supabase';
 import { fetchSupabaseJWT } from '../lib/auth/fetchSupabaseJWT';
+import { createClient } from '@supabase/supabase-js';
 
 interface SyncPreferences {
   sync_frequency_minutes: number;
@@ -63,17 +63,31 @@ const Settings: React.FC = () => {
   useEffect(() => {
     if (session?.user?.id) {
       const loadSyncPreferences = async () => {
-        const { data, error } = await supabase
+        const supabaseJwt = await fetchSupabaseJWT({
+          sub: session.user.id!,
+          email: session.user.email || undefined,
+          lichess_username: session.user.lichessUsername || undefined,
+        });
+        const supabaseWithAuth = createClient(
+          import.meta.env.VITE_SUPABASE_URL!,
+          import.meta.env.VITE_SUPABASE_ANON_KEY!,
+          {
+            global: {
+              headers: {
+                Authorization: `Bearer ${supabaseJwt}`,
+              },
+            },
+          }
+        );
+        const { data, error } = await supabaseWithAuth
           .from('sync_preferences')
           .select('sync_frequency_minutes, is_auto_sync_enabled')
           .eq('user_id', session.user.id)
           .single();
-
         if (error) {
           console.error('Error loading sync preferences:', error);
           return;
         }
-
         if (data) {
           setSyncPreferences(prev => ({
             ...prev,
@@ -82,10 +96,9 @@ const Settings: React.FC = () => {
           }));
         }
       };
-
       loadSyncPreferences();
     }
-  }, [session?.user?.id]);
+  }, [session?.user?.id, session?.user?.email, session?.user?.lichessUsername]);
 
   // Clear save message after 3 seconds
   useEffect(() => {
@@ -210,7 +223,7 @@ const Settings: React.FC = () => {
 
     try {
       const supabaseJwt = await fetchSupabaseJWT({
-        sub: session.user.id,
+        sub: session.user.id!,
         email: session.user.email || undefined,
         lichess_username: session.user.lichessUsername || undefined,
       });
@@ -243,12 +256,25 @@ const Settings: React.FC = () => {
 
   const handleSyncPreferenceChange = async (updates: Partial<SyncPreferences>) => {
     if (!session?.user?.id) return;
-
     try {
-      const { error } = await supabase.from('sync_preferences').update(updates).eq('user_id', session.user.id);
-
+      const supabaseJwt = await fetchSupabaseJWT({
+        sub: session.user.id!,
+        email: session.user.email || undefined,
+        lichess_username: session.user.lichessUsername || undefined,
+      });
+      const supabaseWithAuth = createClient(
+        import.meta.env.VITE_SUPABASE_URL!,
+        import.meta.env.VITE_SUPABASE_ANON_KEY!,
+        {
+          global: {
+            headers: {
+              Authorization: `Bearer ${supabaseJwt}`,
+            },
+          },
+        }
+      );
+      const { error } = await supabaseWithAuth.from('sync_preferences').update(updates).eq('user_id', session.user.id);
       if (error) throw error;
-
       setSyncPreferences(prev => ({ ...prev, ...updates }));
       setSaveMessage({ type: 'success', text: 'Sync preferences updated!' });
     } catch (error) {
