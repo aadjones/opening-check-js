@@ -17,7 +17,18 @@ class OpeningDeviation(BaseModel):
     position_fen: Optional[str] = None
     reference_uci: Optional[str] = None
     review_result: Optional[str] = None
-    review_status: Optional[Any] = None
+    review_status: Optional[str] = None
     reviewed_at: Optional[str] = None
     study_id: Optional[str] = None
     user_id: Optional[str] = None
+
+
+class User(BaseModel):
+    access_token: Optional[str] = None
+    created_at: Optional[str] = None
+    email: Optional[str] = None
+    id: Optional[str] = None
+    last_synced_at: Optional[str] = None
+    lichess_username: Optional[str] = None
+    onboarding_completed: Optional[bool] = None
+    updated_at: Optional[str] = None

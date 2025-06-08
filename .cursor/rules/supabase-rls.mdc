@@ -1,5 +1,5 @@
 ---
-description: 
+description: Supabase security decisions
 globs: 
 alwaysApply: false
 ---

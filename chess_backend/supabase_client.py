@@ -130,7 +130,7 @@ def insert_deviation_to_db(deviation: Any, pgn: str, username: str) -> None:
     data = {
         "user_id": user_id,
         "game_id": game_id,
-        "position_fen": deviation.board.fen(),
+        "position_fen": deviation.board_fen,
         "expected_move": deviation.reference_san,
         "actual_move": deviation.deviation_san,
         "move_number": deviation.move_number,

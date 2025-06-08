@@ -106,7 +106,8 @@ async function getOrCreateUserProfile(lichessUsername: string): Promise<string> 
 export async function saveUserStudySelections(
   userIdentifier: string, // This could be a UUID or Lichess username
   whiteStudyId: string | null,
-  blackStudyId: string | null
+  blackStudyId: string | null,
+  supabaseClient?: typeof supabase
 ): Promise<void> {
   try {
     // Determine if userIdentifier is a UUID or username
@@ -120,8 +121,9 @@ export async function saveUserStudySelections(
       userId = await getOrCreateUserProfile(userIdentifier);
     }
 
+    const client = supabaseClient || supabase;
     // First, deactivate any existing studies for this user
-    const { error: deactivateError } = await supabase
+    const { error: deactivateError } = await client
       .from('lichess_studies')
       .update({ is_active: false })
       .eq('user_id', userId);
@@ -156,10 +158,12 @@ export async function saveUserStudySelections(
 
     // Insert new studies if any
     if (studiesToInsert.length > 0) {
-      const { error: insertError } = await supabase.from('lichess_studies').insert(studiesToInsert);
+      const { error: upsertError } = await client
+        .from('lichess_studies')
+        .upsert(studiesToInsert, { onConflict: 'user_id,lichess_study_id' });
 
-      if (insertError) {
-        console.error('Error inserting studies:', insertError);
+      if (upsertError) {
+        console.error('Error upserting studies:', upsertError);
         throw new Error('Failed to save study selections');
       }
     }
@@ -171,6 +175,22 @@ export async function saveUserStudySelections(
       blackStudyId,
       studiesCount: studiesToInsert.length,
     });
+
+    // Upsert default sync_preferences for this user
+    const { error: syncPrefError } = await client.from('sync_preferences').upsert(
+      [
+        {
+          user_id: userId,
+          sync_frequency_minutes: 60,
+          is_auto_sync_enabled: true,
+        },
+      ],
+      { onConflict: 'user_id' }
+    );
+    if (syncPrefError) {
+      console.error('Error upserting sync_preferences:', syncPrefError);
+      // Not fatal, so don't throw
+    }
   } catch (error) {
     console.error('Error in saveUserStudySelections:', error);
     throw error;

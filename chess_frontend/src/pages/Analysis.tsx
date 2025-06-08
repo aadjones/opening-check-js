@@ -89,46 +89,51 @@ const Analysis: React.FC = () => {
     return token;
   };
 
-  const handleManualAnalysis = async (scope: string) => {
+  const handleManualAnalysis = async (scope: 'recent' | 'today') => {
     setAnalysisError(null);
     setAnalysisSuccess(null);
     if (!session?.user?.id) {
       setAnalysisError('You must be logged in to analyze games.');
       return;
     }
+
+    // Set loading state based on scope
     if (scope === 'recent') {
       setAnalyzingRecent(true);
-      try {
-        const supabaseJwt = await getSupabaseJWT();
-        const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/analyze-games`, {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${supabaseJwt}`,
-            'Content-Type': 'application/json',
-          },
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Analysis failed');
-        if (data.message) {
-          setAnalysisSuccess(data.message);
-        } else {
-          setAnalysisError('Unexpected response from server.');
-        }
-        setLastSyncTime('just now');
-      } catch (err: unknown) {
-        let message = 'Analysis failed';
-        if (err instanceof Error) message = err.message;
-        else if (typeof err === 'string') message = err;
-        setAnalysisError(message);
-      } finally {
-        setAnalyzingRecent(false);
-      }
-    } else if (scope === 'today') {
+    } else {
       setAnalyzingToday(true);
-      // TODO: Implement analysis for today's games if supported by backend
-      setTimeout(() => {
+    }
+
+    try {
+      const supabaseJwt = await getSupabaseJWT();
+      const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/analyze-games`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${supabaseJwt}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ scope }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Analysis failed');
+      if (data.message) {
+        setAnalysisSuccess(data.message);
+      } else {
+        setAnalysisError('Unexpected response from server.');
+      }
+      setLastSyncTime('just now');
+    } catch (err: unknown) {
+      let message = 'Analysis failed';
+      if (err instanceof Error) message = err.message;
+      else if (typeof err === 'string') message = err;
+      setAnalysisError(message);
+    } finally {
+      // Clear loading state based on scope
+      if (scope === 'recent') {
+        setAnalyzingRecent(false);
+      } else {
         setAnalyzingToday(false);
-      }, 2000);
+      }
     }
   };
 

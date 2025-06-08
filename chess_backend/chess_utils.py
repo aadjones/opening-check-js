@@ -47,11 +47,11 @@ def compare_moves(
         f"[compare_moves] Deviation found: my_color={my_color}, player_color={player_color}, move={deviation_san}, expected={reference_san}, move_number={move_number}"
     )
     return DeviationResult(
-        move_number,
-        deviation_san,
-        reference_san,
-        player_color,
-        recent_board,
+        move_number=move_number,
+        deviation_san=deviation_san,
+        reference_san=reference_san,
+        player_color=player_color,
+        board_fen=recent_board.fen(),
         pgn="",
         deviation_uci=deviation_uci,
         reference_uci=reference_uci,

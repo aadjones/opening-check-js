@@ -1,5 +1,5 @@
 ---
-description: 
+description: supabase edge functions
 globs: 
 alwaysApply: false
 ---

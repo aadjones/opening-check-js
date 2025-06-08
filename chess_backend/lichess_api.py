@@ -6,6 +6,7 @@ and get study data from a Lichess study.
 import dataclasses
 import logging
 import re
+from datetime import datetime
 from typing import Optional
 
 import chess.pgn
@@ -41,19 +42,22 @@ class Study:
 def get_last_games_pgn(
     username: str,
     max_games: int = 1,
+    since: Optional[datetime] = None,
     retries: int = 3,
     backoff_factor: float = 1.5,
     timeout: int = 10,
 ) -> Optional[str]:
     """
-    Fetches the PGN of the last several games played by a Lichess username with retry and timeout.
+    Fetches the PGN of games played by a Lichess username with retry and timeout.
+    Can optionally fetch games since a specific timestamp.
 
     :param username: str, the Lichess username of the player
     :param max_games: int, the maximum number of games to retrieve (default is 1)
+    :param since: Optional[datetime], only fetch games played after this timestamp
     :param retries: int, the number of retries in case of failures (default is 3)
     :param backoff_factor: float, the backoff factor for retrying requests (default is 1.5)
     :param timeout: int, the timeout for each HTTP request in seconds (default is 10)
-    :return: Optional[str], the PGN of the last game(s) played by the user, or None if failed
+    :return: Optional[str], the PGN of the games played by the user, or None if failed
     """
     session = requests.Session()
     retry = Retry(
@@ -65,14 +69,19 @@ def get_last_games_pgn(
     )
     adapter = HTTPAdapter(max_retries=retry)
     session.mount("https://", adapter)
-    LOG.info("Fetching %s games for %s", max_games, username)
+    LOG.info("Fetching %s games for %s%s", max_games, username, f" since {since}" if since else "")
 
     try:
         params: dict[str, str | int] = {
             "max": max_games,
             "moves": "true",  # We need the moves
             "pgnInJson": "false",  # We want raw PGN
+            "rated": "true",  # Only rated games
         }
+        if since:
+            # Convert to milliseconds timestamp for Lichess API
+            params["since"] = int(since.timestamp() * 1000)
+
         response = session.get(
             f"https://lichess.org/api/games/user/{username}",
             params=params,

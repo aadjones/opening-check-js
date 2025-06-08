@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import List, Optional, Tuple
 
 # Use local imports since we're running from within the chess_backend directory
@@ -44,15 +45,23 @@ def perform_game_analysis(
     study_url_white: str,
     study_url_black: str,
     max_games: int = 10,
+    since: Optional[datetime] = None,
 ) -> List[Tuple[Optional[DeviationResult], str]]:
     """
     Handles the core logic of fetching games, studies, and finding deviations.
     Returns a list of tuples (DeviationResult or None, pgn_string) for each game.
+
+    :param username: str, the Lichess username to analyze
+    :param study_url_white: str, URL of the white repertoire study
+    :param study_url_black: str, URL of the black repertoire study
+    :param max_games: int, maximum number of games to analyze (default 10)
+    :param since: Optional[datetime], only analyze games played after this timestamp
+    :return: List of tuples (DeviationResult or None, pgn_string)
     """
     try:
-        logger.info(f"Starting analysis for user: {username}, max_games: {max_games}")
+        logger.info(f"Starting analysis for user: {username}, max_games: {max_games}, since: {since}")
 
-        test_game_str = get_last_games_pgn(username, max_games)
+        test_game_str = get_last_games_pgn(username, max_games, since)
         if test_game_str is None:
             logger.warning(f"Error fetching games for user {username}!")
             return []

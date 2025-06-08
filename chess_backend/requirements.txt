@@ -14,3 +14,4 @@ isort
 flake8
 mypy
 types-requests
+PyJWT==2.8.0
