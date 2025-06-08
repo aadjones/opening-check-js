@@ -18,7 +18,7 @@ ifeq ($(OS),Windows_NT)
     RM_DIR := if (Test-Path $$1) { Remove-Item -Recurse -Force $$1 }
 else
     # Unix-like system (Mac/Linux)
-    PYTHON := python3
+    PYTHON := python3.11
     VENV_ACTIVATE := . env/bin/activate
     ECHO := echo
     RM_DIR := rm -rf $$1

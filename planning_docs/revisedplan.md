@@ -24,49 +24,49 @@ Breaking down the remaining work into small, isolated, testable task loops. Each
 ## Phase 1: Backend Foundation (Tasks 1-4)
 
 ### Task 1: BACKEND - Update Database Schema
-- [ ] **Goal**: Add essential tables and columns for sync system
-- [ ] **Files**: Database migration
-- [ ] **Changes Needed**:
-  - [ ] Add `last_synced_at` to profiles
-  - [ ] Add `review_status` to deviations table
-  - [ ] Add `sync_preferences` table (frequency only)
-- [ ] **Success Criteria**: 
-  - [ ] All new tables created
-  - [ ] RLS policies updated
-  - [ ] TypeScript types generated
-- [ ] **Tests**: Schema validation
-- [ ] **Estimated Time**: 1 hour
+- [X] **Goal**: Add essential tables and columns for sync system
+- [X] **Files**: Database migration
+- [X] **Changes Needed**:
+  - [X] Add `last_synced_at` to profiles
+  - [X] Add `review_status` to deviations table
+  - [X] Add `sync_preferences` table (frequency only)
+- [X] **Success Criteria**: 
+  - [X] All new tables created
+  - [X] RLS policies updated
+  - [X] TypeScript types generated
+- [X] **Tests**: Schema validation
+- [X] **Estimated Time**: 1 hour
 
 ### Task 2: BACKEND - Implement Sync System Core
-- [ ] **Goal**: Create base sync system following architecture.md
-- [ ] **Files**: `supabase/functions/sync-games.ts`
-- [ ] **Success Criteria**:
-  - [ ] Fetches games since last_synced_at
-  - [ ] Handles batch processing (50 games max)
-  - [ ] Updates sync timestamps
-  - [ ] Basic rate limit handling
-- [ ] **Tests**: Sync functionality with mock data
-- [ ] **Estimated Time**: 2 hours
+- [X] **Goal**: Create base sync system following architecture.md
+- [X] **Files**: `supabase/functions/sync-games.ts`
+- [X] **Success Criteria**:
+  - [X] Fetches games since last_synced_at
+  - [X] Handles batch processing (50 games max)
+  - [X] Updates sync timestamps
+  - [X] Basic rate limit handling
+- [X] **Tests**: Sync functionality with mock data
+- [X] **Estimated Time**: 2 hours
 
 ### Task 3: BACKEND - Add Review Status System
-- [ ] **Goal**: Implement basic review status tracking
-- [ ] **Files**: `supabase/functions/update-review-status.ts`
-- [ ] **Success Criteria**:
-  - [ ] API endpoint for updating status
-  - [ ] Basic status transitions (Needs Review → Reviewed/Adopted/Ignored)
-  - [ ] RLS policies for status updates
-- [ ] **Tests**: Status update flows
-- [ ] **Estimated Time**: 1 hour
+- [X] **Goal**: Implement basic review status tracking
+- [X] **Files**: `supabase/functions/update-review-status.ts`
+- [X] **Success Criteria**:
+  - [X] API endpoint for updating status
+  - [X] Basic status transitions (Needs Review → Reviewed/Adopted/Ignored)
+  - [X] RLS policies for status updates
+- [X] **Tests**: Status update flows
+- [X] **Estimated Time**: 1 hour
 
 ### Task 4: BACKEND - Add Basic Prep Score
-- [ ] **Goal**: Implement simple prep score tracking
-- [ ] **Files**: `supabase/functions/calculate-prep-score.ts`
-- [ ] **Success Criteria**:
-  - [ ] Calculates weekly scores (held prep vs deviations)
-  - [ ] Updates scores on new games
-  - [ ] Basic score display
-- [ ] **Tests**: Score calculation logic
-- [ ] **Estimated Time**: 1 hour
+- [X] **Goal**: Implement simple prep score tracking
+- [X] **Files**: `supabase/functions/calculate-prep-score.ts`
+- [X] **Success Criteria**:
+  - [X] Calculates weekly scores (held prep vs deviations)
+  - [X] Updates scores on new games
+  - [X] Basic score display
+- [X] **Tests**: Score calculation logic
+- [X] **Estimated Time**: 1 hour
 
 ---
 
@@ -141,9 +141,9 @@ Breaking down the remaining work into small, isolated, testable task loops. Each
 ## Success Metrics
 
 ### Phase 1 Complete
-- [ ] Sync system works reliably
-- [ ] Review status system functional
-- [ ] Prep scores calculated correctly
+- [X] Sync system works reliably
+- [X] Review status system functional
+- [X] Prep scores calculated correctly
 
 ### Phase 2 Complete
 - [ ] Dashboard shows real data
