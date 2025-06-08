@@ -125,21 +125,20 @@ def insert_deviation_to_db(deviation: Any, pgn: str, username: str) -> None:
     client = get_admin_client()
     game_id = extract_game_id_from_pgn(pgn)
     user_id = get_user_id_from_username(username)
-    # Construct a dict (or an OpeningDeviation instance) using the auto-generated model.
-    # Exclude id field to let the database generate it
+    # Construct a dict using the new deviation result dict format
     data = {
         "user_id": user_id,
         "game_id": game_id,
-        "position_fen": deviation.board_fen,
-        "expected_move": deviation.reference_san,
-        "actual_move": deviation.deviation_san,
-        "move_number": deviation.move_number,
-        "color": deviation.player_color,
+        "position_fen": deviation.get("board_fen"),
+        "expected_move": deviation.get("reference_san"),
+        "actual_move": deviation.get("deviation_san"),
+        "move_number": deviation.get("move_number"),
+        "color": deviation.get("player_color"),
         "pgn": pgn,
-        "deviation_uci": getattr(deviation, "deviation_uci", None),
-        "reference_uci": getattr(deviation, "reference_uci", None),
+        "deviation_uci": deviation.get("deviation_uci"),
+        "reference_uci": deviation.get("reference_uci"),
+        "first_deviator": deviation.get("first_deviator"),
     }
-    # Convert to dict for upsert, letting the database generate the id
     client.table("opening_deviations").upsert(data).execute()
 
 
