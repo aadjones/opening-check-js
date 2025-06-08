@@ -32,7 +32,7 @@ def ts_type_to_py(ts_type):
 
 def extract_table_fields(ts_content, table):
     # Find the Row type for the table in the Database type definition
-    pattern = rf"{table}:\s*{{\s*Row:\s*{{(.*?)}};\s*Insert:"
+    pattern = rf"{table}:\s*{{\s*Row:\s*{{(.*?)}}\s*Insert:"
     match = re.search(pattern, ts_content, re.DOTALL)
     if not match:
         raise ValueError(f"Could not find Row definition for table '{table}'")
