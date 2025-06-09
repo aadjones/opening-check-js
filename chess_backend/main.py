@@ -29,11 +29,10 @@ It handles game analysis, deviation tracking, and Lichess API proxying.
 - Rate limiting on Lichess API calls
 """
 
-import logging
 import os
 import time
 from datetime import datetime
-from typing import Any, Awaitable, Callable, Dict, List, Optional, Tuple
+from typing import Any, Awaitable, Callable, List, Optional, Tuple
 
 import httpx
 import jwt

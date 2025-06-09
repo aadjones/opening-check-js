@@ -87,7 +87,7 @@ def perform_game_analysis(
                 )
                 if deviation_info:
                     # Always insert a row for both user and opponent deviations
-                    deviation_info["pgn"] = pgn_string
+                    deviation_info.pgn = pgn_string
                     insert_deviation_to_db(deviation_info, pgn_string, username)
                 # Always append a tuple of (deviation result dict or None, pgn_string)
                 results.append((deviation_info, pgn_string))

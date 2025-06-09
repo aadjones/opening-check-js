@@ -23,6 +23,7 @@ const mockGames: GameListItem[] = [
     gameResult: '0-1',
     playedAt: '2024-03-15T13:00:00Z',
     hasDeviation: true,
+    firstDeviator: 'user',
     deviation: {
       id: 'dev1',
       user_id: 'user-uuid',
@@ -39,6 +40,8 @@ const mockGames: GameListItem[] = [
       pgn: '[Event "Test"]\n1. e4 e5 2. Nf3 Nc6',
       deviation_uci: null,
       reference_uci: null,
+      first_deviator: 'user',
+      review_status: 'needs_review',
     },
   },
 ];
@@ -76,7 +79,7 @@ describe('GamesList', () => {
   it('formats game results correctly', () => {
     renderWithRouter(<GamesList games={mockGames} />);
     expect(screen.getByText('✅ White won')).toBeInTheDocument();
-    expect(screen.getByText('❌ Deviation')).toBeInTheDocument();
+    expect(screen.getByText(/You deviated/)).toBeInTheDocument();
   });
 
   it('handles game click', () => {

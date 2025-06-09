@@ -35,21 +35,19 @@ def compare_moves(
     illegal_msg = f"Illegal move: {recent_move} at position {recent_board.fen()}"
     assert recent_move in recent_board.legal_moves, illegal_msg
     if my_color != player_color:  # If the opponent was first to deviate, return a special result
-        print(
-            f"[compare_moves] Opponent deviated first: my_color={my_color}, player_color={player_color}"
-        )
+        print(f"[compare_moves] Opponent deviated first: my_color={my_color}, player_color={player_color}")
         deviation_san = recent_board.san(recent_move)
-        return {
-            "first_deviator": "opponent",
-            "move_number": move_number,
-            "deviation_san": deviation_san,
-            "player_color": player_color,
-            "board_fen": recent_board.fen(),
-            "pgn": "",
-            "deviation_uci": recent_move.uci() if recent_move else None,
-            "reference_san": repertoire_board.san(rep_move),
-            "reference_uci": rep_move.uci() if rep_move else None,
-        }
+        return DeviationResult(
+            first_deviator="opponent",
+            move_number=move_number,
+            deviation_san=deviation_san,
+            player_color=player_color,
+            board_fen=recent_board.fen(),
+            pgn="",
+            deviation_uci=recent_move.uci() if recent_move else None,
+            reference_san=repertoire_board.san(rep_move),
+            reference_uci=rep_move.uci() if rep_move else None,
+        )
     deviation_san = recent_board.san(recent_move)
     reference_san = repertoire_board.san(rep_move)
     deviation_uci = recent_move.uci() if recent_move else None
@@ -57,17 +55,17 @@ def compare_moves(
     print(
         f"[compare_moves] Deviation found: my_color={my_color}, player_color={player_color}, move={deviation_san}, expected={reference_san}, move_number={move_number}"
     )
-    return {
-        "first_deviator": "user",
-        "move_number": move_number,
-        "deviation_san": deviation_san,
-        "reference_san": reference_san,
-        "player_color": player_color,
-        "board_fen": recent_board.fen(),
-        "pgn": "",
-        "deviation_uci": deviation_uci,
-        "reference_uci": reference_uci,
-    }
+    return DeviationResult(
+        first_deviator="user",
+        move_number=move_number,
+        deviation_san=deviation_san,
+        reference_san=reference_san,
+        player_color=player_color,
+        board_fen=recent_board.fen(),
+        pgn="",
+        deviation_uci=deviation_uci,
+        reference_uci=reference_uci,
+    )
 
 
 def find_deviation(

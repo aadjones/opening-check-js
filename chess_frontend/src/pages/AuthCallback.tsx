@@ -47,13 +47,17 @@ const AuthCallback: React.FC = () => {
           lichess_username: user.username || undefined,
         });
         const { createClient } = await import('@supabase/supabase-js');
-        const supabaseWithAuth = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY, {
-          global: {
-            headers: {
-              Authorization: `Bearer ${supabaseJwt}`,
+        const supabaseWithAuth = createClient(
+          import.meta.env.VITE_SUPABASE_URL,
+          import.meta.env.VITE_SUPABASE_ANON_KEY,
+          {
+            global: {
+              headers: {
+                Authorization: `Bearer ${supabaseJwt}`,
+              },
             },
-          },
-        });
+          }
+        );
         const { getOrCreateUserProfile } = await import('../lib/database/studyOperations');
         const uuid = await getOrCreateUserProfile(user.username, supabaseWithAuth);
         const userWithUUID = { ...user, id: uuid };

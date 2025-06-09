@@ -191,7 +191,10 @@ export async function saveUserStudySelections(
 /**
  * Get user's active study selections
  */
-export async function getUserStudySelections(userIdentifier: string, supabaseClient?: typeof supabase): Promise<StudySelection> {
+export async function getUserStudySelections(
+  userIdentifier: string,
+  supabaseClient?: typeof supabase
+): Promise<StudySelection> {
   try {
     const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(userIdentifier);
     let userId: string;
@@ -242,7 +245,10 @@ export async function getUserStudySelections(userIdentifier: string, supabaseCli
 /**
  * Check if user has completed onboarding (has active studies)
  */
-export async function hasCompletedOnboarding(userIdentifier: string, supabaseClient?: typeof supabase): Promise<boolean> {
+export async function hasCompletedOnboarding(
+  userIdentifier: string,
+  supabaseClient?: typeof supabase
+): Promise<boolean> {
   try {
     const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(userIdentifier);
     let userId: string;

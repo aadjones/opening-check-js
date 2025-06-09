@@ -103,7 +103,11 @@ const OnboardingPage: React.FC = () => {
         error: onboardingError,
         status,
         statusText,
-      } = await supabaseWithAuth.from('profiles').update({ onboarding_completed: true }).eq('id', session.user.id).select(); // Get updated rows for debugging
+      } = await supabaseWithAuth
+        .from('profiles')
+        .update({ onboarding_completed: true })
+        .eq('id', session.user.id)
+        .select(); // Get updated rows for debugging
       console.log('[Onboarding] Supabase update result:', { onboardingData, onboardingError, status, statusText });
       if (onboardingError) {
         console.error('Error updating onboarding_completed flag:', onboardingError.message);

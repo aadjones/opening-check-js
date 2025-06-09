@@ -116,7 +116,9 @@ const GamesList: React.FC<GamesListProps> = ({ games, isLoading, onGameClick }) 
         >
           <div className={styles.gameHeader}>
             <span className={styles.timeControl}>{formatTimeControl(game.timeControl)}</span>
-            <span className={styles.gameResult}>{formatResult(game.gameResult, game.hasDeviation, game.firstDeviator)}</span>
+            <span className={styles.gameResult}>
+              {formatResult(game.gameResult, game.hasDeviation, game.firstDeviator)}
+            </span>
           </div>
 
           <div className={styles.gameContent}>

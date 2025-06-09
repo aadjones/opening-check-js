@@ -1,6 +1,8 @@
 # This file is auto-generated. Do not edit by hand!
 from typing import Any, Optional
+
 from pydantic import BaseModel
+
 
 class OpeningDeviation(BaseModel):
     actual_move: Optional[str] = None
@@ -21,6 +23,7 @@ class OpeningDeviation(BaseModel):
     study_id: Optional[str] = None
     user_id: Optional[str] = None
 
+
 class User(BaseModel):
     access_token: Optional[str] = None
     created_at: Optional[str] = None
@@ -30,4 +33,3 @@ class User(BaseModel):
     lichess_username: Optional[str] = None
     onboarding_completed: Optional[bool] = None
     updated_at: Optional[str] = None
-
