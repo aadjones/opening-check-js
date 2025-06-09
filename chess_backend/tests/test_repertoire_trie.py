@@ -20,7 +20,7 @@ def test_trie_node_initialization():
 
 def test_add_simple_mainline():
     """Tests adding a single game with no variations."""
-    pgn = "1. e4 e5 2. Nf3 Nc6"
+    pgn = "1.e4 e5 2.Nf3 Nc6"
     game = pgn_string_to_game(pgn)
     trie = RepertoireTrie()
     trie.add_study_chapter(game)
@@ -54,3 +54,30 @@ def test_add_simple_mainline():
     assert node_nc6.san == "Nc6"
     assert node_nc6.ply == 4
     assert len(node_nc6.children) == 0 # No more moves
+
+def test_add_game_with_variations():
+    """Tests that sidelines are correctly added as separate branches."""
+    # 1. e4 has two responses: e5 (main) and c5 (sideline)
+    pgn = "1.e4 (1.d4 d5) e5 2.Nf3 (2.f4) Nc6"
+    game = pgn_string_to_game(pgn)
+    trie = RepertoireTrie()
+    trie.add_study_chapter(game)
+
+    # Assert root has two branches: e4 and d4
+    assert len(trie.root.children) == 2
+    assert "e2e4" in trie.root.children
+    assert "d2d4" in trie.root.children
+
+    # Check the d4 branch
+    node_d4 = trie.root.children["d2d4"]
+    assert "d7d5" in node_d4.children
+
+    # Check the e4 branch
+    node_e4 = trie.root.children["e2e4"]
+    assert "e7e5" in node_e4.children
+    node_e5 = node_e4.children["e7e5"]
+
+    # After 1...e5, white has two options: Nf3 and f4
+    assert len(node_e5.children) == 2
+    assert "g1f3" in node_e5.children
+    assert "f2f4" in node_e5.children
