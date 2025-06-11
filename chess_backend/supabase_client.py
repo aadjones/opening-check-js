@@ -121,11 +121,13 @@ def get_user_id_from_username(username: str) -> str:
     raise Exception(f"User not found for username: {username}")
 
 
-def insert_deviation_to_db(deviation: Any, pgn: str, username: str) -> None:
+def insert_deviation_to_db(deviation: Dict[str, Any], pgn: str, username: str) -> None:
     client = get_admin_client()
     game_id = extract_game_id_from_pgn(pgn)
     user_id = get_user_id_from_username(username)
-    # Construct a dict using the new deviation result dict format
+
+    # This logic already uses .get(), which works perfectly with the dict
+    # from .model_dump(). No functional changes needed here.
     data = {
         "user_id": user_id,
         "game_id": game_id,
