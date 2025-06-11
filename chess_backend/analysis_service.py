@@ -4,7 +4,8 @@ from typing import List, Optional, Tuple
 # Use local imports since we're running from within the chess_backend directory
 import lichess_api
 import pgn_utils
-from chess_utils import find_deviation_in_entire_study_white_and_black
+from chess_utils import get_player_color
+from repertoire_trie import RepertoireTrie
 from deviation_result import DeviationResult
 from lichess_api import get_last_games_pgn
 from logging_config import setup_logging
@@ -48,48 +49,68 @@ def perform_game_analysis(
     since: Optional[datetime] = None,
 ) -> List[Tuple[Optional[DeviationResult], str]]:
     """
-    Handles the core logic of fetching games, studies, and finding deviations.
-    Returns a list of tuples (DeviationResult or None, pgn_string) for each game.
-
-    :param username: str, the Lichess username to analyze
-    :param study_url_white: str, URL of the white repertoire study
-    :param study_url_black: str, URL of the black repertoire study
-    :param max_games: int, maximum number of games to analyze (default 10)
-    :param since: Optional[datetime], only analyze games played after this timestamp
-    :return: List of tuples (DeviationResult or None, pgn_string)
+    Handles the core logic of fetching games, studies, and finding deviations
+    using the new RepertoireTrie strategy.
     """
     try:
-        logger.info(f"Starting analysis for user: {username}, max_games: {max_games}, since: {since}")
+        logger.info(f"Starting analysis for user: {username} with Trie strategy.")
 
+        # --- Part 1: Fetch Game Data (no changes here) ---
         test_game_str = get_last_games_pgn(username, max_games, since)
         if test_game_str is None:
-            logger.warning(f"Error fetching games for user {username}!")
+            logger.warning(f"No games found or error fetching games for user {username}!")
             return []
 
         try:
             test_game_list = pgn_utils.pgn_to_pgn_list(test_game_str)
-            white_study = lichess_api.Study.fetch_url(str(study_url_white))
-            black_study = lichess_api.Study.fetch_url(str(study_url_black))
         except Exception as e:
-            logger.error(f"Error processing PGNs or fetching studies: {e}")
+            logger.error(f"Error processing game PGNs: {e}")
             return []
 
-        # This list will hold tuples of (DeviationResult or None, pgn_string)
-        results: List[Tuple[Optional[DeviationResult], str]] = []
+        # --- Part 2: Build the Repertoire Tries (NEW LOGIC) ---
+        logger.info("Building White and Black repertoire tries...")
+        try:
+            # Build White Trie
+            white_study = lichess_api.Study.fetch_url(str(study_url_white))
+            white_trie = RepertoireTrie()
+            for chapter in white_study.chapters:
+                white_trie.add_study_chapter(chapter)
+            logger.info(f"White trie built. Root has {len(white_trie.root.children)} starting moves.")
 
-        for game_obj in test_game_list:  # game_obj is a chess.pgn.Game object
-            deviation_info = None  # Default to None
-            pgn_string = str(game_obj)  # Get the PGN string for this game
+            # Build Black Trie
+            black_study = lichess_api.Study.fetch_url(str(study_url_black))
+            black_trie = RepertoireTrie()
+            for chapter in black_study.chapters:
+                black_trie.add_study_chapter(chapter)
+            logger.info(f"Black trie built. Root has {len(black_trie.root.children)} starting moves.")
+
+        except Exception as e:
+            logger.error(f"Error fetching studies or building tries: {e}")
+            # Depending on desired behavior, you could return or continue with empty tries
+            return []
+        
+        # --- Part 3: Analyze Games Against the Tries (NEW LOGIC) ---
+        results: List[Tuple[Optional[DeviationResult], str]] = []
+        for game_obj in test_game_list:
+            deviation_info = None
+            pgn_string = str(game_obj)
 
             try:
-                deviation_info = find_deviation_in_entire_study_white_and_black(
-                    white_study, black_study, game_obj, username
-                )
+                player_color = get_player_color(game_obj, username)
+                
+                # Select the correct trie based on the player's color for the game
+                if player_color == "White":
+                    deviation_info = white_trie.find_deviation(game_obj, username)
+                elif player_color == "Black":
+                    deviation_info = black_trie.find_deviation(game_obj, username)
+                else:
+                    logger.warning(f"Could not determine color for {username} in game. Skipping.")
+
                 if deviation_info:
-                    # Always insert a row for both user and opponent deviations
                     deviation_info.pgn = pgn_string
-                    insert_deviation_to_db(deviation_info, pgn_string, username)
-                # Always append a tuple of (deviation result dict or None, pgn_string)
+                    # Use .model_dump() to pass a dict to the db function for type safety
+                    insert_deviation_to_db(deviation_info.model_dump(), pgn_string, username)
+                
                 results.append((deviation_info, pgn_string))
             except Exception as e:
                 logger.error(f"Error analyzing one of the games for {username}: {e}")
