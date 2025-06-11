@@ -498,6 +498,12 @@
   box-shadow: 0 1px 4px rgba(185, 28, 28, 0.04);
 }
 
+.opponentDeviatedBanner {
+  background: #f0fdf4; /* A light green success background */
+  color: #15803d;
+  font-weight: 600;
+}
+
 .deviationIcon {
   font-size: 1.3rem;
   margin-right: 0.2rem;

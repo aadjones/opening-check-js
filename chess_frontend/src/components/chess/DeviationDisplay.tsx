@@ -1,12 +1,12 @@
-// src/DeviationDisplay.tsx
 import React, { useState, useEffect, useCallback } from 'react';
 import type { Arrow, Square } from 'react-chessboard/dist/chessboard/types';
 import type { Database } from '../../types/supabase';
-type Deviation = Database['public']['Tables']['opening_deviations']['Row'];
 import ChessBoard from '../ChessBoard';
 import { useChessGame } from '../../hooks/useChessGame';
 import { useAuth } from '../../hooks/useAuth';
 import DeviationMoveControls from './DeviationMoveControls';
+
+type Deviation = Database['public']['Tables']['opening_deviations']['Row'];
 
 export interface DeviationMoveControlState {
   currentMoveIndex: number;
@@ -23,6 +23,7 @@ export interface DeviationMoveControlState {
 interface DeviationDisplayProps {
   result: Deviation | null;
   gameNumber: number;
+  isUserDeviation: boolean; // Prop to determine behavior
   renderControlsExternally?: boolean;
   onMoveControlState?: (state: DeviationMoveControlState) => void;
 }
@@ -30,35 +31,27 @@ interface DeviationDisplayProps {
 const DeviationDisplay: React.FC<DeviationDisplayProps> = ({
   result,
   gameNumber,
+  isUserDeviation,
   renderControlsExternally = false,
   onMoveControlState,
 }) => {
   const { user } = useAuth();
   const username = user?.lichessUsername || user?.name || '';
-  const pgn = result && typeof (result as { pgn?: string }).pgn === 'string' ? (result as { pgn: string }).pgn : null;
-  const { fens, whitePlayer, blackPlayer } = useChessGame(pgn);
+  const pgn = result?.pgn ?? null;
+
+  const { fens, whitePlayer } = useChessGame(pgn);
   const [currentMoveIndex, setCurrentMoveIndex] = useState(0);
   const [isFocused, setIsFocused] = useState(false);
 
-  // Determine user's color in this game
-  const userColor = username === whitePlayer ? 'white' : username === blackPlayer ? 'black' : null;
+  // This is the user's color in the game, needed for board orientation
+  const userColor = username.toLowerCase() === whitePlayer.toLowerCase() ? 'white' : 'black';
 
-  // Only show deviation if the user made the move
-  const deviationIsUsersMove = result && userColor && result.color?.toLowerCase() === userColor;
-
-  // Deviation move index
+  // The move index in the FEN array where the deviation occurred
   const deviationMoveIndex = result
     ? (result.move_number - 1) * 2 + (result.color?.toLowerCase() === 'black' ? 1 : 0)
     : 0;
 
-  // Debug logging
-  console.log('DeviationDisplay Debug:');
-  console.log('PGN:', pgn);
-  console.log('FENs:', fens);
-  console.log('Deviation index:', deviationMoveIndex);
-  console.log('position_fen from DB:', result?.position_fen);
-
-  // Set initial move index to deviation when result changes
+  // Set the board to the deviation position when the component loads or data changes
   useEffect(() => {
     if (result && fens.length > 0) {
       const targetIndex = Math.min(deviationMoveIndex, fens.length - 1);
@@ -68,7 +61,7 @@ const DeviationDisplay: React.FC<DeviationDisplayProps> = ({
     }
   }, [result, fens.length, deviationMoveIndex]);
 
-  // Keyboard navigation
+  // Keyboard navigation logic (no changes needed here)
   const goToMove = useCallback(
     (moveIndex: number) => {
       if (moveIndex >= 0 && moveIndex < fens.length) {
@@ -77,44 +70,38 @@ const DeviationDisplay: React.FC<DeviationDisplayProps> = ({
     },
     [fens.length]
   );
-
   const goToStart = useCallback(() => goToMove(0), [goToMove]);
   const goToPrevious = useCallback(() => goToMove(currentMoveIndex - 1), [currentMoveIndex, goToMove]);
   const goToNext = useCallback(() => goToMove(currentMoveIndex + 1), [currentMoveIndex, goToMove]);
   const goToEnd = useCallback(() => goToMove(fens.length - 1), [fens.length, goToMove]);
   const goToDeviation = useCallback(() => goToMove(deviationMoveIndex), [deviationMoveIndex, goToMove]);
-
   const handleKeyPress = useCallback(
     (event: KeyboardEvent) => {
       if (!isFocused) return;
+      event.preventDefault();
       switch (event.key) {
         case 'ArrowLeft':
-          event.preventDefault();
           goToPrevious();
           break;
         case 'ArrowRight':
-          event.preventDefault();
           goToNext();
           break;
         case 'Home':
-          event.preventDefault();
           goToStart();
           break;
         case 'End':
-          event.preventDefault();
           goToEnd();
           break;
       }
     },
     [goToPrevious, goToNext, goToStart, goToEnd, isFocused]
   );
-
   useEffect(() => {
     document.addEventListener('keydown', handleKeyPress);
     return () => document.removeEventListener('keydown', handleKeyPress);
   }, [handleKeyPress]);
 
-  // Expose move control state/handlers to parent if requested
+  // Expose controls state to parent if needed
   useEffect(() => {
     if (onMoveControlState) {
       onMoveControlState({
@@ -129,7 +116,6 @@ const DeviationDisplay: React.FC<DeviationDisplayProps> = ({
         onMoveSlider: goToMove,
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     currentMoveIndex,
     fens.length,
@@ -140,36 +126,48 @@ const DeviationDisplay: React.FC<DeviationDisplayProps> = ({
     goToDeviation,
     deviationMoveIndex,
     goToMove,
+    onMoveControlState,
   ]);
 
-  if (!result || !deviationIsUsersMove) {
+  if (!result) {
     return (
       <div className="result-card">
-        <h3>Game {gameNumber}: No user deviation found.</h3>
+        <h3>Game {gameNumber}: No deviation data available.</h3>
       </div>
     );
   }
 
-  // Arrows only at deviation position
+  // --- NEW ARROW LOGIC ---
   const customArrows: Arrow[] = [];
-  if (result?.deviation_uci && result.deviation_uci.length === 4) {
+  // The deviating move is always red
+  if (result.deviation_uci && result.deviation_uci.length === 4) {
     customArrows.push([result.deviation_uci.slice(0, 2) as Square, result.deviation_uci.slice(2, 4) as Square, 'red']);
   }
-  if (result?.reference_uci && result.reference_uci.length === 4) {
-    customArrows.push([
-      result.reference_uci.slice(0, 2) as Square,
-      result.reference_uci.slice(2, 4) as Square,
-      'green',
-    ]);
+
+  if (isUserDeviation) {
+    // If user deviated, the single expected move is green
+    if (result.reference_uci && result.reference_uci.length === 4) {
+      customArrows.push([
+        result.reference_uci.slice(0, 2) as Square,
+        result.reference_uci.slice(2, 4) as Square,
+        'blue',
+      ]);
+    }
+  } else {
+    // If opponent deviated, all prepared responses are blue
+    if (result.reference_uci) {
+      const expectedUcis = result.reference_uci.split(', ');
+      for (const uci of expectedUcis) {
+        if (uci.length === 4) {
+          customArrows.push([uci.slice(0, 2) as Square, uci.slice(2, 4) as Square, 'blue']);
+        }
+      }
+    }
   }
 
-  // Only show arrows at the deviation position
+  // Only show the arrows when viewing the exact deviation position
   const showArrows = currentMoveIndex === deviationMoveIndex;
-  const arrows = showArrows ? customArrows : [];
 
-  const opponentName = result.color === 'White' ? blackPlayer : whitePlayer;
-
-  // Only show the chessboard and navigation (no move comparison)
   return (
     <div
       className={`result-card ${isFocused ? 'focused' : ''}`}
@@ -177,21 +175,19 @@ const DeviationDisplay: React.FC<DeviationDisplayProps> = ({
       onFocus={() => setIsFocused(true)}
       onBlur={() => setIsFocused(false)}
       onClick={() => setIsFocused(true)}
+      style={{ outline: 'none' }} // Remove default browser focus ring
     >
-      <div className="opponent-name">{opponentName}</div>
       <div className="chess-board-container">
         <ChessBoard
           fen={fens[currentMoveIndex]}
-          arrows={arrows}
-          orientation={typeof result.color === 'string' ? (result.color.toLowerCase() as 'white' | 'black') : 'white'}
-          boardWidth={300}
+          arrows={showArrows ? customArrows : []}
+          orientation={userColor}
+          boardWidth={360} // A slightly larger, more modern size
           arePiecesDraggable={false}
         />
       </div>
-      <div style={{ textAlign: 'center', margin: '12px 0', fontWeight: 500 }}>
-        Move {currentMoveIndex}/{fens.length - 1}
-      </div>
-      {/* Only render controls here if not rendering externally */}
+
+      {/* Conditionally render controls based on prop */}
       {!renderControlsExternally && (
         <DeviationMoveControls
           currentMoveIndex={currentMoveIndex}

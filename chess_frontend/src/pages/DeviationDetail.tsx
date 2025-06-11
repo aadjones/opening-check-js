@@ -18,10 +18,10 @@ const DeviationDetail: React.FC = () => {
   const { deviation, loading, error, refetch } = useDeviationById(id);
   const [moveControlState, setMoveControlState] = React.useState<DeviationMoveControlState | null>(null);
 
-  // Always call usePageTitle at the top level
-  usePageTitle(deviation ? `Deviation ${deviation.move_number}` : 'Deviation Details');
+  // Set page title dynamically
+  usePageTitle(deviation ? `Deviation on Move ${deviation.move_number}` : 'Deviation Details');
 
-  // Show loading state
+  // Loading State
   if (loading) {
     return (
       <div className={styles.loadingState}>
@@ -31,7 +31,7 @@ const DeviationDetail: React.FC = () => {
     );
   }
 
-  // Show error state
+  // Error State
   if (error) {
     return (
       <div className={styles.errorState}>
@@ -44,7 +44,7 @@ const DeviationDetail: React.FC = () => {
     );
   }
 
-  // Show not found state
+  // Not Found State
   if (!deviation) {
     return (
       <div className={styles.errorState}>
@@ -57,48 +57,55 @@ const DeviationDetail: React.FC = () => {
     );
   }
 
-  // Parse PGN headers for inferred fields
+  // --- Data Parsing and Logic ---
   const headers = parsePgnHeaders(deviation.pgn || '');
+  const isUserDeviation = deviation.first_deviator === 'user';
+  const userColor = isUserDeviation ? deviation.color : deviation.color === 'White' ? 'Black' : 'White';
+  const whitePlayer = headers.White || 'White';
+  const blackPlayer = headers.Black || 'Black';
+  const opponent = userColor?.toLowerCase() === 'white' ? blackPlayer : whitePlayer;
   const openingName = headers.Opening || 'Unknown Opening';
   const timeControl = headers.TimeControl || 'Unknown';
   const gameResult = headers.Result || '';
-  const userColor = deviation.color;
-  const whitePlayer = headers.White || 'White';
-  const blackPlayer = headers.Black || 'Black';
-  // Infer opponent name (the non-user player)
-  const opponent = userColor && userColor.toLowerCase() === 'white' ? blackPlayer : whitePlayer;
-  // Construct game URL (assuming Lichess)
   const gameUrl = deviation.game_id
-    ? `https://lichess.org/${deviation.game_id}/${userColor?.toLowerCase() || 'white'}#${(deviation.move_number - 1) * 2 + (deviation.color?.toLowerCase() === 'black' ? 1 : 0)}`
+    ? `https://lichess.org/${deviation.game_id}/${userColor?.toLowerCase() || 'white'}#${
+        (deviation.move_number - 1) * 2 + (deviation.color?.toLowerCase() === 'black' ? 1 : 0)
+      }`
     : '';
-  // Use actual_move for played move
   const playedMove = deviation.actual_move;
-  // Use detected_at for created_at
   const createdAt = new Date(deviation.detected_at ?? '');
-
-  // When determining userColor, add a null check before using it
-  const safeUserColor = userColor ?? '';
-  if (safeUserColor.toLowerCase() === 'white') {
-    // ...
-  }
 
   return (
     <div className={styles.deviationDetailOuter}>
       <div className={styles.deviationDetailCard}>
-        <div className={styles.deviationBanner}>
-          <span className={styles.deviationIcon}>❌</span>
-          <span className={styles.deviationBannerText}>
-            You deviated from your prep on move {deviation.move_number}
-          </span>
+        {/* --- DYNAMIC BANNER --- */}
+        <div className={`${styles.deviationBanner} ${!isUserDeviation ? styles.opponentDeviatedBanner : ''}`}>
+          {isUserDeviation ? (
+            <>
+              <span className={styles.deviationIcon}>❌</span>
+              <span className={styles.deviationBannerText}>
+                You deviated from your prep on move {deviation.move_number}
+              </span>
+            </>
+          ) : (
+            <>
+              <span className={styles.deviationIcon}>✅</span>
+              <span className={styles.deviationBannerText}>
+                Opponent went off-book on move {deviation.move_number}
+              </span>
+            </>
+          )}
         </div>
-        {/* Chessboard Section - flex layout */}
+
+        {/* --- CHESSBOARD & CONTROLS --- */}
         <div className={styles.chessboardSectionCentered}>
           <div className={styles.chessboardWrapper}>
             <DeviationDisplay
               result={deviation as Deviation}
               gameNumber={1}
               renderControlsExternally={true}
-              onMoveControlState={state => setMoveControlState(state)}
+              onMoveControlState={setMoveControlState}
+              isUserDeviation={isUserDeviation} // Pass the flag
             />
           </div>
           <div className={styles.chessboardControls}>
@@ -117,13 +124,14 @@ const DeviationDetail: React.FC = () => {
             )}
           </div>
         </div>
-        {/* Move Comparison Section */}
+
+        {/* --- MOVE COMPARISON (Optional based on flag) --- */}
         {SHOW_MOVE_COMPARISON_CARDS && (
           <div className={styles.moveComparisonPanel}>
             <div className={styles.moveComparisonCards}>
               <div className={styles.moveCardPlayed}>
-                <div className={styles.moveCardIcon}>❌</div>
-                <div className={styles.moveCardLabel}>You played</div>
+                <div className={styles.moveCardIcon}>{isUserDeviation ? '❌' : '➡️'}</div>
+                <div className={styles.moveCardLabel}>{isUserDeviation ? 'You played' : 'Opponent played'}</div>
                 <div className={styles.moveCardMove}>{playedMove}</div>
               </div>
               <div className={styles.moveCardExpected}>
@@ -134,7 +142,8 @@ const DeviationDetail: React.FC = () => {
             </div>
           </div>
         )}
-        {/* Actions Section */}
+
+        {/* --- ACTION BUTTONS --- */}
         <div className={styles.actionButtonsPanel}>
           {SHOW_REPLAY_PREP_LINE_BUTTON && <button className={styles.primaryAction}>▶️ Replay My Prep Line</button>}
           <div className={styles.primaryActionsGroup}>
@@ -150,7 +159,8 @@ const DeviationDetail: React.FC = () => {
             )}
           </div>
         </div>
-        {/* Game Info Card */}
+
+        {/* --- GAME INFO & DETAILS --- */}
         <div className={styles.gameInfoCard}>
           <div className={styles.openingInfo}>📖 Opening: {openingName}</div>
           <div className={styles.opponentInfo}>
@@ -159,7 +169,7 @@ const DeviationDetail: React.FC = () => {
             {gameResult ? ` — Result: ${gameResult}` : ''}
           </div>
         </div>
-        {/* Meta Info (Collapsible) */}
+
         <details className={styles.metaInfoDetails}>
           <summary>Details</summary>
           <p>Deviation ID: {deviation.id}</p>
