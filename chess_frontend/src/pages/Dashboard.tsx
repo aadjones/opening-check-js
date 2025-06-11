@@ -17,11 +17,22 @@ const Dashboard: React.FC = () => {
   // Transform deviations into game list items
   const recentGames: GameListItem[] = deviations.map(deviation => {
     const headers = parsePgnHeaders(deviation.pgn || '');
-    const userColor = deviation.color;
     const whitePlayer = headers.White || 'White';
     const blackPlayer = headers.Black || 'Black';
-    const opponent =
-      userColor && typeof userColor === 'string' && userColor.toLowerCase() === 'white' ? blackPlayer : whitePlayer;
+
+     // --- THIS IS THE FIX ---
+    // Determine the user's actual color in THIS game by comparing usernames.
+    let userActualColor: 'white' | 'black' | null = null;
+    if (user?.lichessUsername?.toLowerCase() === whitePlayer.toLowerCase()) {
+      userActualColor = 'white';
+    } else if (user?.lichessUsername?.toLowerCase() === blackPlayer.toLowerCase()) {
+      userActualColor = 'black';
+    }
+
+    // Now, correctly determine the opponent.
+    const opponent = userActualColor === 'white' ? blackPlayer : whitePlayer;
+    // --- END OF FIX ---
+
     const timeControl = headers.TimeControl || '600';
     const gameResult = headers.Result || '1/2-1/2';
     const playedAt = deviation.detected_at ?? '';
@@ -31,7 +42,7 @@ const Dashboard: React.FC = () => {
       id: deviation.id ?? '',
       gameId: deviation.game_id ?? '',
       gameUrl,
-      opponent: opponent ?? '',
+      opponent: opponent ?? 'Unknown Opponent',
       timeControl: timeControl ?? '',
       gameResult: gameResult ?? '',
       playedAt: playedAt ?? '',
