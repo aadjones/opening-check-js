@@ -9,6 +9,7 @@ interface UseDeviationsOptions {
   offset?: number;
   timeControl?: 'bullet' | 'blitz' | 'rapid' | 'classical';
   reviewed?: boolean;
+  reviewStatus?: string;
 }
 
 interface UseDeviationsResult {
@@ -52,6 +53,9 @@ export function useDeviations(options: UseDeviationsOptions = {}): UseDeviations
           offset: String(currentOffset),
         });
         // (Optional) Add filters here if supported by backend
+        if (options.reviewStatus) {
+          params.append('review_status', options.reviewStatus);
+        }
 
         const res = await fetch(`/api/deviations?${params.toString()}`);
         if (!res.ok) throw new Error(`Failed to fetch deviations: ${res.status}`);
@@ -71,7 +75,7 @@ export function useDeviations(options: UseDeviationsOptions = {}): UseDeviations
         setLoading(false);
       }
     },
-    [session?.user?.id, options.limit]
+    [session?.user?.id, options.limit, options.reviewStatus]
   );
 
   // Initial fetch

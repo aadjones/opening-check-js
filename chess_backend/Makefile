@@ -18,7 +18,7 @@ ifeq ($(OS),Windows_NT)
     RM_DIR := if (Test-Path $$1) { Remove-Item -Recurse -Force $$1 }
 else
     # Unix-like system (Mac/Linux)
-    PYTHON := python3
+    PYTHON := python3.11
     VENV_ACTIVATE := . env/bin/activate
     ECHO := echo
     RM_DIR := rm -rf $$1
@@ -74,10 +74,12 @@ ifeq ($(OS),Windows_NT)
 	$(ECHO) "Setup complete! Run 'make start' to start the server."
 else
 	@echo "Setting up virtual environment for Unix..."
+	@rm -rf env
 	@$(PYTHON) -m venv env
 	@echo "Installing dependencies..."
-	@. env/bin/activate && pip install -r requirements.txt
-	@. env/bin/activate && pip install -e .
+	@env/bin/pip install --upgrade pip
+	@env/bin/pip install -r requirements.txt
+	@env/bin/pip install -e .
 	@echo "Setup complete! Run 'make start' to start the server."
 endif
 

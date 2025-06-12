@@ -10,9 +10,11 @@ import {
   Demo,
   AuthCallback,
   OnboardingPage,
+  ReviewQueue,
 } from './pages';
 import { AuthProvider } from './contexts/AuthJSContext';
 import './styles/index.css';
+import { SHOW_ANALYSIS_PAGE } from './featureFlags';
 
 function App() {
   return (
@@ -63,11 +65,21 @@ function App() {
                     </ProtectedRoute>
                   }
                 />
+                {SHOW_ANALYSIS_PAGE && (
+                  <Route
+                    path="/analysis"
+                    element={
+                      <ProtectedRoute>
+                        <Analysis />
+                      </ProtectedRoute>
+                    }
+                  />
+                )}
                 <Route
-                  path="/analysis"
+                  path="/review-queue"
                   element={
                     <ProtectedRoute>
-                      <Analysis />
+                      <ReviewQueue />
                     </ProtectedRoute>
                   }
                 />

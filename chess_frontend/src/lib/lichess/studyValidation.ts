@@ -11,6 +11,16 @@
  * This module is prepared for backend/serverless proxy implementation.
  */
 
+// Use relative path for config
+import { API_BASE_URL } from '@/lib/config';
+import type { ApiError } from './errorHandling';
+import {
+  isApiError as isApiErrorType,
+  extractErrorMessage as extractErrorMessageUtil,
+  shouldRetryRequest,
+  getRetryAfterTime,
+} from './errorHandling';
+
 // Study validation result interface
 export interface StudyValidationResult {
   isValid: boolean;
@@ -20,6 +30,7 @@ export interface StudyValidationResult {
   chapterCount?: number;
   studyId?: string;
   corsBlocked?: boolean; // Flag to indicate CORS blocking
+  retryAfter?: string;
 }
 
 // Study metadata from Lichess API
@@ -44,9 +55,21 @@ interface LichessStudyInfo {
   }>;
 }
 
-// Cache for validation results (session-based)
-const validationCache = new Map<string, { result: StudyValidationResult; timestamp: number }>();
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+// Cache for study validation results
+const validationCache = new Map<
+  string,
+  {
+    result: boolean;
+    timestamp: number;
+    error?: ApiError;
+  }
+>();
+
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+// Use imported error handling utilities
+const isApiError = isApiErrorType;
+const extractErrorMessage = extractErrorMessageUtil;
 
 /**
  * Extract study ID from Lichess study URL
@@ -71,24 +94,27 @@ export function extractStudyId(url: string): string | null {
 /**
  * Check if a cached validation result is still valid
  */
-function getCachedResult(studyId: string): StudyValidationResult | null {
-  const cached = validationCache.get(studyId);
+function getCachedResult(studyId: string): boolean | null {
+  const cached = validationCache.get(`exists:${studyId}`);
   if (!cached) return null;
 
-  const isExpired = Date.now() - cached.timestamp > CACHE_TTL;
+  const isExpired = Date.now() - cached.timestamp > CACHE_DURATION;
   if (isExpired) {
-    validationCache.delete(studyId);
+    validationCache.delete(`exists:${studyId}`);
     return null;
   }
 
+  if (cached.error) {
+    throw cached.error;
+  }
   return cached.result;
 }
 
 /**
  * Cache a validation result
  */
-function cacheResult(studyId: string, result: StudyValidationResult): void {
-  validationCache.set(studyId, {
+function cacheResult(studyId: string, result: boolean): void {
+  validationCache.set(`exists:${studyId}`, {
     result,
     timestamp: Date.now(),
   });
@@ -104,43 +130,72 @@ function isBrowserEnvironment(): boolean {
   return typeof window !== 'undefined' && typeof fetch !== 'undefined';
 }
 
+async function fetchWithRetry(url: string, options: RequestInit, maxRetries = 3): Promise<Response> {
+  let lastError: unknown;
+
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      const response = await fetch(url, options);
+      if (!response.ok) {
+        const error = await response.json();
+        if (!shouldRetryRequest(error)) {
+          throw error;
+        }
+        // If we should retry, continue to next attempt
+        lastError = error;
+        continue;
+      }
+      return response;
+    } catch (error) {
+      lastError = error;
+      if (!shouldRetryRequest(error)) {
+        throw error;
+      }
+      // Wait before retrying (exponential backoff)
+      await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
+    }
+  }
+
+  throw lastError;
+}
+
 /**
  * Check if study exists and get basic info (public endpoint)
  * NOTE: This will fail in browser due to CORS - needs backend proxy
  */
-async function checkStudyExists(studyId: string): Promise<LichessStudyInfo | null> {
+export async function checkStudyExists(studyId: string): Promise<boolean> {
+  const cacheKey = `exists:${studyId}`;
+  const cached = validationCache.get(cacheKey);
+
+  if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+    if (cached.error) {
+      throw cached.error;
+    }
+    return cached.result;
+  }
+
   try {
-    const response = await fetch(`/proxy/api/study/${studyId}`, {
-      method: 'GET',
-      headers: {
-        Accept: 'application/json',
-      },
+    const response = await fetchWithRetry(`${API_BASE_URL}/api/proxy/lichess/api/study/${studyId}`, { method: 'HEAD' });
+
+    const result = response.ok;
+    validationCache.set(cacheKey, {
+      result,
+      timestamp: Date.now(),
     });
-
-    if (response.status === 404) {
-      return null; // Study doesn't exist
-    }
-
-    if (response.status === 403) {
-      // Study exists but is private - we'll handle this in the access check
-      throw new Error('PRIVATE_STUDY');
-    }
-
-    if (!response.ok) {
-      throw new Error(`HTTP_ERROR_${response.status}`);
-    }
-
-    const studyInfo: LichessStudyInfo = await response.json();
-    return studyInfo;
+    return result;
   } catch (error) {
-    // Check if this is a CORS error (common in browser)
-    if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
-      throw new Error('CORS_BLOCKED');
-    }
-    if (error instanceof Error) {
-      throw error;
-    }
-    throw new Error('NETWORK_ERROR');
+    const apiError = isApiError(error)
+      ? error
+      : {
+          error: 'Study validation error',
+          message: extractErrorMessage(error),
+        };
+    validationCache.set(cacheKey, {
+      result: false,
+      timestamp: Date.now(),
+      error: apiError,
+    });
+    throw apiError;
   }
 }
 
@@ -148,40 +203,39 @@ async function checkStudyExists(studyId: string): Promise<LichessStudyInfo | nul
  * Check study access with user's Lichess token
  * NOTE: This will fail in browser due to CORS - needs backend proxy
  */
-async function checkStudyAccess(studyId: string, accessToken: string): Promise<LichessStudyInfo | null> {
+export async function checkStudyAccess(studyId: string): Promise<boolean> {
+  const cacheKey = `access:${studyId}`;
+  const cached = validationCache.get(cacheKey);
+
+  if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+    if (cached.error) {
+      throw cached.error;
+    }
+    return cached.result;
+  }
+
   try {
-    const response = await fetch(`/proxy/api/study/${studyId}`, {
-      method: 'GET',
-      headers: {
-        Accept: 'application/json',
-        Authorization: `Bearer ${accessToken}`,
-      },
+    const response = await fetchWithRetry(`${API_BASE_URL}/api/proxy/lichess/api/study/${studyId}`, { method: 'GET' });
+
+    const result = response.ok;
+    validationCache.set(cacheKey, {
+      result,
+      timestamp: Date.now(),
     });
-
-    if (response.status === 404) {
-      return null; // Study doesn't exist
-    }
-
-    if (response.status === 403) {
-      // User doesn't have access to this private study
-      throw new Error('ACCESS_DENIED');
-    }
-
-    if (!response.ok) {
-      throw new Error(`HTTP_ERROR_${response.status}`);
-    }
-
-    const studyInfo: LichessStudyInfo = await response.json();
-    return studyInfo;
+    return result;
   } catch (error) {
-    // Check if this is a CORS error (common in browser)
-    if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
-      throw new Error('CORS_BLOCKED');
-    }
-    if (error instanceof Error) {
-      throw error;
-    }
-    throw new Error('NETWORK_ERROR');
+    const apiError = isApiError(error)
+      ? error
+      : {
+          error: 'Study access error',
+          message: extractErrorMessage(error),
+        };
+    validationCache.set(cacheKey, {
+      result: false,
+      timestamp: Date.now(),
+      error: apiError,
+    });
+    throw apiError;
   }
 }
 
@@ -230,7 +284,10 @@ export async function validateStudyAccess(studyUrl: string, accessToken?: string
   // Check cache first
   const cachedResult = getCachedResult(studyId);
   if (cachedResult) {
-    return cachedResult;
+    return {
+      isValid: cachedResult,
+      studyId,
+    };
   }
 
   // If we're in a browser environment, we know CORS will block us
@@ -244,93 +301,168 @@ export async function validateStudyAccess(studyUrl: string, accessToken?: string
     result.error =
       '⚠️ Study validation temporarily limited due to browser security (CORS). URL format is valid, but we cannot verify the study exists until backend validation is implemented.';
 
-    cacheResult(studyId, result);
+    cacheResult(studyId, result.isValid);
     return result;
   }
 
   try {
-    let studyInfo: LichessStudyInfo | null = null;
+    // Initialize studyInfo as undefined to help TypeScript with type narrowing
+    let studyInfo: LichessStudyInfo | undefined;
 
     // First, try to access with user token if available
     if (accessToken) {
       try {
-        studyInfo = await checkStudyAccess(studyId, accessToken);
+        const hasAccess = await checkStudyAccess(studyId);
+        if (!hasAccess) {
+          const result: StudyValidationResult = {
+            isValid: false,
+            error: 'You do not have access to this study',
+            studyId,
+          };
+          cacheResult(studyId, result.isValid);
+          return result;
+        }
+        // If we have access, fetch the study info
+        const response = await fetchWithRetry(`${API_BASE_URL}/api/proxy/lichess/api/study/${studyId}`, {
+          method: 'GET',
+        });
+        studyInfo = await response.json();
       } catch (error) {
-        if (error instanceof Error) {
-          // Handle CORS blocking
-          if (error.message === 'CORS_BLOCKED') {
+        if (isApiError(error)) {
+          // Handle rate limiting
+          if (error.error === 'Rate limit exceeded') {
+            const retryAfter = getRetryAfterTime(error);
             const result: StudyValidationResult = {
               isValid: false,
-              error:
-                '🚫 Browser security (CORS) prevents direct validation of Lichess studies. This feature requires a backend server to work properly.',
+              error: extractErrorMessage(error),
               studyId,
-              corsBlocked: true,
+              retryAfter: retryAfter?.toString(),
             };
-            cacheResult(studyId, result);
+            // Don't cache rate limit errors
             return result;
           }
 
-          // If access denied with token, the study exists but user can't access it
-          if (error.message === 'ACCESS_DENIED') {
+          // Handle access denied
+          if (error.error === 'Access denied') {
             const result: StudyValidationResult = {
               isValid: false,
-              error: "This study is private and you don't have access to it. Please check with the study owner.",
+              error: error.message,
               studyId,
             };
-            cacheResult(studyId, result);
+            cacheResult(studyId, result.isValid);
             return result;
           }
-          // For other errors with token, fall back to public check
+
+          // For other API errors, use the error message
+          const result: StudyValidationResult = {
+            isValid: false,
+            error: error.message,
+            studyId,
+          };
+          cacheResult(studyId, result.isValid);
+          return result;
         }
+
+        // Handle CORS blocking
+        if (error instanceof Error && error.message === 'CORS_BLOCKED') {
+          const result: StudyValidationResult = {
+            isValid: false,
+            error:
+              '🚫 Browser security (CORS) prevents direct validation of Lichess studies. This feature requires a backend server to work properly.',
+            studyId,
+            corsBlocked: true,
+          };
+          cacheResult(studyId, result.isValid);
+          return result;
+        }
+
+        // For other errors with token, fall back to public check
       }
     }
 
     // If no token or token check failed, try public access
     if (!studyInfo) {
       try {
-        studyInfo = await checkStudyExists(studyId);
-      } catch (error) {
-        if (error instanceof Error) {
-          let errorMessage: string;
-          let corsBlocked = false;
-
-          switch (error.message) {
-            case 'CORS_BLOCKED':
-              errorMessage =
-                '🚫 Browser security (CORS) prevents direct validation of Lichess studies. The URL format looks correct, but we cannot verify the study exists without a backend server.';
-              corsBlocked = true;
-              break;
-            case 'PRIVATE_STUDY':
-              errorMessage = accessToken
-                ? "This study is private and you don't have access to it."
-                : 'This study is private. Please log in with Lichess to check if you have access.';
-              break;
-            case 'NETWORK_ERROR':
-              errorMessage = 'Unable to connect to Lichess. Please check your internet connection and try again.';
-              break;
-            default:
-              if (error.message.startsWith('HTTP_ERROR_429')) {
-                errorMessage = 'Too many requests to Lichess. Please wait a moment and try again.';
-              } else if (error.message.startsWith('HTTP_ERROR_')) {
-                errorMessage = 'Lichess API error. Please try again later.';
-              } else {
-                errorMessage = 'An unexpected error occurred while validating the study.';
-              }
-          }
-
+        const exists = await checkStudyExists(studyId);
+        if (!exists) {
           const result: StudyValidationResult = {
             isValid: false,
-            error: errorMessage,
+            error: 'Study not found',
             studyId,
-            corsBlocked,
           };
-
-          // Don't cache CORS errors for too long
-          if (!corsBlocked) {
-            cacheResult(studyId, result);
-          }
+          cacheResult(studyId, result.isValid);
           return result;
         }
+        // If study exists, fetch the study info
+        const response = await fetchWithRetry(`${API_BASE_URL}/api/proxy/lichess/api/study/${studyId}`, {
+          method: 'GET',
+        });
+        studyInfo = await response.json();
+      } catch (error) {
+        if (isApiError(error)) {
+          // Handle rate limiting
+          if (error.error === 'Rate limit exceeded') {
+            const retryAfter = getRetryAfterTime(error);
+            const result: StudyValidationResult = {
+              isValid: false,
+              error: extractErrorMessage(error),
+              studyId,
+              retryAfter: retryAfter?.toString(),
+            };
+            // Don't cache rate limit errors
+            return result;
+          }
+
+          // Handle not found
+          if (error.error === 'Not found') {
+            const result: StudyValidationResult = {
+              isValid: false,
+              error: error.message,
+              studyId,
+            };
+            cacheResult(studyId, result.isValid);
+            return result;
+          }
+
+          // For other API errors, use the error message
+          const result: StudyValidationResult = {
+            isValid: false,
+            error: error.message,
+            studyId,
+          };
+          cacheResult(studyId, result.isValid);
+          return result;
+        }
+
+        // Handle CORS blocking
+        if (error instanceof Error && error.message === 'CORS_BLOCKED') {
+          const result: StudyValidationResult = {
+            isValid: false,
+            error:
+              '🚫 Browser security (CORS) prevents direct validation of Lichess studies. The URL format looks correct, but we cannot verify the study exists without a backend server.',
+            studyId,
+            corsBlocked: true,
+          };
+          return result;
+        }
+
+        // Handle network errors
+        if (error instanceof Error && error.message === 'NETWORK_ERROR') {
+          const result: StudyValidationResult = {
+            isValid: false,
+            error: 'Unable to connect to Lichess. Please check your internet connection and try again.',
+            studyId,
+          };
+          return result;
+        }
+
+        // For any other errors, use a generic message
+        const result: StudyValidationResult = {
+          isValid: false,
+          error: extractErrorMessage(error),
+          studyId,
+        };
+        return result;
       }
     }
 
@@ -341,7 +473,7 @@ export async function validateStudyAccess(studyUrl: string, accessToken?: string
         error: 'Study not found. Please check the URL and make sure the study exists.',
         studyId,
       };
-      cacheResult(studyId, result);
+      cacheResult(studyId, result.isValid);
       return result;
     }
 
@@ -354,7 +486,7 @@ export async function validateStudyAccess(studyUrl: string, accessToken?: string
       studyId: studyInfo.id,
     };
 
-    cacheResult(studyId, result);
+    cacheResult(studyId, result.isValid);
     return result;
   } catch {
     // Catch-all for unexpected errors

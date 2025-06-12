@@ -1,3 +1,13 @@
+/**
+ * Supabase Client Configuration
+ *
+ * This file runs in the browser and configures the Supabase client for database operations.
+ * It uses the anon key for public database access and is separate from authentication.
+ *
+ * 🔐 Security Note: This client only has access to public tables and RLS-protected data.
+ * For authenticated operations, we use Auth.js with Lichess OAuth instead of Supabase auth.
+ */
+
 import { createClient } from '@supabase/supabase-js';
 
 // Get environment variables

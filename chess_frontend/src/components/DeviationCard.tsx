@@ -20,7 +20,7 @@ const DeviationCard: React.FC<DeviationCardProps> = ({ type, title, description,
         <div className={styles.meta}>
           vs {opponent} • {time}
         </div>
-        <a href={gameUrl} target="_blank" rel="noopener noreferrer" className={styles.link}>
+        <a href={gameUrl} target="_blank" rel="noopener noreferrer" className={`${styles.link} dev`}>
           View Game on Lichess →
         </a>
       </div>

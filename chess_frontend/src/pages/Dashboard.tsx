@@ -5,138 +5,88 @@ import { useDeviations } from '../hooks/useDeviations';
 import styles from './Dashboard.module.css';
 import GamesList, { type GameListItem } from '../components/GamesList';
 import { parsePgnHeaders } from '../utils/pgn';
+import PrepScoreWidget from '../components/dashboard/PrepScoreWidget';
+import LastGameSummaryWidget from '../components/dashboard/LastGameSummaryWidget';
+import InsightsBlock from '../components/dashboard/InsightsBlock';
 
 const Dashboard: React.FC = () => {
   usePageTitle('Dashboard');
-  const { user, loading: authLoading, signOut } = useAuth();
-  const {
-    deviations,
-    loading: deviationsLoading,
-    error: deviationsError,
-    hasMore,
-    loadMore,
-    refetch,
-  } = useDeviations({ limit: 5 });
+  const { user } = useAuth();
+  // Fetch a decent number of deviations for the weekly score.
+  const { deviations, loading: deviationsLoading } = useDeviations({ limit: 25 });
 
-  console.log('deviations:', deviations);
-  // Transform deviations into game list items
+  // Find the most recent deviation for the "Last Game" card.
+  const lastDeviation = deviations.length > 0 ? deviations[0] : null;
+
+  // --- NEW, TARGETED LOG ---
+  // This will run whenever lastDeviation changes from null to a real object.
+  React.useEffect(() => {
+    if (lastDeviation) {
+      console.log('--- Last Game Summary Data ---');
+      console.log('lastDeviation object:', lastDeviation);
+
+      // Now, let's parse it right here and see the result.
+      const headers = parsePgnHeaders(lastDeviation.pgn || '');
+      console.log('Parsed headers from its PGN:', headers);
+      console.log('Value of Opening header:', headers.Opening);
+    }
+  }, [lastDeviation]);
+  // --- END OF LOG ---
+
+  // Transform deviations for the "Recent Games" list (this logic is already fixed)
   const recentGames: GameListItem[] = deviations.map(deviation => {
     const headers = parsePgnHeaders(deviation.pgn || '');
-    const userColor = deviation.color;
     const whitePlayer = headers.White || 'White';
     const blackPlayer = headers.Black || 'Black';
-    const opponent =
-      userColor && typeof userColor === 'string' && userColor.toLowerCase() === 'white' ? blackPlayer : whitePlayer;
+    let userActualColor: 'white' | 'black' | null = null;
+    if (user?.lichessUsername?.toLowerCase() === whitePlayer.toLowerCase()) {
+      userActualColor = 'white';
+    } else if (user?.lichessUsername?.toLowerCase() === blackPlayer.toLowerCase()) {
+      userActualColor = 'black';
+    }
+    const opponent = userActualColor === 'white' ? blackPlayer : whitePlayer;
     const timeControl = headers.TimeControl || '600';
     const gameResult = headers.Result || '1/2-1/2';
     const playedAt = deviation.detected_at ?? '';
     const gameUrl = deviation.game_id ? `https://lichess.org/${deviation.game_id}` : '';
-    console.log('deviation.game_id:', deviation.game_id, 'gameUrl:', gameUrl);
 
     return {
       id: deviation.id ?? '',
       gameId: deviation.game_id ?? '',
       gameUrl,
-      opponent: opponent ?? '',
+      opponent: opponent ?? 'Unknown Opponent',
       timeControl: timeControl ?? '',
       gameResult: gameResult ?? '',
       playedAt: playedAt ?? '',
       hasDeviation: true,
       deviation,
+      firstDeviator: deviation.first_deviator as 'user' | 'opponent' | undefined,
     };
   });
 
-  // Show loading state while auth or data is loading
-  if (authLoading || deviationsLoading) {
-    return (
-      <div className={styles.loadingState}>
-        <div className={styles.loadingSpinner}>⌛</div>
-        <div className={styles.loadingText}>Loading your dashboard...</div>
-      </div>
-    );
-  }
-
-  // Show error state if there's an error
-  if (deviationsError) {
-    return (
-      <div className={styles.errorState}>
-        <div className={styles.errorIcon}>⚠️</div>
-        <div className={styles.errorText}>{deviationsError.message || 'Failed to load deviations'}</div>
-        <button className={styles.retryButton} onClick={() => refetch()}>
-          Try Again
-        </button>
-      </div>
-    );
-  }
+  const username = user?.lichessUsername || user?.name || 'there';
 
   return (
-    <div className={styles.dashboard}>
-      <header className={styles.header}>
-        <h1 className={styles.title}>Dashboard</h1>
-        <p className={styles.subtitle}>
-          {user ? `Welcome back, ${user.name}!` : 'Welcome back!'} Here's your recent chess activity.
-        </p>
-
-        {/* Auth Status Display */}
-        <div className={styles.authStatus}>
-          <strong>🔐 Auth Status:</strong>
-          <br />
-          Loading: {authLoading ? 'Yes' : 'No'}
-          <br />
-          User: {user ? `Logged in as ${user.name} (Lichess)` : 'Not logged in'}
-          <br />
-          {user && (
-            <button onClick={signOut} className={styles.signOutButton}>
-              Sign Out
-            </button>
-          )}
+    <div className={styles.dashboardOuter}>
+      <div className={styles.dashboardInner}>
+        <div className={styles.greetingBlock}>
+          <h1 className={styles.greetingTitle}>
+            Welcome back, {username}! <span className={styles.wave}>👋</span>
+          </h1>
+          <div className={styles.greetingSubtitle}>Here's your recent chess progress.</div>
         </div>
-      </header>
-
-      <div className={styles.grid}>
-        <section className={styles.section}>
-          <div className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>Recent Games</h2>
-          </div>
-          <div className={styles.sectionContent}>
-            <GamesList
-              games={recentGames}
-              isLoading={deviationsLoading}
-              onGameClick={gameId => {
-                // Navigate to game details or open in new tab
-                window.open(`https://lichess.org/${gameId}`, '_blank');
-              }}
-            />
-            {hasMore && (
-              <button className={styles.loadMoreButton} onClick={() => loadMore()}>
-                Load More
-              </button>
-            )}
-          </div>
+        <div className={styles.topRow}>
+          {/* Pass the full list to the Prep Score and the single last one to the summary */}
+          <PrepScoreWidget deviations={deviations} isLoading={deviationsLoading} />
+          <LastGameSummaryWidget lastDeviation={recentGames[0]?.deviation ?? null} isLoading={deviationsLoading} />
+        </div>
+        <InsightsBlock />
+        <section className={styles.recentGamesSection}>
+          <h2 className={styles.sectionTitle}>Recent Games</h2>
+          {/* Show all games in the list, including the most recent */}
+          <GamesList games={recentGames} isLoading={deviationsLoading} />
         </section>
       </div>
-
-      <section className={styles.filters}>
-        <h3 className={styles.filtersTitle}>Quick Filters</h3>
-        <div className={styles.filterGroup}>
-          <label className={styles.filterLabel}>Time Control</label>
-          <select className={styles.filterSelect}>
-            <option value="all">All Games</option>
-            <option value="bullet">Bullet</option>
-            <option value="blitz">Blitz</option>
-            <option value="rapid">Rapid</option>
-            <option value="classical">Classical</option>
-          </select>
-        </div>
-        <div className={styles.filterGroup}>
-          <label className={styles.filterLabel}>Date Range</label>
-          <select className={styles.filterSelect}>
-            <option value="week">This Week</option>
-            <option value="month">This Month</option>
-            <option value="all">All Time</option>
-          </select>
-        </div>
-      </section>
     </div>
   );
 };

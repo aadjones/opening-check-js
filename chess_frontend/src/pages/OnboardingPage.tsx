@@ -5,7 +5,8 @@ import { useAuth } from '../hooks/useAuth';
 import { saveUserStudySelections } from '../lib/database/studyOperations';
 import { extractStudyId } from '../lib/lichess/studyValidation';
 import styles from './OnboardingPage.module.css';
-import { supabase } from '../lib/supabase';
+import { fetchSupabaseJWT } from '../lib/auth/fetchSupabaseJWT';
+import { createClient } from '@supabase/supabase-js';
 
 // Demo study URLs
 const DEMO_WHITE_STUDY = 'https://lichess.org/study/WyolAMxV/pkza6G22';
@@ -76,32 +77,24 @@ const OnboardingPage: React.FC = () => {
 
     try {
       // Save study selections to Supabase database
-      try {
-        await saveUserStudySelections(session.user.id, whiteStudyId, blackStudyId);
-        console.log('Study selections saved successfully:', { whiteStudyId, blackStudyId });
-      } catch (saveError: unknown) {
-        let message = '';
-        if (saveError instanceof Error) {
-          message = saveError.message;
-        } else if (
-          typeof saveError === 'object' &&
-          saveError &&
-          'message' in saveError &&
-          typeof (saveError as { message?: unknown }).message === 'string'
-        ) {
-          message = (saveError as { message: string }).message;
-        } else {
-          message = String(saveError);
-        }
-        if (message.match(/duplicate|constraint|unique/i)) {
-          console.warn('Duplicate/constraint error when saving studies, continuing onboarding:', message);
-        } else {
-          console.error('Error saving studies:', saveError);
-          setError(message || 'Failed to save your study selections. Please try again.');
-          setIsLoading(false);
-          return;
-        }
-      }
+      const supabaseJwt = await fetchSupabaseJWT({
+        sub: session.user.id,
+        email: session.user.email || undefined,
+        lichess_username: session.user.lichessUsername || undefined,
+      });
+
+      // Create a Supabase client with the user's JWT for authenticated DB calls
+      const supabaseWithAuth = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY, {
+        global: {
+          headers: {
+            Authorization: `Bearer ${supabaseJwt}`,
+          },
+        },
+      });
+
+      // Use the authenticated client for DB calls that require auth
+      await saveUserStudySelections(session.user.id, whiteStudyId, blackStudyId, supabaseWithAuth);
+      console.log('Study selections saved successfully:', { whiteStudyId, blackStudyId });
 
       // Mark onboarding as completed regardless of study save result
       console.log('[Onboarding] Attempting to update onboarding_completed flag for user:', session.user.id);
@@ -110,13 +103,35 @@ const OnboardingPage: React.FC = () => {
         error: onboardingError,
         status,
         statusText,
-      } = await supabase.from('profiles').update({ onboarding_completed: true }).eq('id', session.user.id).select(); // Get updated rows for debugging
+      } = await supabaseWithAuth
+        .from('profiles')
+        .update({ onboarding_completed: true })
+        .eq('id', session.user.id)
+        .select(); // Get updated rows for debugging
       console.log('[Onboarding] Supabase update result:', { onboardingData, onboardingError, status, statusText });
       if (onboardingError) {
         console.error('Error updating onboarding_completed flag:', onboardingError.message);
         setError('Failed to update onboarding status. Please try again.');
         setIsLoading(false);
         return;
+      }
+
+      // Trigger initial sync of last 10 games
+      try {
+        const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/analyze-games`, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${supabaseJwt}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ scope: 'recent' }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Initial sync failed');
+        console.log('Initial sync complete:', data.message);
+      } catch (syncErr) {
+        console.error('Initial sync error:', syncErr);
+        // Don't block onboarding, just log
       }
 
       if (isDemoMode) {
@@ -142,10 +157,6 @@ const OnboardingPage: React.FC = () => {
       <div className={styles.container}>
         <div className={styles.header}>
           <h1 className={styles.title}>🎯 Choose Your Repertoire</h1>
-          <div className={styles.welcome}>
-            <h2 className={styles.welcomeTitle}>🧠 Welcome to OutOfBook</h2>
-            <p className={styles.welcomeSubtitle}>Track your games against your prep.</p>
-          </div>
         </div>
 
         <div className={styles.progress}>

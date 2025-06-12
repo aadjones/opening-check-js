@@ -1,3 +1,31 @@
+/**
+ * Sign JWT Edge Function
+ * 
+ * This function runs on Supabase Edge Functions (serverless) and handles JWT signing.
+ * It creates custom JWTs for authenticated database access.
+ * 
+ * 🏗️ Architecture:
+ * Frontend -> Edge Function -> Database (with JWT)
+ * 
+ * 🔄 Process Flow:
+ * 1. Receives user info from frontend
+ * 2. Signs a JWT with user claims
+ * 3. Returns token for database access
+ * 
+ * 🔐 Security:
+ * - Uses JWT_SECRET from environment
+ * - Tokens expire in 1 hour
+ * - Includes user role and claims
+ * - CORS headers for frontend access
+ * 
+ * 📝 JWT Claims:
+ * - sub: User ID
+ * - email: User email (optional)
+ * - lichess_username: Lichess username
+ * - role: "authenticated"
+ * - aud: "authenticated"
+ */
+
 // functions/sign-jwt/index.ts
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { corsHeaders } from "../_shared/cors.ts";

@@ -4,14 +4,14 @@ and get study data from a Lichess study.
 """
 
 import dataclasses
+import json
 import logging
 import re
-from typing import Optional
+from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 import chess.pgn
-import requests
-from requests.adapters import HTTPAdapter
-from urllib3.util.retry import Retry
+import httpx
 
 import pgn_utils
 
@@ -25,10 +25,11 @@ class Study:
     @staticmethod
     def fetch_id(study_id: str) -> "Study":
         url = f"https://lichess.org/api/study/{study_id}.pgn"
-        response: requests.Response = requests.get(url)
-        if response.status_code != 200:
-            raise Exception(f"Failed to fetch study. Status code: {response.status_code}")
-        return Study(chapters=pgn_utils.pgn_to_pgn_list(response.text))
+        with httpx.Client() as client:
+            response = client.get(url)
+            if response.status_code != 200:
+                raise Exception(f"Failed to fetch study. Status code: {response.status_code}")
+            return Study(chapters=pgn_utils.pgn_to_pgn_list(response.text))
 
     @staticmethod
     def fetch_url(url: str) -> "Study":
@@ -38,52 +39,51 @@ class Study:
         return study
 
 
-def get_last_games_pgn(
-    username: str,
-    max_games: int = 1,
-    retries: int = 3,
-    backoff_factor: float = 1.5,
-    timeout: int = 10,
-) -> Optional[str]:
-    """
-    Fetches the PGN of the last several games played by a Lichess username with retry and timeout.
-
-    :param username: str, the Lichess username of the player
-    :param max_games: int, the maximum number of games to retrieve (default is 1)
-    :param retries: int, the number of retries in case of failures (default is 3)
-    :param backoff_factor: float, the backoff factor for retrying requests (default is 1.5)
-    :param timeout: int, the timeout for each HTTP request in seconds (default is 10)
-    :return: Optional[str], the PGN of the last game(s) played by the user, or None if failed
-    """
-    session = requests.Session()
-    retry = Retry(
-        total=retries,
-        read=retries,
-        connect=retries,
-        backoff_factor=backoff_factor,
-        status_forcelist=(500, 502, 504),
-    )
-    adapter = HTTPAdapter(max_retries=retry)
-    session.mount("https://", adapter)
-    LOG.info("Fetching %s games for %s", max_games, username)
-
+def get_last_game_ids(username: str, max_games: int, since: Optional[datetime] = None) -> List[str]:
+    """Fetches a list of the most recent game IDs for a user."""
+    LOG.info("Fetching last %s game IDs for %s", max_games, username)
     try:
-        params: dict[str, str | int] = {
-            "max": max_games,
-            "moves": "true",  # We need the moves
-            "pgnInJson": "false",  # We want raw PGN
+        params: Dict[str, Any] = {"max": max_games, "rated": "true"}
+        if since:
+            params["since"] = int(since.timestamp() * 1000)
+
+        with httpx.Client() as client:
+            response = client.get(
+                f"https://lichess.org/api/games/user/{username}",
+                params=params,
+                headers={"Accept": "application/x-ndjson"},  # We ask for NDJSON to get IDs
+            )
+            response.raise_for_status()
+
+            # Parse the NDJSON response to extract just the game IDs
+            games = response.text.strip().split("\n")
+            game_ids = [json.loads(game).get("id") for game in games]
+            return [gid for gid in game_ids if gid]  # Filter out any potential nulls
+
+    except httpx.RequestError as e:
+        LOG.error(f"Failed to fetch game IDs for {username}: {e}")
+        return []
+
+
+def get_game_data_by_id(game_id: str) -> Optional[Dict[str, Any]]:
+    """
+    Fetches the full PGN and metadata for a single game, ensuring the opening name is included.
+    """
+    LOG.info("Fetching game data for ID: %s", game_id)
+    try:
+        params: Dict[str, Any] = {
+            "pgnInJson": "true",  # Get PGN inside a JSON object
+            "tags": "true",
+            "opening": "true",  # <-- THE KEY PARAMETER
         }
-        response = session.get(
-            f"https://lichess.org/api/games/user/{username}",
-            params=params,
-            timeout=timeout,
-        )
-        # Will raise an HTTPError if the HTTP request returned an unsuccessful status code
-        response.raise_for_status()
-        LOG.info("Fetch done")
-        return response.text
-    except requests.exceptions.RequestException as e:
-        print(f"An error occurred: {e}")
+        with httpx.Client() as client:
+            response = client.get(
+                f"https://lichess.org/game/export/{game_id}", params=params, headers={"Accept": "application/json"}
+            )
+            response.raise_for_status()
+            return response.json()  # type: ignore[no-any-return] # Lichess API returns Dict[str, Any]
+    except httpx.RequestError as e:
+        LOG.error(f"Failed to fetch game data for {game_id}: {e}")
         return None
 
 

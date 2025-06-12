@@ -1,6 +1,22 @@
 import { generatePKCE, storeCodeVerifier } from './pkce';
 
 /**
+ * Lichess OAuth Flow
+ *
+ * This module runs in the browser and handles the OAuth flow with Lichess:
+ * 1. Initiates OAuth by redirecting to Lichess
+ * 2. Handles the callback from Lichess
+ * 3. Exchanges the auth code for an access token
+ * 4. Fetches the user's Lichess profile
+ *
+ * 🔄 Flow:
+ * Browser -> Lichess -> Browser (callback) -> Backend -> Browser
+ *
+ * 🔐 Security: Uses PKCE (Proof Key for Code Exchange) to prevent code interception attacks.
+ * The code verifier is stored in sessionStorage and cleared after use.
+ */
+
+/**
  * Lichess OAuth configuration
  */
 const LICHESS_CONFIG = {

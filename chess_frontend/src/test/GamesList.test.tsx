@@ -23,6 +23,7 @@ const mockGames: GameListItem[] = [
     gameResult: '0-1',
     playedAt: '2024-03-15T13:00:00Z',
     hasDeviation: true,
+    firstDeviator: 'user',
     deviation: {
       id: 'dev1',
       user_id: 'user-uuid',
@@ -39,6 +40,9 @@ const mockGames: GameListItem[] = [
       pgn: '[Event "Test"]\n1. e4 e5 2. Nf3 Nc6',
       deviation_uci: null,
       reference_uci: null,
+      first_deviator: 'user',
+      review_status: 'needs_review',
+      opening_name: 'Sicilian Defense',
     },
   },
 ];
@@ -63,8 +67,8 @@ describe('GamesList', () => {
   it('renders list of games', () => {
     renderWithRouter(<GamesList games={mockGames} />);
     expect(screen.getByTestId('games-list')).toBeInTheDocument();
-    expect(screen.getAllByRole('link', { name: /View on Lichess/ })).toHaveLength(2);
-    expect(screen.getByRole('link', { name: /Review Deviation/ })).toBeInTheDocument();
+    expect(screen.getByText('vs ChessBot')).toBeInTheDocument();
+    expect(screen.getByText('vs GM_Hikaru')).toBeInTheDocument();
   });
 
   it('formats time control correctly', () => {
@@ -76,7 +80,7 @@ describe('GamesList', () => {
   it('formats game results correctly', () => {
     renderWithRouter(<GamesList games={mockGames} />);
     expect(screen.getByText('✅ White won')).toBeInTheDocument();
-    expect(screen.getByText('❌ Deviation')).toBeInTheDocument();
+    expect(screen.getByText(/You deviated/)).toBeInTheDocument();
   });
 
   it('handles game click', () => {
@@ -87,23 +91,6 @@ describe('GamesList', () => {
     fireEvent.click(gameCards[0]);
 
     expect(onGameClick).toHaveBeenCalledWith(mockGames[0].gameId);
-  });
-
-  it('prevents click propagation on links', () => {
-    const onGameClick = vi.fn();
-    renderWithRouter(<GamesList games={mockGames} onGameClick={onGameClick} />);
-
-    const lichessLink = screen.getAllByRole('link', { name: /View on Lichess/ })[0];
-    fireEvent.click(lichessLink);
-
-    expect(onGameClick).not.toHaveBeenCalled();
-  });
-
-  it('shows deviation link only for games with deviations', () => {
-    renderWithRouter(<GamesList games={mockGames} />);
-
-    const deviationLinks = screen.getAllByRole('link', { name: /Review Deviation/ });
-    expect(deviationLinks).toHaveLength(1);
   });
 
   it('is accessible', () => {

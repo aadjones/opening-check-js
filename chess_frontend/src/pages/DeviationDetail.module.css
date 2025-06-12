@@ -32,23 +32,24 @@
 }
 
 .gameInfoCard {
-  background: var(--color-background-card);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-card);
-  padding: var(--spacing-2xl);
-  margin-bottom: var(--spacing-2xl);
+  background: #f7fafc;
+  border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+  padding: 0.7rem 1rem;
+  margin-bottom: 0.5rem;
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-md);
+  gap: 0.3rem;
+  font-size: 0.97rem;
 }
 
 .openingInfo,
 .opponentInfo {
-  font-size: var(--font-size-base);
-  color: var(--color-text);
+  font-size: 0.97rem;
+  color: #4b5563;
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
+  gap: 0.5rem;
 }
 
 .moveComparisonPanel {
@@ -113,61 +114,101 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: var(--spacing-2xl);
+  justify-content: center;
+  gap: 0.2rem;
+  margin-bottom: 0.7rem;
 }
 
-.actionButtonsPanel {
-  background: var(--color-background-card);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-card);
-  padding: var(--spacing-2xl);
-  margin-bottom: var(--spacing-2xl);
+.chessboardWrapper {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--spacing-xl);
+}
+
+.chessboardControls {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: 0.1rem;
+}
+
+.moveIndicator {
+  margin-left: 0.7rem;
+  font-size: 0.92rem;
+  color: #a0aec0;
+  min-width: 44px;
+  text-align: right;
+  font-weight: 400;
+}
+
+.actionButtonsPanel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.7rem;
+  border-top: 1px solid #e5e7eb;
+  padding-top: 0.7rem;
+}
+
+.primaryActionsGroup {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  width: 100%;
+  justify-content: center;
 }
 
 .primaryAction {
-  padding: var(--spacing-xl) var(--spacing-2xl);
-  background: var(--color-primary);
+  background: #2563eb;
   color: white;
   border: none;
-  border-radius: var(--radius-lg);
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
+  border-radius: 8px;
+  padding: 0.85rem 1.7rem;
+  font-size: 1.08rem;
+  font-weight: 600;
   cursor: pointer;
-  width: 100%;
-  max-width: 400px;
-  transition: all var(--transition-normal);
+  transition:
+    background 0.18s,
+    box-shadow 0.18s;
+  box-shadow: 0 1px 4px rgba(37, 99, 235, 0.08);
+  letter-spacing: 0.01em;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
+
 .primaryAction:hover {
-  background: var(--color-primary-hover);
-  box-shadow: var(--shadow-lg);
+  background: #1d4ed8;
 }
 
 .secondaryActionsGroup {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--spacing-md);
-  justify-content: center;
   width: 100%;
+  display: flex;
+  justify-content: center;
 }
 
 .secondaryAction {
-  padding: var(--spacing-md) var(--spacing-lg);
-  background: var(--color-success);
+  width: 100%;
+  max-width: 340px;
+  margin: 0 auto;
+  display: block;
+  background: #22c55e;
   color: white;
   border: none;
-  border-radius: var(--radius-lg);
-  font-weight: var(--font-weight-medium);
+  border-radius: 8px;
+  padding: 0.7rem 1.3rem;
+  font-size: 1rem;
+  font-weight: 500;
   cursor: pointer;
-  font-size: var(--font-size-base);
-  transition: all var(--transition-normal);
-  margin-bottom: var(--spacing-xs);
+  transition: background 0.18s;
+  text-decoration: none;
+  text-align: center;
+  margin-top: 0.2rem;
 }
+
 .secondaryAction:hover {
-  background: var(--color-success-dark);
+  background: #16a34a;
 }
 
 .metaInfoDetails {
@@ -419,4 +460,55 @@
 }
 .retryButton:hover {
   background: #e53e3e;
+}
+
+.deviationDetailOuter {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  background: none;
+  padding-top: 2.5rem;
+}
+
+.deviationDetailCard {
+  width: 100%;
+  max-width: 600px;
+  background: white;
+  border-radius: 14px;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
+  padding: 1.2rem 1.2rem 1.5rem 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.deviationBanner {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: #fee2e2;
+  color: #b91c1c;
+  font-weight: 600;
+  font-size: 1.05rem;
+  border-radius: 8px;
+  padding: 0.35rem 0.8rem;
+  margin-bottom: 0.1rem;
+  box-shadow: 0 1px 4px rgba(185, 28, 28, 0.04);
+}
+
+.opponentDeviatedBanner {
+  background: #f0fdf4; /* A light green success background */
+  color: #15803d;
+  font-weight: 600;
+}
+
+.deviationIcon {
+  font-size: 1.3rem;
+  margin-right: 0.2rem;
+}
+
+.deviationBannerText {
+  flex: 1;
 }

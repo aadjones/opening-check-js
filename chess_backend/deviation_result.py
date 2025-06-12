@@ -5,51 +5,47 @@ first deviates from a reference game.
 
 from typing import Optional
 
-import chess
+from pydantic import BaseModel
 
 
-class DeviationResult:
+class DeviationResult(BaseModel):
     """
     Represents the result of finding a deviation between your chess game and a reference game.
 
     Attributes:
+        first_deviator (str): Who deviated first - "user" or "opponent".
         move_number (int): The move number where the deviation occurs.
         deviation_san (str): The Standard Algebraic Notation (SAN) of the deviating move.
         reference_san (str): The SAN of the expected move in the repertoire.
         player_color (str): The color of the player who deviated.
-        board (chess.Board): A board state to represent the position right before the deviation.
+        board_fen (str): The FEN string representing the position right before the deviation.
         pgn (str): The full game PGN.
         deviation_uci (Optional[str]): The UCI notation of the deviating move.
         reference_uci (Optional[str]): The UCI notation of the expected move in the repertoire.
     """
 
-    def __init__(
-        self,
-        move_number: int,
-        deviation_san: str,
-        reference_san: str,
-        player_color: str,
-        board: Optional[chess.Board] = None,
-        pgn: str = "",
-        deviation_uci: Optional[str] = None,
-        reference_uci: Optional[str] = None,
-    ):
-        self.move_number = move_number
-        self.deviation_san = deviation_san
-        self.reference_san = reference_san
-        self.player_color = player_color
-        self.board = chess.Board() if board is None else board
-        self.pgn = pgn
-        self.deviation_uci = deviation_uci
-        self.reference_uci = reference_uci
+    first_deviator: str
+    move_number: int
+    deviation_san: str
+    reference_san: str
+    player_color: str
+    board_fen: str
+    pgn: str = ""
+    deviation_uci: Optional[str] = None
+    reference_uci: Optional[str] = None
+
+    model_config = {
+        "json_schema_extra": {"examples": [{"board_fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"}]},
+    }
 
     def __repr__(self) -> str:
         return (
-            f"DeviationResult(move_number={self.move_number}, "
+            f"DeviationResult(first_deviator={self.first_deviator!r}, "
+            f"move_number={self.move_number}, "
             f"deviation_san={self.deviation_san!r}, "
             f"reference_san={self.reference_san!r}, "
             f"player_color={self.player_color!r}, "
-            f"board_fen={self.board.fen()!r})"
+            f"board_fen={self.board_fen!r})"
         )
 
     def __eq__(self, other: object) -> bool:
@@ -58,9 +54,10 @@ class DeviationResult:
             return NotImplemented
 
         return (
-            self.move_number == other.move_number
+            self.first_deviator == other.first_deviator
+            and self.move_number == other.move_number
             and self.deviation_san == other.deviation_san
             and self.reference_san == other.reference_san
             and self.player_color == other.player_color
-            # Note: We're intentionally not comparing the 'board' attribute here.
+            # Note: We're intentionally not comparing the 'board_fen' attribute here.
         )

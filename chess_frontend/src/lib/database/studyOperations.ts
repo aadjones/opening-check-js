@@ -1,5 +1,24 @@
 import { supabase } from '../supabase';
 
+/**
+ * Study Database Operations
+ *
+ * This module runs in the browser and handles database operations for chess studies.
+ * It uses the Supabase client (configured with anon key) to interact with the database.
+ *
+ * 📝 Database Operations:
+ * - getOrCreateUserProfile: Creates/finds user profiles in the database
+ * - hasCompletedOnboarding: Checks if user has active studies
+ *
+ * 🔐 Security:
+ * - Uses RLS (Row Level Security) policies in Supabase
+ * - For development, RLS may be disabled (see comments in code)
+ * - In production, proper authentication will be required
+ *
+ * 🏗️ Architecture:
+ * Browser -> Supabase Client -> Database (with RLS)
+ */
+
 export interface StudySelection {
   whiteStudyId: string | null;
   blackStudyId: string | null;
@@ -23,12 +42,13 @@ export interface LichessStudy {
  * Note: For development, we're bypassing RLS by using the anon key directly
  * In production, this would use proper authentication
  */
-async function getOrCreateUserProfile(lichessUsername: string): Promise<string> {
+async function getOrCreateUserProfile(lichessUsername: string, supabaseClient?: typeof supabase): Promise<string> {
+  const client = supabaseClient || supabase;
   try {
     console.log('🔍 Looking for profile with username:', lichessUsername);
 
     // First, try to find existing profile by lichess_username
-    const { data: existingProfile, error: selectError } = await supabase
+    const { data: existingProfile, error: selectError } = await client
       .from('profiles')
       .select('id')
       .eq('lichess_username', lichessUsername)
@@ -42,33 +62,27 @@ async function getOrCreateUserProfile(lichessUsername: string): Promise<string> 
     console.log('👤 Profile not found, creating new one...');
 
     // Generate a UUID for the new profile
-    // Since we're not using Supabase auth, we need to create our own UUID
     const newUserId = crypto.randomUUID();
 
     // If no profile exists, create one
-    // Note: In a real app, this would be handled by the auth system
-    // For now, we'll create a temporary profile for testing
-    const { data: newProfile, error: insertError } = await supabase
+    const { data: newProfile, error: insertError } = await client
       .from('profiles')
       .insert({
-        id: newUserId, // Explicitly provide the UUID
+        id: newUserId,
         lichess_username: lichessUsername,
-        onboarding_completed: false, // Set to false by default for new users
+        onboarding_completed: false,
       })
       .select('id')
       .single();
 
     if (insertError) {
       console.error('❌ Error creating profile:', insertError);
-
-      // If RLS is blocking us, provide helpful error message
       if (insertError.message?.includes('RLS') || insertError.message?.includes('policy')) {
         console.error('🚨 RLS Policy Error: You may need to disable RLS for development');
         console.error(
           '💡 In Supabase dashboard, go to Authentication > Policies and temporarily disable RLS on the profiles table'
         );
       }
-
       throw new Error('Failed to create user profile');
     }
 
@@ -85,24 +99,22 @@ async function getOrCreateUserProfile(lichessUsername: string): Promise<string> 
  * This replaces the localStorage-based approach in onboardingUtils
  */
 export async function saveUserStudySelections(
-  userIdentifier: string, // This could be a UUID or Lichess username
+  userIdentifier: string,
   whiteStudyId: string | null,
-  blackStudyId: string | null
+  blackStudyId: string | null,
+  supabaseClient?: typeof supabase
 ): Promise<void> {
   try {
-    // Determine if userIdentifier is a UUID or username
     const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(userIdentifier);
-
     let userId: string;
     if (isUUID) {
       userId = userIdentifier;
     } else {
-      // It's a Lichess username, get or create profile
-      userId = await getOrCreateUserProfile(userIdentifier);
+      userId = await getOrCreateUserProfile(userIdentifier, supabaseClient);
     }
-
+    const client = supabaseClient || supabase;
     // First, deactivate any existing studies for this user
-    const { error: deactivateError } = await supabase
+    const { error: deactivateError } = await client
       .from('lichess_studies')
       .update({ is_active: false })
       .eq('user_id', userId);
@@ -137,10 +149,12 @@ export async function saveUserStudySelections(
 
     // Insert new studies if any
     if (studiesToInsert.length > 0) {
-      const { error: insertError } = await supabase.from('lichess_studies').insert(studiesToInsert);
+      const { error: upsertError } = await client
+        .from('lichess_studies')
+        .upsert(studiesToInsert, { onConflict: 'user_id,lichess_study_id' });
 
-      if (insertError) {
-        console.error('Error inserting studies:', insertError);
+      if (upsertError) {
+        console.error('Error upserting studies:', upsertError);
         throw new Error('Failed to save study selections');
       }
     }
@@ -152,6 +166,22 @@ export async function saveUserStudySelections(
       blackStudyId,
       studiesCount: studiesToInsert.length,
     });
+
+    // Upsert default sync_preferences for this user
+    const { error: syncPrefError } = await client.from('sync_preferences').upsert(
+      [
+        {
+          user_id: userId,
+          sync_frequency_minutes: 60,
+          is_auto_sync_enabled: true,
+        },
+      ],
+      { onConflict: 'user_id' }
+    );
+    if (syncPrefError) {
+      console.error('Error upserting sync_preferences:', syncPrefError);
+      // Not fatal, so don't throw
+    }
   } catch (error) {
     console.error('Error in saveUserStudySelections:', error);
     throw error;
@@ -161,20 +191,20 @@ export async function saveUserStudySelections(
 /**
  * Get user's active study selections
  */
-export async function getUserStudySelections(userIdentifier: string): Promise<StudySelection> {
+export async function getUserStudySelections(
+  userIdentifier: string,
+  supabaseClient?: typeof supabase
+): Promise<StudySelection> {
   try {
-    // Determine if userIdentifier is a UUID or username
     const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(userIdentifier);
-
     let userId: string;
     if (isUUID) {
       userId = userIdentifier;
     } else {
-      // It's a Lichess username, get profile
-      userId = await getOrCreateUserProfile(userIdentifier);
+      userId = await getOrCreateUserProfile(userIdentifier, supabaseClient);
     }
-
-    const { data: studies, error } = await supabase
+    const client = supabaseClient || supabase;
+    const { data: studies, error } = await client
       .from('lichess_studies')
       .select('lichess_study_id, study_name')
       .eq('user_id', userId)
@@ -215,20 +245,20 @@ export async function getUserStudySelections(userIdentifier: string): Promise<St
 /**
  * Check if user has completed onboarding (has active studies)
  */
-export async function hasCompletedOnboarding(userIdentifier: string): Promise<boolean> {
+export async function hasCompletedOnboarding(
+  userIdentifier: string,
+  supabaseClient?: typeof supabase
+): Promise<boolean> {
   try {
-    // Determine if userIdentifier is a UUID or username
     const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(userIdentifier);
-
     let userId: string;
     if (isUUID) {
       userId = userIdentifier;
     } else {
-      // It's a Lichess username, get profile
-      userId = await getOrCreateUserProfile(userIdentifier);
+      userId = await getOrCreateUserProfile(userIdentifier, supabaseClient);
     }
-
-    const { data: studies, error } = await supabase
+    const client = supabaseClient || supabase;
+    const { data: studies, error } = await client
       .from('lichess_studies')
       .select('id')
       .eq('user_id', userId)

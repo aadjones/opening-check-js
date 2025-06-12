@@ -3,7 +3,9 @@ This module provides utility functions for pgn files.
 """
 
 import io
+from typing import Iterator, List
 
+import chess
 import chess.pgn
 
 
@@ -30,3 +32,19 @@ def pgn_to_pgn_list(pgn_data: str) -> list[chess.pgn.Game]:
     """
     pgn_list_str = pgn_data.strip().split("\n\n\n")
     return [pgn_string_to_game(game) for game in pgn_list_str]
+
+
+def walk_pgn_variations(game: chess.pgn.Game) -> Iterator[List[chess.Move]]:
+    print(f"[Parser] Walking PGN. Game has {len(game.variations)} starting variations.")
+    stack = [(v, [v.move]) for v in reversed(game.variations)]
+
+    count = 0
+    while stack:
+        node, path = stack.pop()
+        count += 1
+        yield path
+
+        for variation in reversed(node.variations):
+            new_path = path + [variation.move]
+            stack.append((variation, new_path))
+    print(f"[Parser] Walk complete. Yielded {count} paths.")

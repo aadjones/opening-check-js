@@ -15,6 +15,7 @@ export interface GameListItem {
   playedAt: string;
   hasDeviation: boolean;
   deviation?: Deviation;
+  firstDeviator?: 'user' | 'opponent';
 }
 
 export interface GamesListProps {
@@ -31,8 +32,9 @@ function formatTimeControl(tc: string) {
   return tc;
 }
 
-function formatResult(result: string, hasDeviation: boolean) {
-  if (hasDeviation) return '❌ Deviation';
+function formatResult(result: string, hasDeviation: boolean, firstDeviator?: 'user' | 'opponent') {
+  if (hasDeviation && firstDeviator === 'user') return '❌ You deviated';
+  if (hasDeviation && firstDeviator === 'opponent') return '➡️ Opponent deviated';
   if (result === '1-0') return '✅ White won';
   if (result === '0-1') return '✅ Black won';
   if (result === '1/2-1/2') return '½-½ Draw';
@@ -51,17 +53,6 @@ const GamesList: React.FC<GamesListProps> = ({ games, isLoading, onGameClick }) 
     'Any undefined IDs:',
     ids.some(id => !id)
   );
-
-  // Helper function to construct game URL with orientation and ply
-  const constructGameUrl = (game: GameListItem) => {
-    if (!game.gameId) return '';
-    const baseUrl = `https://lichess.org/${game.gameId}`;
-    if (!game.hasDeviation || !game.deviation) return baseUrl;
-
-    const userColor = game.deviation.color?.toLowerCase() || 'white';
-    const plyNumber = (game.deviation.move_number - 1) * 2 + (game.deviation.color?.toLowerCase() === 'black' ? 1 : 0);
-    return `${baseUrl}/${userColor}#${plyNumber}`;
-  };
 
   if (isLoading) {
     return (
@@ -91,8 +82,8 @@ const GamesList: React.FC<GamesListProps> = ({ games, isLoading, onGameClick }) 
           className={`${styles.gameCard} ${game.hasDeviation ? styles.hasDeviation : ''}`}
           role="button"
           tabIndex={0}
-          aria-label={`Game vs ${game.opponent} - ${formatTimeControl(game.timeControl)} - ${formatResult(game.gameResult, game.hasDeviation)}`}
-          data-testid="game-card"
+          aria-label={`Game vs ${game.opponent} - ${formatTimeControl(game.timeControl)} - ${formatResult(game.gameResult, game.hasDeviation, game.firstDeviator)}`}
+          data-testid={`game-card${game.firstDeviator ? '-' + game.firstDeviator : ''}`}
           onClick={e => {
             if (game.hasDeviation && game.deviation) {
               e.preventDefault();
@@ -114,7 +105,9 @@ const GamesList: React.FC<GamesListProps> = ({ games, isLoading, onGameClick }) 
         >
           <div className={styles.gameHeader}>
             <span className={styles.timeControl}>{formatTimeControl(game.timeControl)}</span>
-            <span className={styles.gameResult}>{formatResult(game.gameResult, game.hasDeviation)}</span>
+            <span className={styles.gameResult}>
+              {formatResult(game.gameResult, game.hasDeviation, game.firstDeviator)}
+            </span>
           </div>
 
           <div className={styles.gameContent}>
@@ -125,22 +118,13 @@ const GamesList: React.FC<GamesListProps> = ({ games, isLoading, onGameClick }) 
           </div>
 
           <div className={styles.gameActions}>
-            <a
-              href={constructGameUrl(game)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={styles.lichessLink}
-              onClick={e => e.stopPropagation()}
-            >
-              View on Lichess →
-            </a>
             {game.hasDeviation && (
               <Link
                 to={`/deviation/${game.deviation?.id ?? game.id}`}
                 className={styles.deviationLink}
                 onClick={e => e.stopPropagation()}
               >
-                Review Deviation →
+                Review →
               </Link>
             )}
           </div>

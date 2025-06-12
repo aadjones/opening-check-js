@@ -1,5 +1,25 @@
 """
-Supabase client configuration for the chess backend.
+Supabase Database Client
+
+This module runs on the server and provides database access to Supabase.
+It manages two types of clients:
+1. Default client (anon key) - for regular operations
+2. Admin client (service role) - for privileged operations
+
+🏗️ Architecture:
+Server -> Supabase Client -> Database
+       -> Admin Client -> Database (with elevated privileges)
+
+🔐 Security:
+- Uses environment variables for credentials
+- Service role key for admin operations
+- Anon key for regular operations
+- RLS policies still apply based on client type
+
+📝 Database Operations:
+- User profile management
+- Deviation storage and retrieval
+- Study tracking
 """
 
 import os
@@ -101,43 +121,41 @@ def get_user_id_from_username(username: str) -> str:
     raise Exception(f"User not found for username: {username}")
 
 
-def insert_deviation_to_db(deviation: Any, pgn: str, username: str) -> None:
+def insert_deviation_to_db(deviation: Dict[str, Any], pgn: str, username: str) -> None:
+    """Saves a deviation record to the database."""
     client = get_admin_client()
     game_id = extract_game_id_from_pgn(pgn)
     user_id = get_user_id_from_username(username)
-    # Construct a dict (or an OpeningDeviation instance) using the auto-generated model.
-    # Exclude id field to let the database generate it
+
     data = {
         "user_id": user_id,
         "game_id": game_id,
-        "position_fen": deviation.board.fen(),
-        "expected_move": deviation.reference_san,
-        "actual_move": deviation.deviation_san,
-        "move_number": deviation.move_number,
-        "color": deviation.player_color,
         "pgn": pgn,
-        "deviation_uci": getattr(deviation, "deviation_uci", None),
-        "reference_uci": getattr(deviation, "reference_uci", None),
+        "opening_name": deviation.get("opening_name"),  # Still get opening_name
+        "position_fen": deviation.get("board_fen"),
+        "expected_move": deviation.get("reference_san"),
+        "actual_move": deviation.get("deviation_san"),
+        "move_number": deviation.get("move_number"),
+        "color": deviation.get("player_color"),
+        "deviation_uci": deviation.get("deviation_uci"),
+        "reference_uci": deviation.get("reference_uci"),
+        "first_deviator": deviation.get("first_deviator"),
     }
-    # Convert to dict for upsert, letting the database generate the id
-    client.table("opening_deviations").upsert(data).execute()
+    client.table("opening_deviations").upsert(data, on_conflict="game_id, user_id").execute()
 
 
-def get_deviations_for_user(user_id: str, limit: int = 10, offset: int = 0) -> list[Dict[str, Any]]:
+def get_deviations_for_user(
+    user_id: str, limit: int = 10, offset: int = 0, review_status: Optional[str] = None
+) -> list[Dict[str, Any]]:
     """
-    Fetch deviations for a given user_id with pagination.
+    Fetch deviations for a given user_id with pagination and optional review_status filter.
     Returns a list of dicts, each representing a row from opening_deviations.
     """
     client = get_default_client()
-    response = (
-        client.table("opening_deviations")
-        .select("*")
-        .eq("user_id", user_id)
-        .order("id", desc=True)
-        .limit(limit)
-        .offset(offset)
-        .execute()
-    )
+    query = client.table("opening_deviations").select("*").eq("user_id", user_id)
+    if review_status:
+        query = query.eq("review_status", review_status)
+    response = query.order("id", desc=True).limit(limit).offset(offset).execute()
     return response.data or []
 
 

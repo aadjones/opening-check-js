@@ -1,5 +1,5 @@
 ---
-description: 
+description: Supabase PostgreSQL functions
 globs: 
 alwaysApply: false
 ---

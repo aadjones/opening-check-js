@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { validateOAuthCallback, completeOAuthFlow } from '../lib/auth/lichessOAuth';
 import { getStoredCodeVerifier, clearCodeVerifier } from '../lib/auth/pkce';
-import { supabase } from '../lib/supabase';
+import { fetchSupabaseJWT } from '../lib/auth/fetchSupabaseJWT';
 
 const AuthCallback: React.FC = () => {
   const [status, setStatus] = useState<'processing' | 'success' | 'error'>('processing');
@@ -41,8 +41,25 @@ const AuthCallback: React.FC = () => {
         const { user, accessToken } = await completeOAuthFlow(code, codeVerifier);
 
         // Resolve the UUID for this user (creating a profile if needed)
+        const supabaseJwt = await fetchSupabaseJWT({
+          sub: user.id,
+          email: user.email || undefined,
+          lichess_username: user.username || undefined,
+        });
+        const { createClient } = await import('@supabase/supabase-js');
+        const supabaseWithAuth = createClient(
+          import.meta.env.VITE_SUPABASE_URL,
+          import.meta.env.VITE_SUPABASE_ANON_KEY,
+          {
+            global: {
+              headers: {
+                Authorization: `Bearer ${supabaseJwt}`,
+              },
+            },
+          }
+        );
         const { getOrCreateUserProfile } = await import('../lib/database/studyOperations');
-        const uuid = await getOrCreateUserProfile(user.username);
+        const uuid = await getOrCreateUserProfile(user.username, supabaseWithAuth);
         const userWithUUID = { ...user, id: uuid };
 
         // Store the user data with UUID in sessionStorage
@@ -53,7 +70,7 @@ const AuthCallback: React.FC = () => {
         window.dispatchEvent(new CustomEvent('auth-session-refresh'));
 
         // Check if this is a first-time user
-        const { data: profile, error: profileError } = await supabase
+        const { data: profile, error: profileError } = await supabaseWithAuth
           .from('profiles')
           .select('onboarding_completed')
           .eq('id', uuid)
