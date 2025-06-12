@@ -43,7 +43,7 @@ def get_last_game_ids(username: str, max_games: int, since: Optional[datetime] =
     """Fetches a list of the most recent game IDs for a user."""
     LOG.info("Fetching last %s game IDs for %s", max_games, username)
     try:
-        params: Dict[str, Any] = {"max": max_games, "rated": "true"}
+        params: Dict[str, Any] = {"max": max_games, "rated": "both"}
         if since:
             params["since"] = int(since.timestamp() * 1000)
 
