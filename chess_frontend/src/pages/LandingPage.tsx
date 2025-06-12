@@ -38,27 +38,21 @@ const LandingPage: React.FC = () => {
 
           <div className={styles.featuresGrid}>
             <div className={styles.featureCard}>
-              <div className={styles.featureIcon}>🎯</div>
-              <h3 className={styles.featureTitle}>Automatic Detection</h3>
-              <p className={styles.featureDescription}>
-                We automatically detect when you deviate from your prepared lines during real games.
-              </p>
+              <div className={styles.featureIcon}>🧠</div>
+              <h3 className={styles.featureTitle}>Remembers for You</h3>
+              <p className={styles.featureDescription}>Forget your prep? OutOfBook never does.</p>
             </div>
 
             <div className={styles.featureCard}>
-              <div className={styles.featureIcon}>⚡</div>
-              <h3 className={styles.featureTitle}>Instant Feedback</h3>
-              <p className={styles.featureDescription}>
-                Get notified right after you make a mistake, while the position is still fresh in your mind.
-              </p>
+              <div className={styles.featureIcon}>🔁</div>
+              <h3 className={styles.featureTitle}>Catches Every Slip</h3>
+              <p className={styles.featureDescription}>Drift off-book? We spot it instantly.</p>
             </div>
 
             <div className={styles.featureCard}>
-              <div className={styles.featureIcon}>📈</div>
-              <h3 className={styles.featureTitle}>Stay Consistent</h3>
-              <p className={styles.featureDescription}>
-                Keep your actual play aligned with your study preparation for better results.
-              </p>
+              <div className={styles.featureIcon}>📍</div>
+              <h3 className={styles.featureTitle}>Turns Mistakes Into Wins</h3>
+              <p className={styles.featureDescription}>See patterns. Fix habits. Win more games.</p>
             </div>
           </div>
         </div>

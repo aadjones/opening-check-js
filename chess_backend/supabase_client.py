@@ -126,12 +126,12 @@ def insert_deviation_to_db(deviation: Dict[str, Any], pgn: str, username: str) -
     client = get_admin_client()
     game_id = extract_game_id_from_pgn(pgn)
     user_id = get_user_id_from_username(username)
-    
+
     data = {
         "user_id": user_id,
         "game_id": game_id,
         "pgn": pgn,
-        "opening_name": deviation.get("opening_name"), # Still get opening_name
+        "opening_name": deviation.get("opening_name"),  # Still get opening_name
         "position_fen": deviation.get("board_fen"),
         "expected_move": deviation.get("reference_san"),
         "actual_move": deviation.get("deviation_san"),
@@ -144,21 +144,18 @@ def insert_deviation_to_db(deviation: Dict[str, Any], pgn: str, username: str) -
     client.table("opening_deviations").upsert(data, on_conflict="game_id, user_id").execute()
 
 
-def get_deviations_for_user(user_id: str, limit: int = 10, offset: int = 0) -> list[Dict[str, Any]]:
+def get_deviations_for_user(
+    user_id: str, limit: int = 10, offset: int = 0, review_status: Optional[str] = None
+) -> list[Dict[str, Any]]:
     """
-    Fetch deviations for a given user_id with pagination.
+    Fetch deviations for a given user_id with pagination and optional review_status filter.
     Returns a list of dicts, each representing a row from opening_deviations.
     """
     client = get_default_client()
-    response = (
-        client.table("opening_deviations")
-        .select("*")
-        .eq("user_id", user_id)
-        .order("id", desc=True)
-        .limit(limit)
-        .offset(offset)
-        .execute()
-    )
+    query = client.table("opening_deviations").select("*").eq("user_id", user_id)
+    if review_status:
+        query = query.eq("review_status", review_status)
+    response = query.order("id", desc=True).limit(limit).offset(offset).execute()
     return response.data or []
 
 

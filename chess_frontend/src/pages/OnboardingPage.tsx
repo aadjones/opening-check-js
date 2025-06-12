@@ -157,10 +157,6 @@ const OnboardingPage: React.FC = () => {
       <div className={styles.container}>
         <div className={styles.header}>
           <h1 className={styles.title}>🎯 Choose Your Repertoire</h1>
-          <div className={styles.welcome}>
-            <h2 className={styles.welcomeTitle}>🧠 Welcome to OutOfBook</h2>
-            <p className={styles.welcomeSubtitle}>Track your games against your prep.</p>
-          </div>
         </div>
 
         <div className={styles.progress}>

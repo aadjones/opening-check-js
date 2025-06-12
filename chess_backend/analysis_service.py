@@ -4,11 +4,11 @@ from typing import List, Optional, Tuple
 # Use local imports since we're running from within the chess_backend directory
 import lichess_api
 import pgn_utils
-from repertoire_trie import RepertoireTrie
 from chess_utils import get_player_color
 from deviation_result import DeviationResult
-from lichess_api import get_last_game_ids, get_game_data_by_id  # Use the new functions
+from lichess_api import get_game_data_by_id, get_last_game_ids  # Use the new functions
 from logging_config import setup_logging
+from repertoire_trie import RepertoireTrie
 from supabase_client import insert_deviation_to_db
 
 # Configure logging
@@ -76,19 +76,19 @@ def perform_game_analysis(
         results: List[Tuple[Optional[DeviationResult], str]] = []
         for game_id in game_ids:
             game_data = get_game_data_by_id(game_id)
-            if not game_data or 'pgn' not in game_data:
+            if not game_data or "pgn" not in game_data:
                 logger.warning(f"Could not fetch PGN data for game ID {game_id}. Skipping.")
                 continue
 
-            pgn_string = game_data['pgn']
-            opening_name = game_data.get('opening', {}).get('name')
+            pgn_string = game_data["pgn"]
+            opening_name = game_data.get("opening", {}).get("name")
 
             try:
                 game_obj = pgn_utils.pgn_string_to_game(pgn_string)
                 deviation_info = None
 
                 player_color = get_player_color(game_obj, username)
-                
+
                 if player_color == "White":
                     deviation_info = white_trie.find_deviation(game_obj, username)
                 elif player_color == "Black":
@@ -98,11 +98,11 @@ def perform_game_analysis(
 
                 if deviation_info:
                     deviation_dict = deviation_info.model_dump()
-                    deviation_dict['opening_name'] = opening_name
-                    
+                    deviation_dict["opening_name"] = opening_name
+
                     # Call the DB function with the dictionary, PGN string, and username
                     insert_deviation_to_db(deviation_dict, pgn_string, username)
-                
+
                 results.append((deviation_info, pgn_string))
 
             except Exception as e:

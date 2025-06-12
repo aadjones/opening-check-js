@@ -24,7 +24,7 @@ const mockInsights = [
 
 const InsightsBlock: React.FC = () => {
   return (
-    <div className={styles.insightsBlock}>
+    <div className={`${styles.insightsBlock} dev`}>
       <div className={styles.header}>
         <FaLightbulb className={styles.icon} />
         <span className={styles.title}>Insights</span>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { useAuth } from '../hooks/useAuth';
-import { getUserStudies, saveUserStudies, type UserStudies } from '../lib/auth/onboardingUtils';
+import { getUserStudies, type UserStudies } from '../lib/auth/onboardingUtils';
 import { extractStudyId } from '../lib/lichess/studyValidation';
 import styles from './Settings.module.css';
 import { fetchSupabaseJWT } from '../lib/auth/fetchSupabaseJWT';
@@ -10,7 +10,7 @@ import { createClient } from '@supabase/supabase-js';
 interface SyncPreferences {
   sync_frequency_minutes: number;
   is_auto_sync_enabled: boolean;
-  last_synced_at: string | null;
+  updated_at: string | null;
 }
 
 const Settings: React.FC = () => {
@@ -19,7 +19,6 @@ const Settings: React.FC = () => {
   const [whiteStudy, setWhiteStudy] = useState('');
   const [blackStudy, setBlackStudy] = useState('');
   const [originalStudies, setOriginalStudies] = useState<UserStudies | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
   const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   const [timeControls, setTimeControls] = useState({
@@ -34,13 +33,11 @@ const Settings: React.FC = () => {
     human: true,
     bot: false,
   });
-  const [notificationFrequency, setNotificationFrequency] = useState('every');
-  const [celebrateSuccess, setCelebrateSuccess] = useState(false);
 
   const [syncPreferences, setSyncPreferences] = useState<SyncPreferences>({
     sync_frequency_minutes: 60,
     is_auto_sync_enabled: true,
-    last_synced_at: null,
+    updated_at: null,
   });
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncMessage, setSyncMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -81,7 +78,7 @@ const Settings: React.FC = () => {
         );
         const { data, error } = await supabaseWithAuth
           .from('sync_preferences')
-          .select('sync_frequency_minutes, is_auto_sync_enabled')
+          .select('sync_frequency_minutes, is_auto_sync_enabled, updated_at')
           .eq('user_id', session.user.id)
           .single();
         if (error) {
@@ -93,6 +90,7 @@ const Settings: React.FC = () => {
             ...prev,
             sync_frequency_minutes: data.sync_frequency_minutes,
             is_auto_sync_enabled: data.is_auto_sync_enabled,
+            updated_at: data.updated_at,
           }));
         }
       };
@@ -128,72 +126,6 @@ const Settings: React.FC = () => {
       ...prev,
       [type]: !prev[type],
     }));
-  };
-
-  const handleSave = async () => {
-    if (!session?.user?.id) {
-      setSaveMessage({ type: 'error', text: 'No user session found' });
-      return;
-    }
-
-    setIsLoading(true);
-    setSaveMessage(null);
-
-    try {
-      // Extract study IDs from URLs
-      const whiteStudyId = whiteStudy ? extractStudyId(whiteStudy) : null;
-      const blackStudyId = blackStudy ? extractStudyId(blackStudy) : null;
-
-      // Validate that at least one study is provided
-      if (!whiteStudyId && !blackStudyId) {
-        setSaveMessage({ type: 'error', text: 'Please provide at least one study URL' });
-        return;
-      }
-
-      // Save studies using the onboarding utility
-      saveUserStudies(session.user.id, whiteStudyId, blackStudyId);
-
-      // Update original studies for comparison
-      const newStudies = getUserStudies(session.user.id);
-      setOriginalStudies(newStudies);
-
-      setSaveMessage({ type: 'success', text: 'Settings saved successfully!' });
-
-      // TODO: Save other settings (time controls, notifications, etc.)
-      console.log('Other settings to save:', {
-        timeControls,
-        gameTypes,
-        notificationFrequency,
-        celebrateSuccess,
-      });
-    } catch (error) {
-      console.error('Error saving settings:', error);
-      setSaveMessage({ type: 'error', text: 'Failed to save settings. Please try again.' });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleCancel = () => {
-    // Reset to original values
-    if (originalStudies) {
-      setWhiteStudy(originalStudies.whiteStudyId ? `https://lichess.org/study/${originalStudies.whiteStudyId}` : '');
-      setBlackStudy(originalStudies.blackStudyId ? `https://lichess.org/study/${originalStudies.blackStudyId}` : '');
-    } else {
-      setWhiteStudy('');
-      setBlackStudy('');
-    }
-    setSaveMessage(null);
-  };
-
-  // Check if studies have been modified
-  const hasStudyChanges = () => {
-    if (!originalStudies) return whiteStudy || blackStudy;
-
-    const currentWhiteId = whiteStudy ? extractStudyId(whiteStudy) : null;
-    const currentBlackId = blackStudy ? extractStudyId(blackStudy) : null;
-
-    return currentWhiteId !== originalStudies.whiteStudyId || currentBlackId !== originalStudies.blackStudyId;
   };
 
   const formatStudyDisplay = (studyUrl: string) => {
@@ -242,7 +174,7 @@ const Settings: React.FC = () => {
       // Update last sync time
       setSyncPreferences(prev => ({
         ...prev,
-        last_synced_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
       }));
     } catch (err: unknown) {
       let message = 'Sync failed';
@@ -284,7 +216,7 @@ const Settings: React.FC = () => {
   };
 
   return (
-    <div className={styles.settings}>
+    <div className={`${styles.settings} dev`}>
       <header className={styles.header}>
         <h1 className={styles.title}>Settings</h1>
         <p className={styles.subtitle}>Configure your repertoire studies and preferences</p>
@@ -391,68 +323,6 @@ const Settings: React.FC = () => {
 
       <section className={styles.section}>
         <div className={styles.sectionHeader}>
-          <h2 className={styles.sectionTitle}>Notifications</h2>
-        </div>
-        <div className={styles.sectionContent}>
-          <div className={styles.formGroup}>
-            <label className={styles.label}>Notification Frequency</label>
-            <div className={styles.radioGroup}>
-              {[
-                { value: 'every', label: 'Every game' },
-                { value: 'daily', label: 'Daily digest' },
-                { value: 'weekly', label: 'Weekly summary' },
-              ].map(({ value, label }) => (
-                <div key={value} className={styles.radioItem}>
-                  <input
-                    type="radio"
-                    id={`freq-${value}`}
-                    name="frequency"
-                    className={styles.radio}
-                    value={value}
-                    checked={notificationFrequency === value}
-                    onChange={e => setNotificationFrequency(e.target.value)}
-                  />
-                  <label htmlFor={`freq-${value}`} className={styles.radioLabel}>
-                    {label}
-                  </label>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className={styles.formGroup}>
-            <div className={styles.checkboxItem}>
-              <input
-                type="checkbox"
-                id="celebrate-success"
-                className={styles.checkbox}
-                checked={celebrateSuccess}
-                onChange={e => setCelebrateSuccess(e.target.checked)}
-              />
-              <label htmlFor="celebrate-success" className={styles.checkboxLabel}>
-                Celebrate when prep is followed perfectly
-              </label>
-            </div>
-            <div className={styles.helpText}>Get positive notifications when you stick to your preparation</div>
-          </div>
-        </div>
-
-        <div className={styles.actions}>
-          <button className={styles.cancelButton} onClick={handleCancel} disabled={isLoading}>
-            Cancel
-          </button>
-          <button
-            className={`${styles.saveButton} ${hasStudyChanges() ? styles.saveButtonActive : ''}`}
-            onClick={handleSave}
-            disabled={isLoading || !hasStudyChanges()}
-          >
-            {isLoading ? 'Saving...' : 'Save Settings'}
-          </button>
-        </div>
-      </section>
-
-      <section className={styles.section}>
-        <div className={styles.sectionHeader}>
           <h2 className={styles.sectionTitle}>Sync Settings</h2>
         </div>
         <div className={styles.sectionContent}>
@@ -478,10 +348,7 @@ const Settings: React.FC = () => {
               <div className={styles.radioGroup}>
                 {[
                   { value: 5, label: 'Every 5 minutes' },
-                  { value: 15, label: 'Every 15 minutes' },
-                  { value: 30, label: 'Every 30 minutes' },
                   { value: 60, label: 'Every hour' },
-                  { value: 120, label: 'Every 2 hours' },
                 ].map(({ value, label }) => (
                   <div key={value} className={styles.radioItem}>
                     <input
@@ -505,8 +372,8 @@ const Settings: React.FC = () => {
           <div className={styles.formGroup}>
             <div className={styles.syncStatus}>
               <div className={styles.syncStatusText}>
-                {syncPreferences.last_synced_at
-                  ? `Last synced ${new Date(syncPreferences.last_synced_at).toLocaleString()}`
+                {syncPreferences.updated_at
+                  ? `Last synced ${new Date(syncPreferences.updated_at).toLocaleString()}`
                   : 'Never synced'}
               </div>
               <button

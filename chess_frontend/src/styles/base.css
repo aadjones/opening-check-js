@@ -136,6 +136,27 @@ button {
   border: 0;
 }
 
+/* Development marker - easy to remove later */
+.dev {
+  position: relative;
+  border: 2px dashed #f59e0b !important;
+  background: #fef3c7 !important;
+}
+
+.dev::before {
+  content: '🚧 DEV';
+  position: absolute;
+  top: -10px;
+  left: 10px;
+  background: #f59e0b;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: bold;
+  z-index: 10;
+}
+
 .container {
   max-width: 1200px;
   margin: 0 auto;

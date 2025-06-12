@@ -145,9 +145,9 @@ const DeviationDetail: React.FC = () => {
         <div className={styles.actionButtonsPanel}>
           {SHOW_REPLAY_PREP_LINE_BUTTON && <button className={styles.primaryAction}>▶️ Replay My Prep Line</button>}
           <div className={styles.primaryActionsGroup}>
-            <button className={styles.primaryAction}>✓ Mark Reviewed</button>
-            <button className={styles.primaryAction}>⭐ Adopt Move</button>
-            <button className={styles.primaryAction}>🚫 Ignore Line</button>
+            <button className={`${styles.primaryAction} dev`}>✓ Mark Reviewed</button>
+            <button className={`${styles.primaryAction} dev`}>⭐ Adopt Move</button>
+            <button className={`${styles.primaryAction} dev`}>🚫 Ignore Line</button>
           </div>
           <div className={styles.secondaryActionsGroup}>
             {gameUrl && (

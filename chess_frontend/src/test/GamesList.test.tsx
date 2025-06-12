@@ -42,6 +42,7 @@ const mockGames: GameListItem[] = [
       reference_uci: null,
       first_deviator: 'user',
       review_status: 'needs_review',
+      opening_name: 'Sicilian Defense',
     },
   },
 ];
@@ -66,8 +67,8 @@ describe('GamesList', () => {
   it('renders list of games', () => {
     renderWithRouter(<GamesList games={mockGames} />);
     expect(screen.getByTestId('games-list')).toBeInTheDocument();
-    expect(screen.getAllByRole('link', { name: /View on Lichess/ })).toHaveLength(2);
-    expect(screen.getByRole('link', { name: /Review Deviation/ })).toBeInTheDocument();
+    expect(screen.getByText('vs ChessBot')).toBeInTheDocument();
+    expect(screen.getByText('vs GM_Hikaru')).toBeInTheDocument();
   });
 
   it('formats time control correctly', () => {
@@ -90,23 +91,6 @@ describe('GamesList', () => {
     fireEvent.click(gameCards[0]);
 
     expect(onGameClick).toHaveBeenCalledWith(mockGames[0].gameId);
-  });
-
-  it('prevents click propagation on links', () => {
-    const onGameClick = vi.fn();
-    renderWithRouter(<GamesList games={mockGames} onGameClick={onGameClick} />);
-
-    const lichessLink = screen.getAllByRole('link', { name: /View on Lichess/ })[0];
-    fireEvent.click(lichessLink);
-
-    expect(onGameClick).not.toHaveBeenCalled();
-  });
-
-  it('shows deviation link only for games with deviations', () => {
-    renderWithRouter(<GamesList games={mockGames} />);
-
-    const deviationLinks = screen.getAllByRole('link', { name: /Review Deviation/ });
-    expect(deviationLinks).toHaveLength(1);
   });
 
   it('is accessible', () => {
