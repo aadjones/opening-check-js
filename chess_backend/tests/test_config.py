@@ -5,9 +5,8 @@ Configuration and environment tests for the chess backend.
 These tests verify that the application is properly configured.
 """
 
-from unittest.mock import patch
-
 import pytest
+
 
 def test_core_modules_import() -> None:
     """Test that core application modules can be imported."""

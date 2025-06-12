@@ -1,35 +1,52 @@
 import React from 'react';
-import { FaCheckCircle, FaTimesCircle, FaMinusCircle } from 'react-icons/fa';
 import styles from './PrepScoreWidget.module.css';
+import type { Database } from '../../types/supabase';
 
-// Mock data for weekly prep score
-const mockPrepScore = {
-  held: 2, // ✅
-  deviated: 3, // ❌
-  untracked: 1, // ➖
-};
+type Deviation = Database['public']['Tables']['opening_deviations']['Row'];
 
-const PrepScoreWidget: React.FC = () => {
+interface PrepScoreWidgetProps {
+  deviations: Deviation[];
+  isLoading: boolean;
+}
+
+const PrepScoreWidget: React.FC<PrepScoreWidgetProps> = ({ deviations, isLoading }) => {
+  const scores = React.useMemo(() => {
+    if (isLoading || !deviations) {
+      return { followed: 0, deviated: 0 };
+    }
+    return deviations.reduce(
+      (acc, deviation) => {
+        if (deviation.first_deviator === 'user') {
+          acc.deviated += 1;
+        } else if (deviation.first_deviator === 'opponent') {
+          acc.followed += 1;
+        }
+        return acc;
+      },
+      { followed: 0, deviated: 0 }
+    );
+  }, [deviations, isLoading]);
+
+  if (isLoading) {
+    return <div className={`${styles.card} ${styles.skeleton}`}></div>;
+  }
+
   return (
-    <div className={styles.prepScoreWidget}>
-      <h3 className={styles.title}>Weekly Prep Score</h3>
-      <div className={styles.scoresRow}>
+    <div className={styles.card}>
+      <h3 className={styles.title}>Prep Score</h3>
+      <div className={styles.scores}>
         <div className={styles.scoreItem}>
-          <FaCheckCircle className={styles.heldIcon} />
-          <span className={styles.scoreCount}>{mockPrepScore.held}</span>
-          <span className={styles.scoreLabel}>Followed</span>
+          <div className={`${styles.icon} ${styles.followed}`}>✅</div>
+          <div className={styles.count}>{scores.followed}</div>
+          <div className={styles.label}>Followed</div>
         </div>
         <div className={styles.scoreItem}>
-          <FaTimesCircle className={styles.deviatedIcon} />
-          <span className={styles.scoreCount}>{mockPrepScore.deviated}</span>
-          <span className={styles.scoreLabel}>Deviated</span>
-        </div>
-        <div className={styles.scoreItem}>
-          <FaMinusCircle className={styles.untrackedIcon} />
-          <span className={styles.scoreCount}>{mockPrepScore.untracked}</span>
-          <span className={styles.scoreLabel}>Untracked</span>
+          <div className={`${styles.icon} ${styles.deviated}`}>❌</div>
+          <div className={styles.count}>{scores.deviated}</div>
+          <div className={styles.label}>Deviated</div>
         </div>
       </div>
+      <p className={styles.footerText}>Based on the last {deviations.length} games with deviations.</p>
     </div>
   );
 };

@@ -12,27 +12,39 @@ import InsightsBlock from '../components/dashboard/InsightsBlock';
 const Dashboard: React.FC = () => {
   usePageTitle('Dashboard');
   const { user } = useAuth();
-  const { deviations, loading: deviationsLoading } = useDeviations({ limit: 8 });
+  // Fetch a decent number of deviations for the weekly score.
+  const { deviations, loading: deviationsLoading } = useDeviations({ limit: 25 });
 
-  // Transform deviations into game list items
+  // Find the most recent deviation for the "Last Game" card.
+  const lastDeviation = deviations.length > 0 ? deviations[0] : null;
+
+  // --- NEW, TARGETED LOG ---
+  // This will run whenever lastDeviation changes from null to a real object.
+  React.useEffect(() => {
+    if (lastDeviation) {
+      console.log('--- Last Game Summary Data ---');
+      console.log('lastDeviation object:', lastDeviation);
+
+      // Now, let's parse it right here and see the result.
+      const headers = parsePgnHeaders(lastDeviation.pgn || '');
+      console.log('Parsed headers from its PGN:', headers);
+      console.log('Value of Opening header:', headers.Opening);
+    }
+  }, [lastDeviation]);
+  // --- END OF LOG ---
+
+  // Transform deviations for the "Recent Games" list (this logic is already fixed)
   const recentGames: GameListItem[] = deviations.map(deviation => {
     const headers = parsePgnHeaders(deviation.pgn || '');
     const whitePlayer = headers.White || 'White';
     const blackPlayer = headers.Black || 'Black';
-
-     // --- THIS IS THE FIX ---
-    // Determine the user's actual color in THIS game by comparing usernames.
     let userActualColor: 'white' | 'black' | null = null;
     if (user?.lichessUsername?.toLowerCase() === whitePlayer.toLowerCase()) {
       userActualColor = 'white';
     } else if (user?.lichessUsername?.toLowerCase() === blackPlayer.toLowerCase()) {
       userActualColor = 'black';
     }
-
-    // Now, correctly determine the opponent.
     const opponent = userActualColor === 'white' ? blackPlayer : whitePlayer;
-    // --- END OF FIX ---
-
     const timeControl = headers.TimeControl || '600';
     const gameResult = headers.Result || '1/2-1/2';
     const playedAt = deviation.detected_at ?? '';
@@ -61,15 +73,17 @@ const Dashboard: React.FC = () => {
           <h1 className={styles.greetingTitle}>
             Welcome back, {username}! <span className={styles.wave}>👋</span>
           </h1>
-          <div className={styles.greetingSubtitle}>Here's your chess progress this week.</div>
+          <div className={styles.greetingSubtitle}>Here's your recent chess progress.</div>
         </div>
         <div className={styles.topRow}>
-          <PrepScoreWidget />
-          <LastGameSummaryWidget />
+          {/* Pass the full list to the Prep Score and the single last one to the summary */}
+          <PrepScoreWidget deviations={deviations} isLoading={deviationsLoading} />
+          <LastGameSummaryWidget lastDeviation={recentGames[0]?.deviation ?? null} isLoading={deviationsLoading} />
         </div>
         <InsightsBlock />
         <section className={styles.recentGamesSection}>
           <h2 className={styles.sectionTitle}>Recent Games</h2>
+          {/* Show all games in the list, including the most recent */}
           <GamesList games={recentGames} isLoading={deviationsLoading} />
         </section>
       </div>

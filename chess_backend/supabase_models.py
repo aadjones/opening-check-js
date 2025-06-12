@@ -14,6 +14,7 @@ class OpeningDeviation(BaseModel):
     game_id: Optional[str] = None
     id: Optional[str] = None
     move_number: Optional[int] = None
+    opening_name: Optional[str] = None
     pgn: Optional[str] = None
     position_fen: Optional[str] = None
     reference_uci: Optional[str] = None

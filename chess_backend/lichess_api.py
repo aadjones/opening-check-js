@@ -7,7 +7,7 @@ import dataclasses
 import logging
 import re
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List, Dict, Any
 
 import chess.pgn
 import requests
@@ -37,64 +37,52 @@ class Study:
         study = Study.fetch_id(_extract_study_id_from_url(url))
         LOG.info("done")
         return study
-
-
-def get_last_games_pgn(
-    username: str,
-    max_games: int = 1,
-    since: Optional[datetime] = None,
-    retries: int = 3,
-    backoff_factor: float = 1.5,
-    timeout: int = 10,
-) -> Optional[str]:
-    """
-    Fetches the PGN of games played by a Lichess username with retry and timeout.
-    Can optionally fetch games since a specific timestamp.
-
-    :param username: str, the Lichess username of the player
-    :param max_games: int, the maximum number of games to retrieve (default is 1)
-    :param since: Optional[datetime], only fetch games played after this timestamp
-    :param retries: int, the number of retries in case of failures (default is 3)
-    :param backoff_factor: float, the backoff factor for retrying requests (default is 1.5)
-    :param timeout: int, the timeout for each HTTP request in seconds (default is 10)
-    :return: Optional[str], the PGN of the games played by the user, or None if failed
-    """
-    session = requests.Session()
-    retry = Retry(
-        total=retries,
-        read=retries,
-        connect=retries,
-        backoff_factor=backoff_factor,
-        status_forcelist=(500, 502, 504),
-    )
-    adapter = HTTPAdapter(max_retries=retry)
-    session.mount("https://", adapter)
-    LOG.info("Fetching %s games for %s%s", max_games, username, f" since {since}" if since else "")
-
+    
+def get_last_game_ids(username: str, max_games: int, since: Optional[datetime] = None) -> List[str]:
+    """Fetches a list of the most recent game IDs for a user."""
+    LOG.info("Fetching last %s game IDs for %s", max_games, username)
     try:
-        params: dict[str, str | int] = {
-            "max": max_games,
-            "moves": "true",  # We need the moves
-            "pgnInJson": "false",  # We want raw PGN
-            "rated": "true",  # Only rated games
-        }
+        params = {"max": max_games, "rated": "true"}
         if since:
-            # Convert to milliseconds timestamp for Lichess API
             params["since"] = int(since.timestamp() * 1000)
-
-        response = session.get(
+            
+        response = requests.get(
             f"https://lichess.org/api/games/user/{username}",
             params=params,
-            timeout=timeout,
+            headers={"Accept": "application/x-ndjson"} # We ask for NDJSON to get IDs
         )
-        # Will raise an HTTPError if the HTTP request returned an unsuccessful status code
         response.raise_for_status()
-        LOG.info("Fetch done")
-        return response.text
+        
+        # Parse the NDJSON response to extract just the game IDs
+        games = response.text.strip().split('\n')
+        game_ids = [requests.compat.json.loads(game).get('id') for game in games]
+        return [gid for gid in game_ids if gid] # Filter out any potential nulls
+        
     except requests.exceptions.RequestException as e:
-        print(f"An error occurred: {e}")
-        return None
+        LOG.error(f"Failed to fetch game IDs for {username}: {e}")
+        return []
 
+def get_game_data_by_id(game_id: str) -> Optional[Dict[str, Any]]:
+    """
+    Fetches the full PGN and metadata for a single game, ensuring the opening name is included.
+    """
+    LOG.info("Fetching game data for ID: %s", game_id)
+    try:
+        params = {
+            "pgnInJson": "true", # Get PGN inside a JSON object
+            "tags": "true",
+            "opening": "true" # <-- THE KEY PARAMETER
+        }
+        response = requests.get(
+            f"https://lichess.org/game/export/{game_id}",
+            params=params,
+            headers={"Accept": "application/json"}
+        )
+        response.raise_for_status()
+        return response.json() # Returns a JSON object with a 'pgn' key and other metadata
+    except requests.exceptions.RequestException as e:
+        LOG.error(f"Failed to fetch game data for {game_id}: {e}")
+        return None
 
 def _extract_study_id_from_url(url: str) -> str:
     """

@@ -55,6 +55,7 @@ export type Database = {
           game_id: string | null;
           id: string;
           move_number: number;
+          opening_name: string | null;
           pgn: string | null;
           position_fen: string;
           reference_uci: string | null;
@@ -74,6 +75,7 @@ export type Database = {
           game_id?: string | null;
           id?: string;
           move_number: number;
+          opening_name?: string | null;
           pgn?: string | null;
           position_fen: string;
           reference_uci?: string | null;
@@ -93,6 +95,7 @@ export type Database = {
           game_id?: string | null;
           id?: string;
           move_number?: number;
+          opening_name?: string | null;
           pgn?: string | null;
           position_fen?: string;
           reference_uci?: string | null;

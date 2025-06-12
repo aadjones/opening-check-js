@@ -1,72 +1,81 @@
 import React from 'react';
-import { FaCheckCircle, FaTimesCircle, FaMinusCircle, FaPlay } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
 import styles from './LastGameSummaryWidget.module.css';
+import { parsePgnHeaders } from '../../utils/pgn';
+import type { Database } from '../../types/supabase';
+import { useAuth } from '../../hooks/useAuth';
 
-// Mock data for the most recent game
-const mockLastGame = {
-  status: 'deviation', // 'followed', 'deviation', or 'untracked'
-  opening: 'Najdorf',
-  moveNumber: 6,
-  deviationMove: 'h3',
-  expectedMove: 'Be2',
-  opponent: 'BigBlunder420',
-  timeControl: 'Blitz 5+3',
-  result: 'loss', // 'win', 'loss', 'draw'
-  reviewed: false,
-};
+type Deviation = Database['public']['Tables']['opening_deviations']['Row'];
 
-function getStatusBadge(status: string) {
-  if (status === 'followed') {
+interface LastGameSummaryWidgetProps {
+  lastDeviation: Deviation | null;
+  isLoading: boolean;
+}
+
+const LastGameSummaryWidget: React.FC<LastGameSummaryWidgetProps> = ({ lastDeviation, isLoading }) => {
+  const { user } = useAuth();
+
+  if (isLoading) {
+    return <div className={`${styles.card} ${styles.skeleton}`}></div>;
+  }
+
+  if (!lastDeviation) {
     return (
-      <span className={styles.statusBadgeFollowed}>
-        <FaCheckCircle /> Followed
-      </span>
-    );
-  } else if (status === 'deviation') {
-    return (
-      <span className={styles.statusBadgeDeviation}>
-        <FaTimesCircle /> Deviation
-      </span>
-    );
-  } else {
-    return (
-      <span className={styles.statusBadgeUntracked}>
-        <FaMinusCircle /> Untracked
-      </span>
+      <div className={styles.card}>
+        <h3 className={styles.title}>Last Game</h3>
+        <div className={styles.emptyState}>
+          <span className={styles.emptyIcon}>🎮</span>
+          <p>Play a game to see your summary here!</p>
+        </div>
+      </div>
     );
   }
-}
 
-function getResultText(result: string) {
-  if (result === 'win') return '1-0';
-  if (result === 'loss') return '0-1';
-  return '½-½';
-}
+  const opening = lastDeviation.opening_name || 'Unknown Opening';
+  const headers = parsePgnHeaders(lastDeviation.pgn || '');
+  const result = headers.Result || '?:?';
+  const timeControl = headers.TimeControl || 'N/A';
+  const whitePlayer = headers.White || '';
+  const blackPlayer = headers.Black || '';
 
-const LastGameSummaryWidget: React.FC = () => {
+  const userActualColor = user?.lichessUsername?.toLowerCase() === whitePlayer.toLowerCase() ? 'white' : 'black';
+  const opponent = userActualColor === 'white' ? blackPlayer : whitePlayer;
+
+  const isUserDeviation = lastDeviation.first_deviator === 'user';
+
   return (
-    <div className={styles.lastGameSummaryWidget}>
-      <div className={styles.widgetTitle}>Last Game</div>
-      <div className={styles.headerRow}>
-        <div className={styles.status}>{getStatusBadge(mockLastGame.status)}</div>
-        <div className={styles.opening}>{mockLastGame.opening ? mockLastGame.opening : 'Unknown Opening'}</div>
+    <div className={styles.card}>
+      <div className={styles.header}>
+        <h3 className={styles.title}>Last Game</h3>
+        <span className={styles.opening}>{opening.split(':')[0]}</span>
       </div>
-      <div className={styles.metaRow}>
-        <span className={styles.opponent}>vs {mockLastGame.opponent}</span>
-        <span className={styles.timeControl}>{mockLastGame.timeControl}</span>
-        <span className={styles.result}>{getResultText(mockLastGame.result)}</span>
+
+      <div className={styles.gameInfo}>
+        <span className={isUserDeviation ? styles.statusDeviation : styles.statusFollowed}>
+          {isUserDeviation ? '❌ Deviation' : '✅ Prep Held'}
+        </span>
+        <span className={styles.opponent}>vs {opponent}</span>
+        <span>{timeControl}</span>
+        <span className={styles.result}>{result}</span>
       </div>
-      {mockLastGame.status === 'deviation' && !mockLastGame.reviewed && (
-        <div className={styles.reviewRow}>
-          <span className={styles.deviationInfo}>
-            Deviation on move {mockLastGame.moveNumber}: played <b>{mockLastGame.deviationMove}</b>, expected{' '}
-            <b>{mockLastGame.expectedMove}</b>
-          </span>
-          <button className={styles.reviewButton}>
-            <FaPlay style={{ marginRight: 6 }} /> Review Now
-          </button>
-        </div>
-      )}
+
+      <div className={styles.deviationDetails}>
+        {isUserDeviation ? (
+          <>
+            Deviation on move {lastDeviation.move_number}: played{' '}
+            <span className={styles.playedMove}>{lastDeviation.actual_move}</span>, expected{' '}
+            <span className={styles.expectedMove}>{lastDeviation.expected_move}</span>
+          </>
+        ) : (
+          <>
+            Opponent deviated on move {lastDeviation.move_number} with {lastDeviation.actual_move}
+          </>
+        )}
+      </div>
+
+      <Link to={`/deviation/${lastDeviation.id}`} className={styles.reviewButton}>
+        Review Now
+      </Link>
     </div>
   );
 };

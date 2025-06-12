@@ -4,7 +4,9 @@ This module provides utility functions for chess analysis.
 
 import os
 from typing import Optional
+
 import chess.pgn
+
 
 def get_player_color(recent_game: chess.pgn.Game, player_name: str) -> str:
     """

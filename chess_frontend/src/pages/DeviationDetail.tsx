@@ -90,9 +90,7 @@ const DeviationDetail: React.FC = () => {
           ) : (
             <>
               <span className={styles.deviationIcon}>✅</span>
-              <span className={styles.deviationBannerText}>
-                Opponent went off-book on move {deviation.move_number}
-              </span>
+              <span className={styles.deviationBannerText}>Opponent went off-book on move {deviation.move_number}</span>
             </>
           )}
         </div>

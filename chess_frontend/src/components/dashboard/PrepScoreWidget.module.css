@@ -1,70 +1,84 @@
-.prepScoreWidget {
+.card {
   background: white;
-  border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  padding: 1.5rem 2rem;
-  margin-bottom: 2rem;
+  border-radius: 14px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
   display: flex;
   flex-direction: column;
-  align-items: center;
+}
+
+.skeleton {
+  min-height: 180px;
+  background-color: #f3f4f6;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
 }
 
 .title {
-  font-size: 1.25rem;
+  font-size: 1.125rem;
   font-weight: 600;
-  color: #1f2937;
-  margin-bottom: 1rem;
+  text-align: center;
+  color: #374151;
+  margin-bottom: 1.5rem;
 }
 
-.scoresRow {
+.scores {
   display: flex;
-  gap: 2.5rem;
-  justify-content: center;
+  justify-content: space-around;
+  flex: 1;
 }
 
 .scoreItem {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.25rem;
+  gap: 0.5rem;
 }
 
-.scoreCount {
-  font-size: 2rem;
+.icon {
+  font-size: 1.75rem;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon.followed {
+  background: #dcfce7;
+}
+
+.icon.deviated {
+  background: #fee2e2;
+}
+
+.count {
+  font-size: 2.25rem;
   font-weight: 700;
   color: #1f2937;
-  margin: 0.25rem 0;
+  line-height: 1;
 }
 
-.scoreLabel {
-  font-size: 0.95rem;
+.label {
+  font-size: 0.875rem;
   color: #6b7280;
   font-weight: 500;
 }
 
-.heldIcon {
-  color: #22c55e;
-  font-size: 1.5rem;
-}
-
-.deviatedIcon {
-  color: #ef4444;
-  font-size: 1.5rem;
-}
-
-.untrackedIcon {
-  color: #a1a1aa;
-  font-size: 1.5rem;
-}
-
-@media (max-width: 600px) {
-  .prepScoreWidget {
-    padding: 1rem;
-  }
-  .scoresRow {
-    gap: 1.25rem;
-  }
-  .scoreCount {
-    font-size: 1.3rem;
-  }
+.footerText {
+  text-align: center;
+  font-size: 0.8rem;
+  color: #9ca3af;
+  margin-top: 1.5rem;
+  margin-bottom: -0.5rem;
 }

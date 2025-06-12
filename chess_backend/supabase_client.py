@@ -122,26 +122,26 @@ def get_user_id_from_username(username: str) -> str:
 
 
 def insert_deviation_to_db(deviation: Dict[str, Any], pgn: str, username: str) -> None:
+    """Saves a deviation record to the database."""
     client = get_admin_client()
     game_id = extract_game_id_from_pgn(pgn)
     user_id = get_user_id_from_username(username)
-
-    # This logic already uses .get(), which works perfectly with the dict
-    # from .model_dump(). No functional changes needed here.
+    
     data = {
         "user_id": user_id,
         "game_id": game_id,
+        "pgn": pgn,
+        "opening_name": deviation.get("opening_name"), # Still get opening_name
         "position_fen": deviation.get("board_fen"),
         "expected_move": deviation.get("reference_san"),
         "actual_move": deviation.get("deviation_san"),
         "move_number": deviation.get("move_number"),
         "color": deviation.get("player_color"),
-        "pgn": pgn,
         "deviation_uci": deviation.get("deviation_uci"),
         "reference_uci": deviation.get("reference_uci"),
         "first_deviator": deviation.get("first_deviator"),
     }
-    client.table("opening_deviations").upsert(data).execute()
+    client.table("opening_deviations").upsert(data, on_conflict="game_id, user_id").execute()
 
 
 def get_deviations_for_user(user_id: str, limit: int = 10, offset: int = 0) -> list[Dict[str, Any]]:

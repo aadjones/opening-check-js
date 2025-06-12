@@ -54,17 +54,6 @@ const GamesList: React.FC<GamesListProps> = ({ games, isLoading, onGameClick }) 
     ids.some(id => !id)
   );
 
-  // Helper function to construct game URL with orientation and ply
-  const constructGameUrl = (game: GameListItem) => {
-    if (!game.gameId) return '';
-    const baseUrl = `https://lichess.org/${game.gameId}`;
-    if (!game.hasDeviation || !game.deviation) return baseUrl;
-
-    const userColor = game.deviation.color?.toLowerCase() || 'white';
-    const plyNumber = (game.deviation.move_number - 1) * 2 + (game.deviation.color?.toLowerCase() === 'black' ? 1 : 0);
-    return `${baseUrl}/${userColor}#${plyNumber}`;
-  };
-
   if (isLoading) {
     return (
       <div className={styles.gamesList} data-testid="games-list">
@@ -129,22 +118,13 @@ const GamesList: React.FC<GamesListProps> = ({ games, isLoading, onGameClick }) 
           </div>
 
           <div className={styles.gameActions}>
-            <a
-              href={constructGameUrl(game)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={styles.lichessLink}
-              onClick={e => e.stopPropagation()}
-            >
-              View on Lichess →
-            </a>
             {game.hasDeviation && (
               <Link
                 to={`/deviation/${game.deviation?.id ?? game.id}`}
                 className={styles.deviationLink}
                 onClick={e => e.stopPropagation()}
               >
-                Review Deviation →
+                Review →
               </Link>
             )}
           </div>
