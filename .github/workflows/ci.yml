@@ -29,7 +29,6 @@ jobs:
         with:
           path: |
             ~/.cache/pip
-            chess_backend/env
           key: ${{ runner.os }}-python-${{ hashFiles('chess_backend/requirements.txt') }}
           restore-keys: |
             ${{ runner.os }}-python-
