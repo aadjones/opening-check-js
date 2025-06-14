@@ -1,0 +1,26 @@
+{
+  "project": {
+    "name": "Chess Opening Deviation Analyzer",
+    "description": "Analyzes chess games to find opening deviations and their outcomes"
+  },
+  "supabase": {
+    "project_id": "fsmtmtconmgujlhmkqgp",
+    "project_name": "OutOfBook",
+    "region": "us-east-2",
+    "database_url": "db.fsmtmtconmgujlhmkqgp.supabase.co",
+    "tables": [
+      "profiles",
+      "lichess_studies", 
+      "opening_deviations",
+      "review_queue",
+      "sync_preferences"
+    ],
+    "description": "Production database for chess opening analysis and deviation tracking"
+  },
+  "mcp": {
+    "configured": true,
+    "server_type": "supabase",
+    "scope": "global",
+    "auth_method": "personal_access_token"
+  }
+} 

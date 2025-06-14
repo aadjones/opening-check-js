@@ -139,6 +139,7 @@ For detailed frontend testing information, see `chess_frontend/README-TESTING.md
 - Frontend is built with React, TypeScript, and Vite
 - Backend is built with Python, FastAPI, and python-chess
 - The Makefile automatically detects your OS and uses appropriate commands
+- **AI Database Assistant**: MCP (Model Context Protocol) is configured for direct AI interaction with Supabase - see `SETUP_INSTRUCTIONS.md` for details
 
 ## Cross-Platform Notes
 
