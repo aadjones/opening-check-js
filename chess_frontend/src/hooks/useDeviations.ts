@@ -24,9 +24,10 @@ interface UseDeviationsResult {
 /**
  * Hook for fetching and managing user deviations
  * Now uses the backend /api/deviations endpoint.
+ * By default, only shows deviations from currently active studies.
  * TODO: Remove user_id param when backend auth is ready.
  */
-export function useDeviations(options: UseDeviationsOptions = {}): UseDeviationsResult {
+export function useDeviations(options: UseDeviationsOptions = {}, refreshKey?: unknown): UseDeviationsResult {
   const { session } = useAuth();
   const [deviations, setDeviations] = useState<Deviation[]>([]);
   const [loading, setLoading] = useState(true);
@@ -80,9 +81,10 @@ export function useDeviations(options: UseDeviationsOptions = {}): UseDeviations
 
   // Initial fetch
   useEffect(() => {
+    console.log('[useDeviations] useEffect triggered, refreshKey:', refreshKey);
     fetchDeviations(0, false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session?.user?.id, options.limit]);
+  }, [session?.user?.id, options.limit, refreshKey]);
 
   // Load more function
   const loadMore = useCallback(() => fetchDeviations(offset, true), [fetchDeviations, offset]);

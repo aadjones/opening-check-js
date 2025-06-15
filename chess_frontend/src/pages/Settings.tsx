@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { useAuth } from '../hooks/useAuth';
-import { getUserStudies, type UserStudies } from '../lib/auth/onboardingUtils';
 import { extractStudyId } from '../lib/lichess/studyValidation';
 import styles from './Settings.module.css';
 import { fetchSupabaseJWT } from '../lib/auth/fetchSupabaseJWT';
 import { createClient } from '@supabase/supabase-js';
+import { saveUserStudySelections, getUserStudySelections } from '../lib/database/studyOperations';
+import { useTriggerStudyUpdate } from '../contexts/useStudyUpdate';
 
 interface SyncPreferences {
   sync_frequency_minutes: number;
@@ -18,7 +19,6 @@ const Settings: React.FC = () => {
   const { session } = useAuth();
   const [whiteStudy, setWhiteStudy] = useState('');
   const [blackStudy, setBlackStudy] = useState('');
-  const [originalStudies, setOriginalStudies] = useState<UserStudies | null>(null);
   const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   const [timeControls, setTimeControls] = useState({
@@ -42,17 +42,23 @@ const Settings: React.FC = () => {
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncMessage, setSyncMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
+  const [isSavingStudies, setIsSavingStudies] = useState(false);
+
+  const triggerStudyUpdate = useTriggerStudyUpdate();
+
   // Load user's studies on component mount
   useEffect(() => {
     if (session?.user?.id) {
-      // session.user.id is always the UUID
-      const userStudies = getUserStudies(session.user.id);
-      if (userStudies) {
-        setOriginalStudies(userStudies);
-        // Convert study IDs back to URLs for display
-        setWhiteStudy(userStudies.whiteStudyId ? `https://lichess.org/study/${userStudies.whiteStudyId}` : '');
-        setBlackStudy(userStudies.blackStudyId ? `https://lichess.org/study/${userStudies.blackStudyId}` : '');
-      }
+      (async () => {
+        try {
+          const studies = await getUserStudySelections(session.user.id as string);
+          console.log('[Settings] Loaded studies from DB:', studies);
+          setWhiteStudy(studies.whiteStudyId ? `https://lichess.org/study/${studies.whiteStudyId}` : '');
+          setBlackStudy(studies.blackStudyId ? `https://lichess.org/study/${studies.blackStudyId}` : '');
+        } catch (err) {
+          console.error('[Settings] Failed to load studies from DB:', err);
+        }
+      })();
     }
   }, [session?.user?.id]);
 
@@ -205,9 +211,17 @@ const Settings: React.FC = () => {
           },
         }
       );
-      const { error } = await supabaseWithAuth.from('sync_preferences').update(updates).eq('user_id', session.user.id);
+      // If enabling auto-sync, always set frequency to 5
+      const updateObj = { ...updates };
+      if (updates.is_auto_sync_enabled) {
+        updateObj.sync_frequency_minutes = 5;
+      }
+      const { error } = await supabaseWithAuth
+        .from('sync_preferences')
+        .update(updateObj)
+        .eq('user_id', session.user.id);
       if (error) throw error;
-      setSyncPreferences(prev => ({ ...prev, ...updates }));
+      setSyncPreferences(prev => ({ ...prev, ...updateObj }));
       setSaveMessage({ type: 'success', text: 'Sync preferences updated!' });
     } catch (error) {
       console.error('Error updating sync preferences:', error);
@@ -215,8 +229,68 @@ const Settings: React.FC = () => {
     }
   };
 
+  const handleSaveStudies = async () => {
+    if (!session?.user?.id) {
+      setSaveMessage({ type: 'error', text: 'You must be logged in to save studies.' });
+      return;
+    }
+    setIsSavingStudies(true);
+    setSaveMessage(null);
+    try {
+      // Extract study IDs from URLs
+      const whiteId = extractStudyId(whiteStudy);
+      const blackId = extractStudyId(blackStudy);
+      console.log('[Settings] Saving studies:', { whiteStudy, blackStudy, whiteId, blackId });
+      if (!whiteId && !blackId) {
+        throw new Error('Please enter at least one valid study URL.');
+      }
+      const supabaseJwt = await fetchSupabaseJWT({
+        sub: session.user.id!,
+        email: session.user.email || undefined,
+        lichess_username: session.user.lichessUsername || undefined,
+      });
+      const supabaseWithAuth = createClient(
+        import.meta.env.VITE_SUPABASE_URL!,
+        import.meta.env.VITE_SUPABASE_ANON_KEY!,
+        {
+          global: {
+            headers: {
+              Authorization: `Bearer ${supabaseJwt}`,
+            },
+          },
+        }
+      );
+      // Save studies (activates new, deactivates old)
+      await saveUserStudySelections(session.user.id, whiteId, blackId, supabaseWithAuth);
+      // Trigger deviation analysis for last 10 games
+      const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/analyze-games`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${supabaseJwt}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ scope: 'recent' }),
+      });
+      const data = await res.json();
+      console.log('[Settings] Deviation analysis response:', data);
+      if (!res.ok) throw new Error(data.error || 'Deviation analysis failed');
+      setSaveMessage({ type: 'success', text: data.message || 'Studies updated and deviations recomputed!' });
+      console.log('[Settings] About to call triggerStudyUpdate, function exists:', !!triggerStudyUpdate);
+      triggerStudyUpdate();
+      console.log('[Settings] triggerStudyUpdate called');
+      // Optionally, update originalStudies state here if you want to reflect changes
+    } catch (err: unknown) {
+      let message = 'Failed to update studies';
+      if (err instanceof Error) message = err.message;
+      else if (typeof err === 'string') message = err;
+      setSaveMessage({ type: 'error', text: message });
+    } finally {
+      setIsSavingStudies(false);
+    }
+  };
+
   return (
-    <div className={`${styles.settings} dev`}>
+    <div className={styles.settings}>
       <header className={styles.header}>
         <h1 className={styles.title}>Settings</h1>
         <p className={styles.subtitle}>Configure your repertoire studies and preferences</p>
@@ -225,13 +299,6 @@ const Settings: React.FC = () => {
       <section className={styles.section}>
         <div className={styles.sectionHeader}>
           <h2 className={styles.sectionTitle}>Repertoire Studies</h2>
-          {originalStudies && (
-            <div className={styles.studyStatus}>
-              <span className={styles.statusText}>
-                ✅ Configured during onboarding on {new Date(originalStudies.completedAt).toLocaleDateString()}
-              </span>
-            </div>
-          )}
         </div>
         <div className={styles.sectionContent}>
           <div className={styles.formGroup}>
@@ -245,6 +312,7 @@ const Settings: React.FC = () => {
               placeholder="https://lichess.org/study/abc123"
               value={whiteStudy}
               onChange={e => setWhiteStudy(e.target.value)}
+              disabled={isSavingStudies}
             />
             {formatStudyDisplay(whiteStudy)}
             <div className={styles.helpText}>
@@ -263,6 +331,7 @@ const Settings: React.FC = () => {
               placeholder="https://lichess.org/study/xyz789"
               value={blackStudy}
               onChange={e => setBlackStudy(e.target.value)}
+              disabled={isSavingStudies}
             />
             {formatStudyDisplay(blackStudy)}
             <div className={styles.helpText}>
@@ -270,11 +339,20 @@ const Settings: React.FC = () => {
             </div>
           </div>
 
+          <button
+            className={isSavingStudies ? styles.saveButton : `${styles.saveButton} ${styles.saveButtonActive}`}
+            onClick={handleSaveStudies}
+            disabled={isSavingStudies}
+            style={{ marginTop: '1rem', minWidth: 120 }}
+          >
+            {isSavingStudies ? 'Saving…' : 'Save'}
+          </button>
+
           {saveMessage && <div className={`${styles.saveMessage} ${styles[saveMessage.type]}`}>{saveMessage.text}</div>}
         </div>
       </section>
 
-      <section className={styles.section}>
+      <section className={`${styles.section} dev`}>
         <div className={styles.sectionHeader}>
           <h2 className={styles.sectionTitle}>Game Filters</h2>
         </div>
@@ -339,35 +417,8 @@ const Settings: React.FC = () => {
                 Enable automatic game sync
               </label>
             </div>
-            <div className={styles.helpText}>Automatically sync your games from Lichess at regular intervals</div>
+            <div className={styles.helpText}>Automatically sync your games from Lichess every 5 minutes</div>
           </div>
-
-          {syncPreferences.is_auto_sync_enabled && (
-            <div className={styles.formGroup}>
-              <label className={styles.label}>Sync Frequency</label>
-              <div className={styles.radioGroup}>
-                {[
-                  { value: 5, label: 'Every 5 minutes' },
-                  { value: 60, label: 'Every hour' },
-                ].map(({ value, label }) => (
-                  <div key={value} className={styles.radioItem}>
-                    <input
-                      type="radio"
-                      id={`freq-${value}`}
-                      name="sync-frequency"
-                      className={styles.radio}
-                      value={value}
-                      checked={syncPreferences.sync_frequency_minutes === value}
-                      onChange={() => handleSyncPreferenceChange({ sync_frequency_minutes: value })}
-                    />
-                    <label htmlFor={`freq-${value}`} className={styles.radioLabel}>
-                      {label}
-                    </label>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
 
           <div className={styles.formGroup}>
             <div className={styles.syncStatus}>

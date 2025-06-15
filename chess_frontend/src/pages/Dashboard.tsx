@@ -2,6 +2,7 @@ import React from 'react';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { useAuth } from '../hooks/useAuth';
 import { useDeviations } from '../hooks/useDeviations';
+import { useStudyUpdate } from '../contexts/useStudyUpdate';
 import styles from './Dashboard.module.css';
 import GamesList, { type GameListItem } from '../components/GamesList';
 import { parsePgnHeaders } from '../utils/pgn';
@@ -12,8 +13,9 @@ import InsightsBlock from '../components/dashboard/InsightsBlock';
 const Dashboard: React.FC = () => {
   usePageTitle('Dashboard');
   const { user } = useAuth();
+  const lastStudyUpdate = useStudyUpdate();
   // Fetch a decent number of deviations for the weekly score.
-  const { deviations, loading: deviationsLoading } = useDeviations({ limit: 25 });
+  const { deviations, loading: deviationsLoading } = useDeviations({ limit: 10 }, lastStudyUpdate);
 
   // Find the most recent deviation for the "Last Game" card.
   const lastDeviation = deviations.length > 0 ? deviations[0] : null;

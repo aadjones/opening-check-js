@@ -156,3 +156,12 @@
     width: 100%;
   }
 }
+
+.markedMessage {
+  color: #4caf50;
+  font-weight: 600;
+  font-size: 1.1rem;
+  padding: 1.5rem 0;
+  text-align: center;
+  transition: opacity 0.3s;
+}
