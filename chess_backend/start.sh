@@ -30,7 +30,12 @@ echo -e "\n🔗  PUBLIC URL → $URL"
 echo "▶︎ updating BACKEND_URL secret…"
 supabase secrets set BACKEND_URL="$URL" >/dev/null
 echo "▶︎ redeploying edge functions…"
-supabase functions deploy --project-ref "${PROJECT_REF}" sign-jwt analyze-games >/dev/null
+cd "$(dirname "$0")/.."
+for fn in $(ls supabase/functions); do
+  if [ -d "supabase/functions/$fn" ] && [[ "$fn" != _shared ]]; then
+    supabase functions deploy --project-ref "${PROJECT_REF}" "$fn" >/dev/null
+  fi
+done
 echo "✅  Edge functions deployed successfully!"
 echo "   • sign-jwt: Ready to authenticate users"
 echo "   • analyze-games: Ready to process game analysis"

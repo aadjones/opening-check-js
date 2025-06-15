@@ -512,3 +512,11 @@
 .deviationBannerText {
   flex: 1;
 }
+
+.successText {
+  color: #4caf50;
+  margin-top: 0.5rem;
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: opacity 0.3s;
+}

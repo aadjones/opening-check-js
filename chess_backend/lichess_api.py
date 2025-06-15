@@ -7,6 +7,7 @@ import dataclasses
 import json
 import logging
 import re
+import time
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
@@ -17,6 +18,10 @@ import pgn_utils
 
 LOG = logging.getLogger(__name__)
 
+# Feature flags (mirrored from frontend featureFlags.ts)
+ENABLE_LICHESS_STUDY_THROTTLE = True
+LICHESS_THROTTLE_DELAY_SECONDS = 1
+
 
 @dataclasses.dataclass
 class Study:
@@ -24,9 +29,20 @@ class Study:
 
     @staticmethod
     def fetch_id(study_id: str) -> "Study":
+        if ENABLE_LICHESS_STUDY_THROTTLE:
+            LOG.info(
+                f"[THROTTLE] Sleeping {LICHESS_THROTTLE_DELAY_SECONDS}s before fetching study due to feature flag."
+            )
+            time.sleep(LICHESS_THROTTLE_DELAY_SECONDS)
         url = f"https://lichess.org/api/study/{study_id}.pgn"
         with httpx.Client() as client:
-            response = client.get(url)
+            response = client.get(
+                url,
+                headers={
+                    "User-Agent": "OutOfBook/1.0 (https://github.com/aadjones/opening-check-js; aaron.demby.jones@gmail.com)",
+                    "Accept": "text/plain",
+                },
+            )
             if response.status_code != 200:
                 raise Exception(f"Failed to fetch study. Status code: {response.status_code}")
             return Study(chapters=pgn_utils.pgn_to_pgn_list(response.text))
@@ -43,7 +59,12 @@ def get_last_game_ids(username: str, max_games: int, since: Optional[datetime] =
     """Fetches a list of the most recent game IDs for a user."""
     LOG.info("Fetching last %s game IDs for %s", max_games, username)
     try:
-        params: Dict[str, Any] = {"max": max_games, "rated": "both"}
+        if ENABLE_LICHESS_STUDY_THROTTLE:
+            LOG.info(
+                f"[THROTTLE] Sleeping {LICHESS_THROTTLE_DELAY_SECONDS}s before fetching game IDs due to feature flag."
+            )
+            time.sleep(LICHESS_THROTTLE_DELAY_SECONDS)
+        params: Dict[str, Any] = {"max": max_games}
         if since:
             params["since"] = int(since.timestamp() * 1000)
 
@@ -51,7 +72,10 @@ def get_last_game_ids(username: str, max_games: int, since: Optional[datetime] =
             response = client.get(
                 f"https://lichess.org/api/games/user/{username}",
                 params=params,
-                headers={"Accept": "application/x-ndjson"},  # We ask for NDJSON to get IDs
+                headers={
+                    "Accept": "application/x-ndjson",
+                    "User-Agent": "OutOfBook/1.0 (https://github.com/aadjones/opening-check-js; aaron.demby.jones@gmail.com)",
+                },
             )
             response.raise_for_status()
 
@@ -71,6 +95,11 @@ def get_game_data_by_id(game_id: str) -> Optional[Dict[str, Any]]:
     """
     LOG.info("Fetching game data for ID: %s", game_id)
     try:
+        if ENABLE_LICHESS_STUDY_THROTTLE:
+            LOG.info(
+                f"[THROTTLE] Sleeping {LICHESS_THROTTLE_DELAY_SECONDS}s before fetching game data due to feature flag."
+            )
+            time.sleep(LICHESS_THROTTLE_DELAY_SECONDS)
         params: Dict[str, Any] = {
             "pgnInJson": "true",  # Get PGN inside a JSON object
             "tags": "true",
@@ -78,7 +107,12 @@ def get_game_data_by_id(game_id: str) -> Optional[Dict[str, Any]]:
         }
         with httpx.Client() as client:
             response = client.get(
-                f"https://lichess.org/game/export/{game_id}", params=params, headers={"Accept": "application/json"}
+                f"https://lichess.org/game/export/{game_id}",
+                params=params,
+                headers={
+                    "Accept": "application/json",
+                    "User-Agent": "OutOfBook/1.0 (https://github.com/aadjones/opening-check-js; aaron.demby.jones@gmail.com)",
+                },
             )
             response.raise_for_status()
             return response.json()  # type: ignore[no-any-return] # Lichess API returns Dict[str, Any]

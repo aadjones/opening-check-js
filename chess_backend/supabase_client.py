@@ -24,6 +24,7 @@ Server -> Supabase Client -> Database
 
 import os
 import re
+from datetime import datetime
 from typing import Any, Dict, Optional
 
 from dotenv import load_dotenv
@@ -111,6 +112,27 @@ def extract_game_id_from_pgn(pgn: str) -> Optional[str]:
     return None
 
 
+def extract_game_date_from_pgn(pgn: str) -> Optional[datetime]:
+    """Extract the game date from PGN headers and convert to datetime."""
+    # Try UTCDate first (more reliable), then fall back to Date
+    date_match = re.search(r'\[UTCDate "([^"]+)"\]', pgn)
+    if not date_match:
+        date_match = re.search(r'\[Date "([^"]+)"\]', pgn)
+
+    if date_match:
+        date_str = date_match.group(1)
+        try:
+            # Parse date in format "YYYY.MM.DD"
+            return datetime.strptime(date_str, "%Y.%m.%d")
+        except ValueError:
+            try:
+                # Try alternative format "YYYY-MM-DD"
+                return datetime.strptime(date_str, "%Y-%m-%d")
+            except ValueError:
+                return None
+    return None
+
+
 def get_user_id_from_username(username: str) -> str:
     client = get_admin_client()
     response = client.table("profiles").select("id").eq("lichess_username", username).limit(1).execute()
@@ -121,14 +143,40 @@ def get_user_id_from_username(username: str) -> str:
     raise Exception(f"User not found for username: {username}")
 
 
-def insert_deviation_to_db(deviation: Dict[str, Any], pgn: str, username: str) -> None:
+def get_study_id_from_url(study_url: str, user_id: str) -> Optional[str]:
+    """Get the study ID from the lichess_studies table based on study URL and user."""
+    client = get_admin_client()
+    response = (
+        client.table("lichess_studies")
+        .select("id")
+        .eq("study_url", study_url)
+        .eq("user_id", user_id)
+        .eq("is_active", True)
+        .limit(1)
+        .execute()
+    )
+    data = response.data
+    if data and len(data) > 0:
+        study_id = data[0].get("id")
+        if isinstance(study_id, str):
+            return study_id
+    return None
+
+
+def insert_deviation_to_db(deviation: Dict[str, Any], pgn: str, username: str, study_url: Optional[str] = None) -> None:
     """Saves a deviation record to the database."""
     client = get_admin_client()
     game_id = extract_game_id_from_pgn(pgn)
     user_id = get_user_id_from_username(username)
 
+    # Get study_id if study_url is provided
+    study_id = None
+    if study_url:
+        study_id = get_study_id_from_url(study_url, user_id)
+
     data = {
         "user_id": user_id,
+        "study_id": study_id,
         "game_id": game_id,
         "pgn": pgn,
         "opening_name": deviation.get("opening_name"),  # Still get opening_name
@@ -145,18 +193,64 @@ def insert_deviation_to_db(deviation: Dict[str, Any], pgn: str, username: str) -
 
 
 def get_deviations_for_user(
-    user_id: str, limit: int = 10, offset: int = 0, review_status: Optional[str] = None
+    user_id: str,
+    limit: int = 10,
+    offset: int = 0,
+    review_status: Optional[str] = None,
+    active_studies_only: bool = True,
 ) -> list[Dict[str, Any]]:
     """
     Fetch deviations for a given user_id with pagination and optional review_status filter.
+    If active_studies_only is True, only returns deviations from active studies.
     Returns a list of dicts, each representing a row from opening_deviations.
+    Deviations are ordered by actual game date (from PGN) rather than detection date.
     """
     client = get_default_client()
-    query = client.table("opening_deviations").select("*").eq("user_id", user_id)
+
+    if active_studies_only:
+        # Get active study IDs for this user
+        active_studies_response = (
+            client.table("lichess_studies").select("id").eq("user_id", user_id).eq("is_active", True).execute()
+        )
+        active_study_ids = [study["id"] for study in active_studies_response.data or []]
+
+        # If no active studies, return empty list
+        if not active_study_ids:
+            return []
+
+        # Query deviations that belong to active studies
+        query = client.table("opening_deviations").select("*").eq("user_id", user_id).in_("study_id", active_study_ids)
+    else:
+        # Query all deviations for the user
+        query = client.table("opening_deviations").select("*").eq("user_id", user_id)
+
     if review_status:
         query = query.eq("review_status", review_status)
-    response = query.order("id", desc=True).limit(limit).offset(offset).execute()
-    return response.data or []
+
+    # Fetch all deviations (we'll sort and paginate in Python)
+    response = query.execute()
+    deviations = response.data or []
+
+    # Sort by game date from PGN (most recent first)
+    def get_game_date(deviation: Dict[str, Any]) -> datetime:
+        game_date = extract_game_date_from_pgn(deviation.get("pgn", ""))
+        if game_date:
+            return game_date
+        # Fallback to detected_at if no game date found
+        detected_at = deviation.get("detected_at")
+        if detected_at:
+            try:
+                return datetime.fromisoformat(detected_at.replace("Z", "+00:00"))
+            except ValueError:
+                pass
+        # Final fallback to a very old date
+        return datetime(1900, 1, 1)
+
+    # Sort by game date (most recent first)
+    deviations.sort(key=get_game_date, reverse=True)
+
+    # Apply pagination
+    return deviations[offset : offset + limit]
 
 
 def get_deviation_by_id(deviation_id: str) -> Optional[Dict[str, Any]]:

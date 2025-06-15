@@ -223,12 +223,20 @@ async def get_deviations(
     limit: int = Query(10, ge=1, le=100, description="Number of deviations to fetch."),
     offset: int = Query(0, ge=0, description="Offset for pagination."),
     review_status: Optional[str] = Query(None, description="Filter by review status (needs_review, reviewed, etc.)"),
+    active_studies_only: bool = Query(True, description="Only show deviations from active studies."),
 ) -> List[OpeningDeviation]:
     """
     Fetch deviations for a user with pagination and optional review_status filter.
+    By default, only shows deviations from active studies.
     TODO: Replace user_id query param with extraction from authentication context (JWT/session) for production security.
     """
-    rows = get_deviations_for_user(user_id=user_id, limit=limit, offset=offset, review_status=review_status)
+    rows = get_deviations_for_user(
+        user_id=user_id,
+        limit=limit,
+        offset=offset,
+        review_status=review_status,
+        active_studies_only=active_studies_only,
+    )
     # Convert each dict (row) into an OpeningDeviation instance.
     return [OpeningDeviation(**row) for row in rows]
 

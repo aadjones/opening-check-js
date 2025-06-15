@@ -1,3 +1,4 @@
+import time
 from datetime import datetime
 from typing import List, Optional, Tuple
 
@@ -13,6 +14,10 @@ from supabase_client import insert_deviation_to_db
 
 # Configure logging
 logger = setup_logging(__name__)
+
+# Feature flags (mirrored from frontend featureFlags.ts)
+ENABLE_LICHESS_STUDY_THROTTLE = True
+LICHESS_THROTTLE_DELAY_SECONDS = 1
 
 """
 Chess Game Analysis Service
@@ -56,13 +61,26 @@ def perform_game_analysis(
         logger.info("Building White and Black repertoire tries...")
         try:
             # Build White Trie
+            if ENABLE_LICHESS_STUDY_THROTTLE:
+                logger.info(
+                    f"[THROTTLE] Sleeping {LICHESS_THROTTLE_DELAY_SECONDS}s before fetching white study due to feature flag."
+                )
+                time.sleep(LICHESS_THROTTLE_DELAY_SECONDS)
             white_study = lichess_api.Study.fetch_url(str(study_url_white))
             white_trie = RepertoireTrie()
             for chapter in white_study.chapters:
                 white_trie.add_study_chapter(chapter)
             logger.info(f"White trie built. Root has {len(white_trie.root.children)} starting moves.")
+            # Debug: print root moves (UCI and SAN)
+            root_moves = [(uci, node.san) for uci, node in white_trie.root.children.items()]
+            logger.info(f"[DEBUG] White trie root moves (UCI, SAN): {root_moves}")
 
             # Build Black Trie
+            if ENABLE_LICHESS_STUDY_THROTTLE:
+                logger.info(
+                    f"[THROTTLE] Sleeping {LICHESS_THROTTLE_DELAY_SECONDS}s before fetching black study due to feature flag."
+                )
+                time.sleep(LICHESS_THROTTLE_DELAY_SECONDS)
             black_study = lichess_api.Study.fetch_url(str(study_url_black))
             black_trie = RepertoireTrie()
             for chapter in black_study.chapters:
@@ -100,8 +118,15 @@ def perform_game_analysis(
                     deviation_dict = deviation_info.model_dump()
                     deviation_dict["opening_name"] = opening_name
 
-                    # Call the DB function with the dictionary, PGN string, and username
-                    insert_deviation_to_db(deviation_dict, pgn_string, username)
+                    # Determine which study URL to use based on player color
+                    study_url = None
+                    if player_color == "White":
+                        study_url = study_url_white
+                    elif player_color == "Black":
+                        study_url = study_url_black
+
+                    # Call the DB function with the dictionary, PGN string, username, and study URL
+                    insert_deviation_to_db(deviation_dict, pgn_string, username, study_url)
 
                 results.append((deviation_info, pgn_string))
 

@@ -9,6 +9,7 @@ import type { Database } from '../types/supabase';
 import { SHOW_MOVE_COMPARISON_CARDS, SHOW_REPLAY_PREP_LINE_BUTTON } from '../featureFlags';
 import DeviationMoveControls from '../components/chess/DeviationMoveControls';
 import type { DeviationMoveControlState } from '../components/chess/DeviationMoveControls';
+import { supabase } from '../lib/supabase';
 
 type Deviation = Database['public']['Tables']['opening_deviations']['Row'];
 
@@ -17,6 +18,10 @@ const DeviationDetail: React.FC = () => {
   const navigate = useNavigate();
   const { deviation, loading, error, refetch } = useDeviationById(id);
   const [moveControlState, setMoveControlState] = React.useState<DeviationMoveControlState | null>(null);
+  const [marking, setMarking] = React.useState(false);
+  const [marked, setMarked] = React.useState(false);
+  const [showSuccess, setShowSuccess] = React.useState(false);
+  const [errorMsg, setErrorMsg] = React.useState<string | null>(null);
 
   // Set page title dynamically
   usePageTitle(deviation ? `Deviation on Move ${deviation.move_number}` : 'Deviation Details');
@@ -74,6 +79,25 @@ const DeviationDetail: React.FC = () => {
     : '';
   const playedMove = deviation.actual_move;
   const createdAt = new Date(deviation.detected_at ?? '');
+
+  const handleMarkReviewed = async () => {
+    if (!deviation?.id) return;
+    setMarking(true);
+    setErrorMsg(null);
+    const { error } = await supabase
+      .from('opening_deviations')
+      .update({ review_status: 'reviewed' })
+      .eq('id', deviation.id);
+    setMarking(false);
+    if (error) {
+      setErrorMsg('Failed to mark as reviewed.');
+    } else {
+      setMarked(true);
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 2000);
+      refetch();
+    }
+  };
 
   return (
     <div className={styles.deviationDetailOuter}>
@@ -145,7 +169,21 @@ const DeviationDetail: React.FC = () => {
         <div className={styles.actionButtonsPanel}>
           {SHOW_REPLAY_PREP_LINE_BUTTON && <button className={styles.primaryAction}>▶️ Replay My Prep Line</button>}
           <div className={styles.primaryActionsGroup}>
-            <button className={`${styles.primaryAction} dev`}>✓ Mark Reviewed</button>
+            <button
+              type="button"
+              className={styles.primaryAction}
+              onClick={handleMarkReviewed}
+              disabled={marking || marked}
+              style={{
+                backgroundColor: marked ? '#4caf50' : undefined,
+                color: marked ? 'white' : undefined,
+                cursor: marked ? 'default' : undefined,
+                border: marked ? 'none' : undefined,
+                transition: 'background 0.2s',
+              }}
+            >
+              {marked ? '✓ Reviewed' : marking ? 'Marking...' : '✓ Mark Reviewed'}
+            </button>
             <button className={`${styles.primaryAction} dev`}>⭐ Adopt Move</button>
             <button className={`${styles.primaryAction} dev`}>🚫 Ignore Line</button>
           </div>
@@ -174,6 +212,9 @@ const DeviationDetail: React.FC = () => {
           <p>Game ID: {deviation.game_id}</p>
           <p>Created: {createdAt.toLocaleString()}</p>
         </details>
+
+        {showSuccess && <div className={styles.successText}>Marked as reviewed!</div>}
+        {errorMsg && <div className={styles.errorText}>{errorMsg}</div>}
       </div>
     </div>
   );
