@@ -5,7 +5,12 @@ This module provides utility functions for chess analysis.
 import os
 from typing import Optional
 
+from logging_config import setup_logging
+
 import chess.pgn
+
+
+logger = setup_logging(__name__)
 
 
 def get_player_color(recent_game: chess.pgn.Game, player_name: str) -> str:
@@ -19,14 +24,16 @@ def get_player_color(recent_game: chess.pgn.Game, player_name: str) -> str:
     white_player = recent_game.headers["White"]
     black_player = recent_game.headers["Black"]
 
-    print(f"[get_player_color] player_name: '{player_name}' | White: '{white_player}' | Black: '{black_player}'")
+    logger.debug(
+        f"[get_player_color] player_name: '{player_name}' | White: '{white_player}' | Black: '{black_player}'"
+    )
     if player_name.strip().lower() == white_player.strip().lower():
-        print("[get_player_color] Matched as White")
+        logger.debug("[get_player_color] Matched as White")
         return "White"
     if player_name.strip().lower() == black_player.strip().lower():
-        print("[get_player_color] Matched as Black")
+        logger.debug("[get_player_color] Matched as Black")
         return "Black"
-    print(f"[get_player_color] No match for player_name: '{player_name}'")
+    logger.debug(f"[get_player_color] No match for player_name: '{player_name}'")
     # Else:
     raise Exception(f"Could not find match {player_name} to the game!")
 
@@ -45,8 +52,8 @@ def write_pgn(pgn_data: str, filename: str) -> None:
     with open(full_path, "wb") as f:
         f.write(pgn_data.encode())  # Convert string to bytes
 
-    # Print confirmation message
-    print(f"PGN data successfully saved to: {full_path}")
+    # Log confirmation message
+    logger.info(f"PGN data successfully saved to: {full_path}")
 
 
 def read_pgn(pgn_file_path: str) -> Optional[chess.pgn.Game]:

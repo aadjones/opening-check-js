@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import Dict, List, Optional
 
+from logging_config import setup_logging
+
 import chess
 import chess.pgn
 
@@ -21,6 +23,9 @@ class TrieNode:
 
     def __repr__(self) -> str:
         return f"TrieNode(ply={self.ply}, san={self.san!r}, children={len(self.children)})"
+
+
+logger = setup_logging(__name__)
 
 
 class RepertoireTrie:
@@ -42,7 +47,9 @@ class RepertoireTrie:
 
             if child_node is None:
                 # Use the 'move_san' variable we just created for the log message.
-                print(f"[Trie] Adding new node: {move_san} (ply {temp_board.ply() + 1}) at UCI {uci}")
+                logger.debug(
+                    f"[Trie] Adding new node: {move_san} (ply {temp_board.ply() + 1}) at UCI {uci}"
+                )
                 child_node = TrieNode(ply=temp_board.ply() + 1, san=move_san)
                 current_node.children[uci] = child_node
 
@@ -52,11 +59,13 @@ class RepertoireTrie:
             current_node = child_node
 
     def add_study_chapter(self, chapter: chess.pgn.Game) -> None:
-        print(f"[Trie] Processing chapter starting from FEN: {chapter.headers.get('FEN', 'startpos')}")
+        logger.info(
+            f"[Trie] Processing chapter starting from FEN: {chapter.headers.get('FEN', 'startpos')}"
+        )
         board = chapter.board()
 
         sequences = list(walk_pgn_variations(chapter))
-        print(f"[Trie] Found {len(sequences)} move sequences in chapter.")
+        logger.info(f"[Trie] Found {len(sequences)} move sequences in chapter.")
 
         for move_sequence in sequences:
             # uci_path = " ".join([m.uci() for m in move_sequence])
