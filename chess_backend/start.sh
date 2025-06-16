@@ -21,7 +21,15 @@ trap 'echo stopping...; kill $PY_PID $NGROK_PID 2>/dev/null || true' INT TERM
 # ───────────────────────────────────────────────
 echo -n "⏳ waiting for ngrok…"
 until curl -s http://localhost:4040/api/tunnels >/dev/null 2>&1; do sleep 1; done
-URL=$(curl -s http://localhost:4040/api/tunnels | jq -r '.tunnels[0].public_url')
+
+# jq is used to parse the ngrok JSON response. If it isn't installed, fall back
+# to Python so the script works on freshly provisioned systems without extra
+# troubleshooting.
+if command -v jq >/dev/null 2>&1; then
+  URL=$(curl -s http://localhost:4040/api/tunnels | jq -r '.tunnels[0].public_url')
+else
+  URL=$(curl -s http://localhost:4040/api/tunnels | python3 -c 'import sys, json; print(json.load(sys.stdin)["tunnels"][0]["public_url"])')
+fi
 echo -e "\n🔗  PUBLIC URL → $URL"
 
 # ───────────────────────────────────────────────
