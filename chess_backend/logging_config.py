@@ -114,5 +114,17 @@ def update_gitignore() -> None:
             f.write("\n# Log files\nlogs/\n*.log\n")
 
 
-# Update .gitignore when module is imported
-update_gitignore()
+
+if __name__ == "__main__":
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Utility helpers for logging configuration")
+    parser.add_argument(
+        "--update-gitignore",
+        action="store_true",
+        help="Add log file patterns to the project's .gitignore",
+    )
+    args = parser.parse_args()
+
+    if args.update_gitignore:
+        update_gitignore()
