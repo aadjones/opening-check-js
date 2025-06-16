@@ -32,6 +32,7 @@ cd chess_backend
 make test      # Run tests
 make format    # Format code
 make lint      # Lint code
+python -m logging_config --update-gitignore  # Update .gitignore with log patterns
 ```
 
 ### Frontend Commands
