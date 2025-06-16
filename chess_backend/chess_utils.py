@@ -5,10 +5,9 @@ This module provides utility functions for chess analysis.
 import os
 from typing import Optional
 
-from logging_config import setup_logging
-
 import chess.pgn
 
+from logging_config import setup_logging
 
 logger = setup_logging(__name__)
 
@@ -24,9 +23,7 @@ def get_player_color(recent_game: chess.pgn.Game, player_name: str) -> str:
     white_player = recent_game.headers["White"]
     black_player = recent_game.headers["Black"]
 
-    logger.debug(
-        f"[get_player_color] player_name: '{player_name}' | White: '{white_player}' | Black: '{black_player}'"
-    )
+    logger.debug(f"[get_player_color] player_name: '{player_name}' | White: '{white_player}' | Black: '{black_player}'")
     if player_name.strip().lower() == white_player.strip().lower():
         logger.debug("[get_player_color] Matched as White")
         return "White"
