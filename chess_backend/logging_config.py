@@ -114,7 +114,6 @@ def update_gitignore() -> None:
             f.write("\n# Log files\nlogs/\n*.log\n")
 
 
-
 if __name__ == "__main__":
     import argparse
 
