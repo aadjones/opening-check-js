@@ -200,10 +200,11 @@ def get_deviations_for_user(
     active_studies_only: bool = True,
 ) -> list[Dict[str, Any]]:
     """
-    Fetch deviations for a given user_id with pagination and optional review_status filter.
-    If active_studies_only is True, only returns deviations from active studies.
-    Returns a list of dicts, each representing a row from opening_deviations.
-    Deviations are ordered by actual game date (from PGN) rather than detection date.
+    Fetch deviations for ``user_id`` with pagination and an optional
+    ``review_status`` filter. If ``active_studies_only`` is ``True``, only
+    deviations from active studies are returned. Results are limited in the
+    database for scalability, but are ordered by the actual game date parsed
+    from the PGN after retrieval.
     """
     client = get_default_client()
 
@@ -227,30 +228,25 @@ def get_deviations_for_user(
     if review_status:
         query = query.eq("review_status", review_status)
 
-    # Fetch all deviations (we'll sort and paginate in Python)
-    response = query.execute()
+    response = query.order("detected_at", desc=True).range(offset, offset + limit - 1).execute()
+
     deviations = response.data or []
 
-    # Sort by game date from PGN (most recent first)
-    def get_game_date(deviation: Dict[str, Any]) -> datetime:
-        game_date = extract_game_date_from_pgn(deviation.get("pgn", ""))
+    def sort_key(dev: Dict[str, Any]) -> datetime:
+        game_date = extract_game_date_from_pgn(dev.get("pgn", ""))
         if game_date:
             return game_date
-        # Fallback to detected_at if no game date found
-        detected_at = deviation.get("detected_at")
-        if detected_at:
+        detected = dev.get("detected_at")
+        if detected:
             try:
-                return datetime.fromisoformat(detected_at.replace("Z", "+00:00"))
+                return datetime.fromisoformat(detected.replace("Z", "+00:00"))
             except ValueError:
                 pass
-        # Final fallback to a very old date
         return datetime(1900, 1, 1)
 
-    # Sort by game date (most recent first)
-    deviations.sort(key=get_game_date, reverse=True)
+    deviations.sort(key=sort_key, reverse=True)
 
-    # Apply pagination
-    return deviations[offset : offset + limit]
+    return deviations
 
 
 def get_deviation_by_id(deviation_id: str) -> Optional[Dict[str, Any]]:
