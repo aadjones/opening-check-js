@@ -1,5 +1,5 @@
 .card {
-  background: white;
+  background: var(--color-background-card);
   border-radius: 14px;
   padding: 1.5rem;
   box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
@@ -9,7 +9,7 @@
 
 .skeleton {
   min-height: 180px;
-  background-color: #f3f4f6;
+  background-color: var(--color-neutral-100);
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
@@ -27,7 +27,7 @@
   font-size: 1.125rem;
   font-weight: 600;
   text-align: center;
-  color: #374151;
+  color: var(--color-text);
   margin-bottom: 1.5rem;
 }
 
@@ -55,30 +55,30 @@
 }
 
 .icon.followed {
-  background: #dcfce7;
+  background: var(--color-success-light);
 }
 
 .icon.deviated {
-  background: #fee2e2;
+  background: var(--color-error-light);
 }
 
 .count {
   font-size: 2.25rem;
   font-weight: 700;
-  color: #1f2937;
+  color: var(--color-text);
   line-height: 1;
 }
 
 .label {
   font-size: 0.875rem;
-  color: #6b7280;
+  color: var(--color-text-muted);
   font-weight: 500;
 }
 
 .footerText {
   text-align: center;
   font-size: 0.8rem;
-  color: #9ca3af;
+  color: var(--color-text-muted);
   margin-top: 1.5rem;
   margin-bottom: -0.5rem;
 }

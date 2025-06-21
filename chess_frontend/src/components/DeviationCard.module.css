@@ -2,7 +2,7 @@
   display: flex;
   align-items: flex-start;
   padding: 1rem;
-  background: #fff;
+  background: var(--color-background-card);
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   margin-bottom: 1rem;
@@ -20,21 +20,22 @@
 .title {
   font-weight: bold;
   margin-bottom: 0.25rem;
+  color: var(--color-text);
 }
 
 .description {
-  color: #555;
+  color: var(--color-text-muted);
   margin-bottom: 0.25rem;
 }
 
 .meta {
   font-size: 0.9rem;
-  color: #888;
+  color: var(--color-text-muted);
   margin-bottom: 0.5rem;
 }
 
 .link {
-  color: #3b82f6;
+  color: var(--color-primary);
   text-decoration: none;
   font-size: 0.95rem;
 }
@@ -43,8 +44,8 @@
 }
 
 .deviation {
-  color: #e53e3e;
+  color: var(--color-error);
 }
 .success {
-  color: #22c55e;
+  color: var(--color-success);
 }

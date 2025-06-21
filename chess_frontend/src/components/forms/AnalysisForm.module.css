@@ -51,7 +51,7 @@
 
 .submitButton {
   background: var(--color-primary);
-  color: white;
+  color: var(--color-text-inverse);
   border: none;
   padding: var(--spacing-lg) var(--spacing-2xl);
   border-radius: var(--radius-lg);

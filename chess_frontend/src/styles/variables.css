@@ -4,11 +4,13 @@
   --color-primary: #5b8def;
   --color-primary-hover: #3a6ee8;
   --color-primary-light: rgba(91, 141, 239, 0.1);
+  --color-primary-dark: #2d5bd7;
 
   --color-secondary: #22314a;
   --color-text: #22314a;
   --color-text-muted: #666;
   --color-text-light: #999;
+  --color-text-inverse: #ffffff;
 
   --color-success: #10b981;
   --color-success-hover: #059669;
@@ -111,4 +113,73 @@
   --z-tooltip: 70;
   --z-toast: 80;
   --z-max: 100;
+}
+
+/* Dark Theme */
+[data-theme='dark'] {
+  /* Colors - Dark Mode */
+  --color-primary: #6b9eff;
+  --color-primary-hover: #4a8eff;
+  --color-primary-light: rgba(107, 158, 255, 0.1);
+  --color-primary-dark: #3a7bd5;
+
+  --color-secondary: #e2e8f0;
+  --color-text: #f1f5f9;
+  --color-text-muted: #94a3b8;
+  --color-text-light: #64748b;
+  --color-text-inverse: #0f172a;
+
+  --color-success: #22c55e;
+  --color-success-hover: #16a34a;
+  --color-success-light: rgba(34, 197, 94, 0.1);
+  --color-success-border: rgba(34, 197, 94, 0.2);
+
+  --color-error: #ef4444;
+  --color-error-hover: #dc2626;
+  --color-error-light: rgba(239, 68, 68, 0.1);
+  --color-error-border: rgba(239, 68, 68, 0.2);
+
+  --color-warning: #f59e0b;
+  --color-warning-hover: #d97706;
+  --color-warning-light: rgba(245, 158, 11, 0.1);
+  --color-warning-border: rgba(245, 158, 11, 0.2);
+
+  --color-neutral-50: #1e293b;
+  --color-neutral-100: #334155;
+  --color-neutral-200: #475569;
+  --color-neutral-300: #64748b;
+  --color-neutral-400: #94a3b8;
+  --color-neutral-500: #cbd5e1;
+  --color-neutral-600: #e2e8f0;
+  --color-neutral-700: #f1f5f9;
+  --color-neutral-800: #f8fafc;
+  --color-neutral-900: #ffffff;
+
+  --color-background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  --color-background-card: #1e293b;
+  --color-background-input: #334155;
+  --color-border: #475569;
+  --color-border-focus: var(--color-primary);
+
+  /* Shadows - Adjusted for dark theme */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.4);
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.3);
+  --shadow-card-hover: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+/* Smooth theme transitions */
+* {
+  transition:
+    background-color var(--transition-normal),
+    color var(--transition-normal),
+    border-color var(--transition-normal),
+    box-shadow var(--transition-normal);
+}
+
+/* Prevent transition on page load */
+.theme-transition-disabled * {
+  transition: none !important;
 }

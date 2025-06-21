@@ -31,6 +31,12 @@
   text-decoration: none;
 }
 
+.navRight {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2xl);
+}
+
 .navLinks {
   display: flex;
   gap: var(--spacing-3xl);
@@ -79,6 +85,11 @@
     flex-direction: column;
     gap: var(--spacing-lg);
     padding: var(--spacing-lg) 0;
+  }
+
+  .navRight {
+    flex-direction: column;
+    gap: var(--spacing-lg);
   }
 
   .navLinks {

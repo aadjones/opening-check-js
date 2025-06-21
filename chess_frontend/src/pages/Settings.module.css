@@ -81,6 +81,7 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   background: var(--color-background-input);
+  color: var(--color-text);
   font-size: var(--font-size-base);
   transition: all var(--transition-normal);
 }
@@ -88,6 +89,7 @@
 .input:focus {
   border-color: var(--color-border-focus);
   background: var(--color-background-card);
+  color: var(--color-text);
   box-shadow: 0 0 0 3px var(--color-primary-light);
   outline: none;
 }
@@ -200,7 +202,7 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  color: white;
+  color: var(--color-text-inverse);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-bold);
 }
@@ -297,7 +299,7 @@
 
 .saveButtonActive {
   background: var(--color-primary);
-  color: white;
+  color: var(--color-text-inverse);
   cursor: pointer;
 }
 
@@ -396,7 +398,7 @@
 
 .syncButton {
   background: var(--color-primary);
-  color: white;
+  color: var(--color-text-inverse);
   border: none;
   padding: var(--spacing-sm) var(--spacing-lg);
   border-radius: var(--radius-md);

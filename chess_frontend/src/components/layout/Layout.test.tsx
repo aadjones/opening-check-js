@@ -2,15 +2,18 @@ import { render, screen } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { describe, it, expect } from 'vitest';
 import Layout from './Layout';
+import { ThemeProvider } from '../../contexts/ThemeContext';
 
 describe('Layout Component', () => {
   it('renders basic structure without exploding', () => {
     render(
-      <BrowserRouter>
-        <Layout>
-          <h1>Dashboard Page</h1>
-        </Layout>
-      </BrowserRouter>
+      <ThemeProvider>
+        <BrowserRouter>
+          <Layout>
+            <h1>Dashboard Page</h1>
+          </Layout>
+        </BrowserRouter>
+      </ThemeProvider>
     );
 
     // Check that Layout renders its core elements

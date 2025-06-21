@@ -8,13 +8,13 @@
 }
 
 .gameCard {
-  background: white;
+  background: var(--color-background-card);
   border-radius: 8px;
   padding: 1rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   transition: all 0.2s ease;
   cursor: pointer;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--color-border);
 }
 
 .gameCard:hover {
@@ -23,7 +23,7 @@
 }
 
 .gameCard.hasDeviation {
-  border-left: 4px solid #ef4444;
+  border-left: 4px solid var(--color-error);
 }
 
 .gameHeader {
@@ -36,8 +36,8 @@
 .timeControl {
   font-size: 0.875rem;
   font-weight: 500;
-  color: #6b7280;
-  background: #f3f4f6;
+  color: var(--color-text-muted);
+  background: var(--color-neutral-100);
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
 }
@@ -53,13 +53,13 @@
 .opponent {
   font-size: 1.125rem;
   font-weight: 500;
-  color: #111827;
+  color: var(--color-text);
   margin-bottom: 0.25rem;
 }
 
 .gameMeta {
   font-size: 0.875rem;
-  color: #6b7280;
+  color: var(--color-text-muted);
 }
 
 .gameActions {
@@ -67,13 +67,13 @@
   gap: 1rem;
   margin-top: 0.5rem;
   padding-top: 0.5rem;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--color-border);
 }
 
 .lichessLink,
 .deviationLink {
   font-size: 0.875rem;
-  color: #2563eb;
+  color: var(--color-primary);
   text-decoration: none;
   display: flex;
   align-items: center;
@@ -86,21 +86,21 @@
 }
 
 .deviationLink {
-  color: #dc2626;
+  color: var(--color-error);
 }
 
 /* Loading state */
 .gameCardSkeleton {
-  background: white;
+  background: var(--color-background-card);
   border-radius: 8px;
   padding: 1rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--color-border);
 }
 
 .skeletonHeader {
   height: 1.5rem;
-  background: #f3f4f6;
+  background: var(--color-neutral-100);
   border-radius: 4px;
   margin-bottom: 0.75rem;
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
@@ -108,7 +108,7 @@
 
 .skeletonContent {
   height: 2rem;
-  background: #f3f4f6;
+  background: var(--color-neutral-100);
   border-radius: 4px;
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
@@ -127,19 +127,19 @@
 .emptyState {
   text-align: center;
   padding: 3rem 1rem;
-  background: white;
+  background: var(--color-background-card);
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--color-border);
 }
 
 .emptyState p {
   margin: 0;
-  color: #111827;
+  color: var(--color-text);
 }
 
 .emptyStateSubtext {
   margin-top: 0.5rem !important;
-  color: #6b7280 !important;
+  color: var(--color-text-muted) !important;
   font-size: 0.875rem;
 }

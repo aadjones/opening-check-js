@@ -10,6 +10,7 @@ export { default as Layout } from './layout/Layout';
 
 // UI components
 export { default as UnderConstruction } from './ui/UnderConstruction';
+export { default as ThemeToggle } from './ui/ThemeToggle';
 
 // Auth components
 export { default as ProtectedRoute } from './ProtectedRoute';
