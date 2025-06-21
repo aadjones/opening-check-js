@@ -42,6 +42,7 @@ def perform_game_analysis(
     study_url_black: str,
     max_games: int = 10,
     since: Optional[datetime] = None,
+    access_token: Optional[str] = None,
 ) -> List[Tuple[Optional[DeviationResult], str]]:
     """
     Handles the core logic of fetching games, studies, and finding deviations
@@ -66,7 +67,7 @@ def perform_game_analysis(
                     f"[THROTTLE] Sleeping {LICHESS_THROTTLE_DELAY_SECONDS}s before fetching white study due to feature flag."
                 )
                 time.sleep(LICHESS_THROTTLE_DELAY_SECONDS)
-            white_study = lichess_api.Study.fetch_url(str(study_url_white))
+            white_study = lichess_api.Study.fetch_url(str(study_url_white), access_token)
             white_trie = RepertoireTrie()
             for chapter in white_study.chapters:
                 white_trie.add_study_chapter(chapter)
@@ -81,7 +82,7 @@ def perform_game_analysis(
                     f"[THROTTLE] Sleeping {LICHESS_THROTTLE_DELAY_SECONDS}s before fetching black study due to feature flag."
                 )
                 time.sleep(LICHESS_THROTTLE_DELAY_SECONDS)
-            black_study = lichess_api.Study.fetch_url(str(study_url_black))
+            black_study = lichess_api.Study.fetch_url(str(study_url_black), access_token)
             black_trie = RepertoireTrie()
             for chapter in black_study.chapters:
                 black_trie.add_study_chapter(chapter)

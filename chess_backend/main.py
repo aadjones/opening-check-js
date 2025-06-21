@@ -136,7 +136,10 @@ async def get_dummy_games() -> dict[str, List[str]]:
 
 
 @app.post("/api/analyze_games", response_model=AnalysisResponse)
-async def analyze_games_endpoint(request: AnalysisRequest) -> AnalysisResponse:
+async def analyze_games_endpoint(
+    request: AnalysisRequest,
+    current_user: User = Depends(get_current_user),
+) -> AnalysisResponse:
     try:
         logger.info(f"Received analysis request for user: {request.username}, scope: {request.scope}")
 
@@ -152,6 +155,7 @@ async def analyze_games_endpoint(request: AnalysisRequest) -> AnalysisResponse:
             study_url_black=str(request.study_url_black),
             max_games=request.max_games,
             since=since,
+            access_token=current_user.access_token,
         )
 
         # Filter out None results and extract just the DeviationResult objects

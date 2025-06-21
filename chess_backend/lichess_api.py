@@ -28,29 +28,30 @@ class Study:
     chapters: list[chess.pgn.Game]
 
     @staticmethod
-    def fetch_id(study_id: str) -> "Study":
+    def fetch_id(study_id: str, access_token: Optional[str] = None) -> "Study":
         if ENABLE_LICHESS_STUDY_THROTTLE:
             LOG.info(
                 f"[THROTTLE] Sleeping {LICHESS_THROTTLE_DELAY_SECONDS}s before fetching study due to feature flag."
             )
             time.sleep(LICHESS_THROTTLE_DELAY_SECONDS)
         url = f"https://lichess.org/api/study/{study_id}.pgn"
+        headers = {
+            "User-Agent": "OutOfBook/1.0 (https://github.com/aadjones/opening-check-js; aaron.demby.jones@gmail.com)",
+            "Accept": "text/plain",
+        }
+        if access_token:
+            headers["Authorization"] = f"Bearer {access_token}"
+
         with httpx.Client() as client:
-            response = client.get(
-                url,
-                headers={
-                    "User-Agent": "OutOfBook/1.0 (https://github.com/aadjones/opening-check-js; aaron.demby.jones@gmail.com)",
-                    "Accept": "text/plain",
-                },
-            )
+            response = client.get(url, headers=headers)
             if response.status_code != 200:
                 raise Exception(f"Failed to fetch study. Status code: {response.status_code}")
             return Study(chapters=pgn_utils.pgn_to_pgn_list(response.text))
 
     @staticmethod
-    def fetch_url(url: str) -> "Study":
+    def fetch_url(url: str, access_token: Optional[str] = None) -> "Study":
         LOG.info(f"Fetching study from {url}...")
-        study = Study.fetch_id(_extract_study_id_from_url(url))
+        study = Study.fetch_id(_extract_study_id_from_url(url), access_token)
         LOG.info("done")
         return study
 
