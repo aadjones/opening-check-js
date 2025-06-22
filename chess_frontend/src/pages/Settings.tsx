@@ -165,13 +165,25 @@ const Settings: React.FC = () => {
         email: session.user.email || undefined,
         lichess_username: session.user.lichessUsername || undefined,
       });
-      const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/analyze-games`, {
+      
+      // Get user studies for the API call
+      if (!whiteStudy && !blackStudy) {
+        throw new Error('No studies configured. Please add study URLs first.');
+      }
+      
+      const res = await fetch(`http://localhost:8000/api/analyze_games`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${supabaseJwt}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ scope: 'recent' }),
+        body: JSON.stringify({ 
+          username: session.user.lichessUsername,
+          study_url_white: whiteStudy,
+          study_url_black: blackStudy,
+          max_games: 10,
+          scope: 'recent'
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Sync failed');
@@ -263,13 +275,19 @@ const Settings: React.FC = () => {
       // Save studies (activates new, deactivates old)
       await saveUserStudySelections(session.user.id, whiteId, blackId, supabaseWithAuth);
       // Trigger deviation analysis for last 10 games
-      const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/analyze-games`, {
+      const res = await fetch(`http://localhost:8000/api/analyze_games`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${supabaseJwt}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ scope: 'recent' }),
+        body: JSON.stringify({ 
+          username: session.user.lichessUsername,
+          study_url_white: whiteStudy,
+          study_url_black: blackStudy,
+          max_games: 10,
+          scope: 'recent'
+        }),
       });
       const data = await res.json();
       console.log('[Settings] Deviation analysis response:', data);
