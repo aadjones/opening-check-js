@@ -15,4 +15,4 @@ flake8
 mypy
 types-requests
 PyJWT==2.8.0
-python-jose[cryptography]==3.3.0
+python-jose[cryptography]==3.4.0
