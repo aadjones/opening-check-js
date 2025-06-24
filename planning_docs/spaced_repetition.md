@@ -15,7 +15,7 @@ Transform deviation review into an engaging, low-friction training ritual modele
 
 * Header: “Ready to review?”
 
-* Button: `[Yes!]`
+* Button: `[Let's go!]`
 
 * Optionally: small “What is this?” explainer link
 
