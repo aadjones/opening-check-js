@@ -188,6 +188,7 @@ def insert_deviation_to_db(deviation: Dict[str, Any], pgn: str, username: str, s
         "deviation_uci": deviation.get("deviation_uci"),
         "reference_uci": deviation.get("reference_uci"),
         "first_deviator": deviation.get("first_deviator"),
+        "previous_position_fen": deviation.get("previous_position_fen"),
     }
     client.table("opening_deviations").upsert(data, on_conflict="game_id, user_id").execute()
 

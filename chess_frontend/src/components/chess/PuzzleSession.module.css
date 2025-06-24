@@ -1,0 +1,162 @@
+.puzzleSession {
+  min-height: 100vh;
+  padding: 1rem;
+}
+
+.header {
+  max-width: 800px;
+  margin: 0 auto 2rem auto;
+}
+
+.progressBar {
+  width: 100%;
+  height: 4px;
+  background: var(--color-neutral-200);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+.progressFill {
+  height: 100%;
+  background: var(--color-primary);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+.sessionInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.progressText {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+.exitButton {
+  background: var(--color-background-card);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  color: var(--color-text);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+}
+
+.exitButton:hover {
+  background: var(--color-neutral-100);
+  border-color: var(--color-neutral-300);
+}
+
+/* Message states */
+.loading,
+.error,
+.noPuzzles,
+.celebration {
+  max-width: 500px;
+  margin: 4rem auto;
+  text-align: center;
+  padding: 3rem 2rem;
+  background: var(--color-background-card);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.loading {
+  color: var(--color-text-muted);
+  font-size: 1.1rem;
+}
+
+.error h3,
+.noPuzzles h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: var(--color-text);
+}
+
+.error p,
+.noPuzzles p {
+  color: var(--color-text-muted);
+  margin-bottom: 2rem;
+  line-height: 1.5;
+}
+
+.error .exitButton,
+.noPuzzles .exitButton {
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.error .exitButton:hover,
+.noPuzzles .exitButton:hover {
+  background: var(--color-primary-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Celebration styles */
+.celebration {
+  background: linear-gradient(135deg, var(--color-background-card), var(--color-primary-light));
+  border: 2px solid var(--color-primary);
+}
+
+.celebrationIcon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  animation: bounce 1s ease-in-out infinite alternate;
+}
+
+.celebration h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: var(--color-primary);
+  font-size: 1.5rem;
+}
+
+.celebration p {
+  color: var(--color-text);
+  margin-bottom: 1.5rem;
+  font-size: 1.1rem;
+}
+
+.celebrationStats {
+  background: var(--color-background);
+  padding: 1rem;
+  border-radius: 8px;
+  color: var(--color-text-muted);
+  font-weight: 600;
+}
+
+@keyframes bounce {
+  from {
+    transform: translateY(0px);
+  }
+  to {
+    transform: translateY(-10px);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .puzzleSession {
+    padding: 0.5rem;
+  }
+
+  .sessionInfo {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+
+  .progressText {
+    text-align: center;
+  }
+}

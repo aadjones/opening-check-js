@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { usePageTitle } from '../hooks/usePageTitle';
 import styles from './Analysis.module.css';
 import { useAuth } from '../hooks/useAuth';
-import { fetchSupabaseJWT } from '../lib/auth/fetchSupabaseJWT';
 
 interface GameResult {
   id: string;
@@ -25,8 +24,6 @@ const Analysis: React.FC = () => {
   const [lastSyncTime, setLastSyncTime] = useState('2 minutes ago');
   const [analysisError, setAnalysisError] = useState<string | null>(null);
   const [analysisSuccess, setAnalysisSuccess] = useState<string | null>(null);
-  // Cache the JWT in memory for 1 hour
-  const jwtCache = React.useRef<{ token: string; exp: number } | null>(null);
 
   // Mock data - in real app this would come from API
   const recentGames: GameResult[] = [
@@ -70,25 +67,6 @@ const Analysis: React.FC = () => {
     },
   ];
 
-  const getSupabaseJWT = async () => {
-    if (
-      jwtCache.current &&
-      jwtCache.current.exp > Math.floor(Date.now() / 1000) + 60 // 1 min leeway
-    ) {
-      return jwtCache.current.token;
-    }
-    if (!session?.user?.id) throw new Error('Not logged in');
-    const token = await fetchSupabaseJWT({
-      sub: session.user.id,
-      email: session.user.email || undefined,
-      lichess_username: session.user.lichessUsername || undefined,
-    });
-    // Decode exp from JWT (payload is the 2nd part, base64url encoded)
-    const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
-    jwtCache.current = { token, exp: payload.exp };
-    return token;
-  };
-
   const handleManualAnalysis = async (scope: 'recent' | 'today') => {
     setAnalysisError(null);
     setAnalysisSuccess(null);
@@ -105,21 +83,24 @@ const Analysis: React.FC = () => {
     }
 
     try {
-      const supabaseJwt = await getSupabaseJWT();
-      const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/analyze-games`, {
+      const res = await fetch(`http://localhost:8000/api/analyze_games`, {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${supabaseJwt}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ scope }),
+        body: JSON.stringify({
+          max_games: scope === 'recent' ? 10 : 50,
+          since: scope === 'today' ? new Date().toISOString().split('T')[0] : undefined,
+        }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Analysis failed');
-      if (data.message) {
-        setAnalysisSuccess(data.message);
+      if (!res.ok) throw new Error(data.message || 'Analysis failed');
+
+      const deviationCount = data.deviations?.length || 0;
+      if (deviationCount > 0) {
+        setAnalysisSuccess(`Found ${deviationCount} deviations!`);
       } else {
-        setAnalysisError('Unexpected response from server.');
+        setAnalysisSuccess('No deviations found. Your opening preparation is solid!');
       }
       setLastSyncTime('just now');
     } catch (err: unknown) {

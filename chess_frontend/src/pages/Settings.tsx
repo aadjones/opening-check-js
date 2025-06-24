@@ -165,24 +165,24 @@ const Settings: React.FC = () => {
         email: session.user.email || undefined,
         lichess_username: session.user.lichessUsername || undefined,
       });
-      
+
       // Get user studies for the API call
       if (!whiteStudy && !blackStudy) {
         throw new Error('No studies configured. Please add study URLs first.');
       }
-      
+
       const res = await fetch(`http://localhost:8000/api/analyze_games`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${supabaseJwt}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           username: session.user.lichessUsername,
           study_url_white: whiteStudy,
           study_url_black: blackStudy,
           max_games: 10,
-          scope: 'recent'
+          scope: 'recent',
         }),
       });
       const data = await res.json();
@@ -281,12 +281,12 @@ const Settings: React.FC = () => {
           Authorization: `Bearer ${supabaseJwt}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           username: session.user.lichessUsername,
           study_url_white: whiteStudy,
           study_url_black: blackStudy,
           max_games: 10,
-          scope: 'recent'
+          scope: 'recent',
         }),
       });
       const data = await res.json();

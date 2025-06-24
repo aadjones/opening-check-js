@@ -30,15 +30,15 @@
 //  Supabase Edge Function - Analyze Games
 //---------------------------------------------------------------
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { jwtVerify }   from "https://deno.land/x/jose@v4.14.4/index.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
+import { jwtVerify } from "https://deno.land/x/jose@v4.15.4/index.ts";
 import { corsHeaders } from "../_shared/cors.ts";
 
 // ── types ─────────────────────────────────────────────────────
 interface Deviation {
   study_id?: string | null;
   game_id?: string | null;
-  board_fen_before_deviation?: string;
+  board_fen?: string;
   reference_san?: string;
   deviation_san?: string;
   whole_move_number?: number;
@@ -46,6 +46,8 @@ interface Deviation {
   pgn?: string | null;
   deviation_uci?: string | null;
   reference_uci?: string | null;
+  previous_position_fen?: string | null;
+  first_deviator?: string | null;
 }
 
 interface DeviationRow {
@@ -61,6 +63,7 @@ interface DeviationRow {
   pgn: string | null;
   deviation_uci?: string | null;
   reference_uci?: string | null;
+  previous_position_fen?: string | null;
 }
 
 interface SyncPreferences {
@@ -146,28 +149,34 @@ async function analyseUserGames(userId: string, scope: 'recent' | 'today') {
     throw new Error(`Backend API ${engineResp.status} – ${txt}`);
   }
   const result = await engineResp.json();
-  if (!Array.isArray(result)) {
+  if (!result.deviations || !Array.isArray(result.deviations)) {
     console.log(result.message || "No deviations found.");
     // Update last_synced_at even if no games found
     await updateLastSyncedAt(userId);
     return;
   }
-  const deviations = result;
-  const rows = deviations.filter(Boolean).map(d => ({
-    user_id:       userId,
-    study_id:      d?.study_id ?? null,
-    game_id:       d?.game_id  ?? null,
-    position_fen:  d?.board_fen ?? '',
-    expected_move: d?.reference_san ?? '',
-    actual_move:   d?.deviation_san ?? '',
-    move_number:   d?.whole_move_number ?? 0,
-    color:         normaliseColor(d?.player_color),
-    detected_at:   new Date().toISOString(),
-    pgn:           d?.pgn ?? null,
-    deviation_uci: d?.deviation_uci ?? null,
-    reference_uci: d?.reference_uci ?? null,
-    first_deviator: d?.first_deviator ?? null,
-  })) as DeviationRow[];
+  const deviations = result.deviations;
+  const rows = deviations.filter(Boolean).map((d: Deviation) => {
+    const moveNumber = d?.whole_move_number ?? 0;
+    const color = normaliseColor(d?.player_color);
+    
+    return {
+      user_id:       userId,
+      study_id:      d?.study_id ?? null,
+      game_id:       d?.game_id  ?? null,
+      position_fen:  d?.board_fen ?? '',
+      expected_move: d?.reference_san ?? '',
+      actual_move:   d?.deviation_san ?? '',
+      move_number:   moveNumber,
+      color:         color,
+      detected_at:   new Date().toISOString(),
+      pgn:           d?.pgn ?? null,
+      deviation_uci: d?.deviation_uci ?? null,
+      reference_uci: d?.reference_uci ?? null,
+      first_deviator: d?.first_deviator ?? null,
+      previous_position_fen: d?.previous_position_fen ?? null, // Get from backend
+    };
+  }) as DeviationRow[];
 
   if (rows.length) {
     const { error: upsertErr } = await supabase

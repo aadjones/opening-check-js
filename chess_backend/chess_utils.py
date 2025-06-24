@@ -2,9 +2,11 @@
 This module provides utility functions for chess analysis.
 """
 
+import io
 import os
 from typing import Optional
 
+import chess
 import chess.pgn
 
 from logging_config import setup_logging
@@ -62,3 +64,60 @@ def read_pgn(pgn_file_path: str) -> Optional[chess.pgn.Game]:
     """
     with open(pgn_file_path, "r", encoding="utf-8") as pgn_file:
         return chess.pgn.read_game(pgn_file)
+
+
+def calculate_previous_position_fen(pgn_string: Optional[str], move_number: int, color: str) -> Optional[str]:
+    """
+    Calculate the FEN position one move before the deviation occurred.
+
+    Args:
+        pgn_string: The full PGN of the game (can be None)
+        move_number: The move number where deviation occurred (1-based)
+        color: The color of the player ('white' or 'black')
+
+    Returns:
+        FEN string of the position before the deviation, or None if calculation fails
+    """
+    if not pgn_string:
+        return None
+
+    # Normalize color
+    normalized_color = color.lower() if color else ""
+    is_white = normalized_color.startswith("w")
+
+    # Special case: White's first move has no previous position
+    if move_number == 1 and is_white:
+        return None
+
+    try:
+        # Parse the PGN
+        pgn_io = io.StringIO(pgn_string)
+        game = chess.pgn.read_game(pgn_io)
+        if not game:
+            return None
+
+        # Create a board and play through the moves
+        board = game.board()
+        moves = list(game.mainline_moves())
+
+        # Calculate target move index (0-based index of the deviating move)
+        # For white moves: move index = (move_number - 1) * 2
+        # For black moves: move index = (move_number - 1) * 2 + 1
+        deviation_move_index = (move_number - 1) * 2 + (0 if is_white else 1)
+
+        # If this is Black's first move, return starting position
+        if deviation_move_index == 1:
+            return chess.STARTING_FEN
+
+        # Play moves up to (but not including) the opponent's last move
+        # For animation, we want to show the opponent's last move being played
+        # So we need the position before the opponent's move (2 ply back from deviation)
+        moves_to_play = deviation_move_index - 1
+        for i in range(min(moves_to_play, len(moves))):
+            board.push(moves[i])
+
+        return board.fen()
+
+    except Exception as e:
+        print(f"Error calculating previous position: {e}")
+        return None

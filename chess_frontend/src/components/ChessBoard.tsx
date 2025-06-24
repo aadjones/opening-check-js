@@ -5,16 +5,17 @@ import type { Arrow, BoardOrientation } from 'react-chessboard/dist/chessboard/t
 export interface ChessBoardProps {
   fen: string;
   arrows?: Arrow[];
+  customSquareStyles?: Record<string, Record<string, string | number>>;
   orientation?: BoardOrientation;
   boardWidth?: number;
   arePiecesDraggable?: boolean;
-  // For future extensibility
   onMove?: (from: string, to: string) => void;
 }
 
 const ChessBoard: React.FC<ChessBoardProps> = ({
   fen,
   arrows = [],
+  customSquareStyles = {},
   orientation = 'white',
   boardWidth = 300,
   arePiecesDraggable = false,
@@ -24,6 +25,7 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
     <Chessboard
       position={fen}
       customArrows={arrows}
+      customSquareStyles={customSquareStyles}
       boardOrientation={orientation}
       boardWidth={boardWidth}
       arePiecesDraggable={arePiecesDraggable}

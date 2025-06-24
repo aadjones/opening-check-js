@@ -35,7 +35,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     to="/review-queue"
                     className={`${styles.navLink} ${location.pathname === '/review-queue' ? styles.active : ''}`}
                   >
-                    Review Queue
+                    Review
                   </Link>
                 </li>
                 {SHOW_ANALYSIS_PAGE && (

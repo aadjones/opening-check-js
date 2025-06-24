@@ -33,6 +33,7 @@ class DeviationResult(BaseModel):
     pgn: str = ""
     deviation_uci: Optional[str] = None
     reference_uci: Optional[str] = None
+    previous_position_fen: Optional[str] = None
 
     model_config = {
         "json_schema_extra": {"examples": [{"board_fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"}]},
