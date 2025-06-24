@@ -65,14 +65,15 @@ Deno.serve(async (req) => {
             lichess_username: profile.lichess_username
           });
 
-          // Call analyze-games as this user
-          const res = await fetch(`${SUPABASE_URL}/functions/v1/analyze-games`, {
+          // Call Python backend analyze_games endpoint
+          const res = await fetch(`http://host.docker.internal:8000/api/analyze_games`, {
             method: "POST",
             headers: {
-              Authorization: `Bearer ${jwt}`,
               "Content-Type": "application/json"
             },
-            body: JSON.stringify({ scope: "recent" })
+            body: JSON.stringify({ 
+              max_games: 10
+            })
           });
           if (!res.ok) {
             const errText = await res.text();

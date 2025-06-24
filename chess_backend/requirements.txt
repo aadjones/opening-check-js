@@ -1,5 +1,12 @@
+black
+isort
+flake8
+mypy
+types-requests
+PyJWT
+python-jose[cryptography]
 fastapi
-uvicorn
+uvicorn[standard]
 pydantic
 requests
 python-chess
@@ -9,9 +16,3 @@ pytest-mock
 supabase
 python-dotenv
 httpx
-black
-isort
-flake8
-mypy
-types-requests
-PyJWT==2.8.0

@@ -18,6 +18,138 @@
 .subtitle {
   color: var(--color-text-muted);
   font-size: 1.1rem;
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.5;
+}
+
+.launcherContent {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+}
+
+.launcherCard {
+  background: var(--color-background-card);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 3rem 2rem;
+  text-align: center;
+  max-width: 400px;
+  width: 100%;
+}
+
+.puzzleCount {
+  margin-bottom: 2rem;
+}
+
+.countNumber {
+  display: block;
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin-bottom: 0.5rem;
+}
+
+.countLabel {
+  color: var(--color-text-muted);
+  font-size: 1.1rem;
+}
+
+.startButton {
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 1rem 2rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: 1.5rem;
+  min-width: 120px;
+}
+
+.startButton:hover {
+  background: var(--color-primary-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.startButton:active {
+  transform: translateY(0);
+}
+
+.explainer {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.explainerLink {
+  color: var(--color-text-muted);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.explainerLink:hover {
+  color: var(--color-text);
+}
+
+.loadingMessage,
+.errorMessage,
+.noPuzzlesMessage {
+  text-align: center;
+  padding: 2rem;
+  border-radius: 8px;
+}
+
+.loadingMessage {
+  color: var(--color-text-muted);
+  font-size: 1.1rem;
+}
+
+.errorMessage {
+  background: var(--color-error-light);
+  color: var(--color-error);
+  border: 1px solid var(--color-error);
+}
+
+.noPuzzlesMessage {
+  background: var(--color-background-card);
+  border: 1px solid var(--color-border);
+}
+
+.noPuzzlesMessage h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: var(--color-text);
+}
+
+.noPuzzlesMessage p {
+  color: var(--color-text-muted);
+  margin-bottom: 0.5rem;
+  line-height: 1.5;
+}
+
+.noPuzzlesMessage p:last-child {
+  margin-bottom: 0;
+}
+
+.backButton {
+  background: var(--color-background-card);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  color: var(--color-text);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 1rem;
+}
+
+.backButton:hover {
+  background: var(--color-neutral-100);
+  border-color: var(--color-neutral-300);
 }
 
 .queueList {
@@ -142,8 +274,21 @@
   transform: translateY(1px);
 }
 
-/* Responsive adjustments */
+.markedMessage {
+  color: var(--color-success);
+  font-weight: 600;
+  font-size: 1.1rem;
+  padding: 1.5rem 0;
+  text-align: center;
+  transition: opacity 0.3s;
+}
+
 @media (max-width: 640px) {
+  .launcherCard {
+    margin: 0 1rem;
+    padding: 2rem 1.5rem;
+  }
+
   .deviationContent {
     grid-template-columns: 1fr;
   }
@@ -155,13 +300,4 @@
   .actionButton {
     width: 100%;
   }
-}
-
-.markedMessage {
-  color: var(--color-success);
-  font-weight: 600;
-  font-size: 1.1rem;
-  padding: 1.5rem 0;
-  text-align: center;
-  transition: opacity 0.3s;
 }

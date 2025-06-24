@@ -7,6 +7,7 @@ from typing import Dict, List, Optional
 import chess
 import chess.pgn
 
+from chess_utils import calculate_previous_position_fen
 from deviation_result import DeviationResult
 from logging_config import setup_logging
 from pgn_utils import walk_pgn_variations
@@ -96,6 +97,10 @@ class RepertoireTrie:
                 # We need all potential reference UCIs for a complete result
                 reference_ucis = list(current_trie_node.children.keys())
 
+                # Calculate the previous position FEN
+                pgn_string = str(recent_game)
+                previous_position_fen = calculate_previous_position_fen(pgn_string, move_number, player_color)
+
                 return DeviationResult(
                     first_deviator=first_deviator,
                     move_number=move_number,
@@ -105,6 +110,7 @@ class RepertoireTrie:
                     reference_uci=", ".join(sorted(reference_ucis)),
                     player_color=player_color,
                     board_fen=board_fen_before_move,
+                    previous_position_fen=previous_position_fen,
                 )
 
         # No deviation found

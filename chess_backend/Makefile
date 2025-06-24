@@ -5,7 +5,7 @@
 SHELL := /bin/bash
 .SHELLFLAGS := -c
 
-.PHONY: start dev install setup test clean format lint type-check check-all help gen-pytypes
+.PHONY: start dev install setup test clean format lint type-check check-all help gen-pytypes kill
 
 # Detect operating system
 ifeq ($(OS),Windows_NT)
@@ -45,6 +45,7 @@ ifeq ($(OS),Windows_NT)
 	$(ECHO) "  make check-all  - Run all checks"
 	$(ECHO) "  make clean      - Clean up virtual environment and cache"
 	$(ECHO) "  make gen-pytypes - Generate Pydantic models from Supabase types"
+	$(ECHO) "  make kill       - Kill processes running on port 8000"
 	$(ECHO) ""
 else
 	@echo ""
@@ -60,6 +61,7 @@ else
 	@echo "  make check-all  - Run all checks"
 	@echo "  make clean      - Clean up virtual environment and cache"
 	@echo "  make gen-pytypes - Generate Pydantic models from Supabase types"
+	@echo "  make kill       - Kill processes running on port 8000"
 	@echo ""
 endif
 
@@ -189,3 +191,13 @@ endif
 gen-pytypes:
 	@echo "Generating Pydantic models from Supabase types..."
 	python3 scripts/gen_pydantic_from_supabase.py 
+
+# Kill processes running on port 8000
+kill:
+ifeq ($(OS),Windows_NT)
+	$(ECHO) "Killing processes on port 8000..."
+	netstat -ano | findstr :8000 | for /f "tokens=5" %a in ('more') do taskkill /f /pid %a 2>nul || echo No processes found
+else
+	@echo "Killing processes on port 8000..."
+	@lsof -ti :8000 | xargs kill -9 2>/dev/null || echo "No processes found on port 8000"
+endif
