@@ -67,7 +67,7 @@ async def get_current_user(request: Request) -> User:
         # The token is signed by our edge function and contains user claims
 
         # Get JWT secret from environment
-        jwt_secret = os.getenv("JWT_SECRET")
+        jwt_secret = os.getenv("SUPABASE_JWT_SECRET") or os.getenv("JWT_SECRET")
         if not jwt_secret:
             raise HTTPException(status_code=500, detail="JWT secret not configured")
 

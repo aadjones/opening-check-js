@@ -14,8 +14,11 @@ def validate_environment():
         "SUPABASE_URL",
         "SUPABASE_ANON_KEY", 
         "SUPABASE_SERVICE_ROLE_KEY",
-        "JWT_SECRET"
     ]
+    
+    # Check for JWT secret (either name is fine)
+    if not (os.getenv("SUPABASE_JWT_SECRET") or os.getenv("JWT_SECRET")):
+        missing_vars.append("SUPABASE_JWT_SECRET or JWT_SECRET")
     
     missing_vars = []
     for var in required_vars:
