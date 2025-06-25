@@ -11,6 +11,7 @@ import time
 import signal
 import threading
 from pathlib import Path
+import argparse
 
 # === NEW: Set project root as base directory ===
 SCRIPT_DIR = Path(__file__).resolve().parent
@@ -122,6 +123,15 @@ def cleanup_processes(processes):
 
 def main():
     """Main function"""
+    parser = argparse.ArgumentParser(description="Start Out of Book dev servers.")
+    parser.add_argument(
+        "--backend-mode",
+        choices=["simple", "full"],
+        default="simple",
+        help="'simple' (default): just start uvicorn; 'full': run 'make start' for backend (ngrok, Supabase secret, edge functions)"
+    )
+    args = parser.parse_args()
+
     print_colored("Starting Out of Book development servers...", Colors.GREEN)
     
     # Check if we're in the right directory
@@ -139,11 +149,13 @@ def main():
     
     # Start backend
     print_colored("Starting backend...", Colors.BLUE)
-    # Use different commands based on OS
-    if os.name == 'nt':  # Windows
-        backend_command = "powershell -Command \"& env\\Scripts\\activate.ps1; uvicorn main:app --reload --port 8000\""
-    else:  # Unix-like
-        backend_command = ". env/bin/activate && uvicorn main:app --reload --port 8000"
+    if args.backend_mode == "full":
+        backend_command = "make start"
+    else:
+        if os.name == 'nt':  # Windows
+            backend_command = "powershell -Command \"& env\\Scripts\\activate.ps1; uvicorn main:app --reload --port 8000\""
+        else:  # Unix-like
+            backend_command = ". env/bin/activate && uvicorn main:app --reload --port 8000"
     
     backend_process = run_with_logging(
         backend_command,

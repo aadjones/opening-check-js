@@ -1,0 +1,33 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Project Rules
+
+## Type Safety
+- Use Pydantic models and type annotations for all FastAPI endpoints.
+
+## Error Handling
+- Use `HTTPException` for client errors; log and re-raise server errors.
+
+## Supabase Usage
+- Use environment variables and dependency injection for Supabase config.
+- Use Supabase client libraries for all DB/auth operations.
+- Enable RLS on all user data tables and write explicit policies.
+
+## Edge & SQL Functions
+- Use Edge Functions for serverless logic.
+- Use versioned PostgreSQL functions for reusable DB logic.
+
+## Authentication
+- Require and verify JWT tokens with Supabase for protected endpoints.
+
+## Styling
+- Use CSS Modules for all styles; no global or inline styles.
+
+## Chess Features
+- Use `react-chessboard` and `chess.js` for chess logic and UI.
+
+## Testing
+- All new code must have tests (pytest for backend, Vitest/RTL for frontend).
