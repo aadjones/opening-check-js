@@ -112,7 +112,16 @@ class AnalysisResponse(BaseModel):
 
 app = FastAPI(title="Chess Analysis Backend")
 
-app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
+# Get allowed origins from environment variable, default to local development
+allowed_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:5173").split(",")
+
+app.add_middleware(
+    CORSMiddleware, 
+    allow_origins=allowed_origins,
+    allow_credentials=True,
+    allow_methods=["*"], 
+    allow_headers=["*"]
+)
 
 # Configure logging
 logger = setup_logging(__name__)

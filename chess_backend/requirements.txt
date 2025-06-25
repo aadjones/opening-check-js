@@ -1,18 +1,21 @@
+# Production dependencies
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+pydantic>=2.0.0
+requests>=2.31.0
+python-chess>=1.999
+supabase>=2.0.0
+python-dotenv>=1.0.0
+httpx>=0.25.0
+PyJWT>=2.8.0
+python-jose[cryptography]>=3.3.0
+
+# Development dependencies (optional in production)
 black
 isort
 flake8
 mypy
 types-requests
-PyJWT
-python-jose[cryptography]
-fastapi
-uvicorn[standard]
-pydantic
-requests
-python-chess
 pytest
 pytest-cov
 pytest-mock
-supabase
-python-dotenv
-httpx
