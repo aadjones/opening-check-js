@@ -21,6 +21,9 @@ interface UseDeviationsResult {
   loadMore: () => Promise<void>;
 }
 
+// Use VITE_API_BASE_URL for backend requests. In local dev, set to "" or "/api" to use proxy; in production, set to full backend URL.
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
+
 /**
  * Hook for fetching and managing user deviations
  * Now uses the backend /api/deviations endpoint.
@@ -58,7 +61,7 @@ export function useDeviations(options: UseDeviationsOptions = {}, refreshKey?: u
           params.append('review_status', options.reviewStatus);
         }
 
-        const res = await fetch(`/api/deviations?${params.toString()}`);
+        const res = await fetch(`${API_BASE_URL}/api/deviations?${params.toString()}`);
         if (!res.ok) throw new Error(`Failed to fetch deviations: ${res.status}`);
         const data: Deviation[] = await res.json();
 
@@ -112,7 +115,7 @@ export function useDeviationById(id: string | undefined) {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`/api/deviations/${id}`);
+      const res = await fetch(`${API_BASE_URL}/api/deviations/${id}`);
       if (!res.ok) {
         if (res.status === 404) {
           setDeviation(null);
