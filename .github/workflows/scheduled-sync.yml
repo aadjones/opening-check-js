@@ -10,4 +10,10 @@ jobs:
     steps:
       - name: Call Supabase Edge Function
         run: |
-          curl -X POST "https://fsmtmtconmgujlhmkqgp.functions.supabase.co/scheduled-sync"
+          set -e
+          response=$(curl -s -w "%{http_code}" -o response.txt -X POST "https://fsmtmtconmgujlhmkqgp.functions.supabase.co/scheduled-sync")
+          cat response.txt
+          if [ "$response" -lt 200 ] || [ "$response" -ge 300 ]; then
+            echo "Request failed with status code $response"
+            exit 1
+          fi
