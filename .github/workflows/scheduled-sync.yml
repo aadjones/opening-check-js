@@ -12,7 +12,8 @@ jobs:
       - name: Call Supabase Edge Function
         run: |
           set -e
-          response=$(curl -s -w "%{http_code}" -o response.txt -X POST "https://fsmtmtconmgujlhmkqgp.functions.supabase.co/scheduled-sync")
+          response=$(curl -s -w "%{http_code}" -o response.txt -X POST "https://fsmtmtconmgujlhmkqgp.functions.supabase.co/scheduled-sync" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}")
           cat response.txt
           if [ "$response" -lt 200 ] || [ "$response" -ge 300 ]; then
             echo "Request failed with status code $response"
