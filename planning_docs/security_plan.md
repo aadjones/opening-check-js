@@ -30,6 +30,8 @@ This document outlines the security plan for implementing Row-Level Security (RL
 ## Next Steps
 - Access Supabase Dashboard to adjust RLS settings for development.
 - Begin designing RLS policies for production.
+- **NOTE:** As of 26 June 2025, secret validation is temporarily skipped for the scheduled sync Edge Function cron job to simplify development and reduce friction. **TODO:** Add proper secret validation before production deployment to prevent unauthorized access.
+- **NOTE:** As of 26 June 2025, JWT authentication between the scheduled sync Edge Function and the Python backend is also skipped for development simplicity. **TODO:** Implement JWT verification in the Python backend and send the JWT from the Edge Function before production deployment.
 
 ---
 
