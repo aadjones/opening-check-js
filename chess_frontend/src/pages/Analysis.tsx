@@ -83,7 +83,7 @@ const Analysis: React.FC = () => {
     }
 
     try {
-      const res = await fetch(`http://localhost:8000/api/analyze_games`, {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/analyze_games`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

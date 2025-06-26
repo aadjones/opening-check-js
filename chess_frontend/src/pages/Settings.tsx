@@ -171,7 +171,7 @@ const Settings: React.FC = () => {
         throw new Error('No studies configured. Please add study URLs first.');
       }
 
-      const res = await fetch(`http://localhost:8000/api/analyze_games`, {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/analyze_games`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${supabaseJwt}`,
@@ -275,7 +275,7 @@ const Settings: React.FC = () => {
       // Save studies (activates new, deactivates old)
       await saveUserStudySelections(session.user.id, whiteId, blackId, supabaseWithAuth);
       // Trigger deviation analysis for last 10 games
-      const res = await fetch(`http://localhost:8000/api/analyze_games`, {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/analyze_games`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${supabaseJwt}`,
