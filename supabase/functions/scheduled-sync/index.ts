@@ -6,6 +6,8 @@ import { corsHeaders } from "../_shared/cors.ts";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
 const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 const JWT_SECRET = Deno.env.get("JWT_SECRET") ?? "";
+const BACKEND_URL = Deno.env.get("BACKEND_URL") ?? "http://host.docker.internal:8000";
+const ANALYZE_URL = `${BACKEND_URL}/api/analyze_games`;
 
 const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
 
@@ -26,6 +28,7 @@ async function _generateUserJWT({ sub, email, lichess_username }: { sub: string,
 }
 
 Deno.serve(async (req) => {
+  console.log("ANALYZE_URL being used:", ANALYZE_URL);
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -69,7 +72,7 @@ Deno.serve(async (req) => {
           // });
 
           // Call Python backend analyze_games endpoint
-          const res = await fetch(`http://host.docker.internal:8000/api/analyze_games`, {
+          const res = await fetch(ANALYZE_URL, {
             method: "POST",
             headers: {
               "Content-Type": "application/json"
