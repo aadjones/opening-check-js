@@ -8,16 +8,15 @@ on:
 jobs:
   call-scheduled-sync:
     runs-on: ubuntu-latest
+    env:
+      CRON_SECRET: ${{ secrets.CRON_SECRET }}
     steps:
-      - name: Call Supabase Edge Function
+      - name: Invoke scheduled-sync
         env:
-          SR_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-          URL:  https://fsmtmtconmgujlhmkqgp.functions.supabase.co/scheduled-sync
+          SB_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}   # already in your repo secrets
         run: |
-          set -e
-          code=$(curl -s -o response.txt -w '%{http_code}' -X POST "$URL" \
-                  -H "apikey: $SR_KEY" \
-                  -H "Authorization: Bearer $SR_KEY")
-          cat response.txt
-          [ "$code" -ge 200 ] && [ "$code" -lt 300 ] || {
-              echo "Request failed with status $code"; exit 1; }
+          curl -f -s -o /dev/null -w 'HTTP %{http_code}\n' \
+            -X POST \
+            -H "apikey: $SB_KEY" \
+            -H "Authorization: Bearer $SB_KEY" \
+            https://fsmtmtconmgujlhmkqgp.functions.supabase.co/scheduled-sync

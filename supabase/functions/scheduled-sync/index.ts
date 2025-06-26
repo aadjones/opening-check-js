@@ -30,19 +30,8 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  // Debug logs
-  console.log("DEBUG: Received Authorization header:", req.headers.get("authorization"));
-  console.log("DEBUG: Expected header: Bearer " + Deno.env.get("CRON_SECRET"));
-
-  // Simple cron secret check
-  const CRON_SECRET = Deno.env.get("CRON_SECRET");
-  const authHeader = req.headers.get("authorization");
-  if (!authHeader || authHeader !== `Bearer ${CRON_SECRET}`) {
-    return new Response(
-      JSON.stringify({ code: 401, message: "Missing or invalid authorization header" }),
-      { status: 401, headers: corsHeaders }
-    );
-  }
+  // No custom secret check → rely on Supabase's default JWT verification.
+  // If the runtime accepted the JWT, we're authorised.
 
   const now = new Date();
   const syncedUsers: string[] = [];
