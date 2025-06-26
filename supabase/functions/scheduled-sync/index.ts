@@ -9,7 +9,7 @@ const JWT_SECRET = Deno.env.get("JWT_SECRET") ?? "";
 
 const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
 
-async function generateUserJWT({ sub, email, lichess_username }: { sub: string, email?: string, lichess_username?: string }) {
+async function _generateUserJWT({ sub, email, lichess_username }: { sub: string, email?: string, lichess_username?: string }) {
   const key = new TextEncoder().encode(JWT_SECRET);
   const iat = Math.floor(Date.now() / 1000);
   return await new SignJWT({
@@ -59,11 +59,11 @@ Deno.serve(async (req) => {
           if (profileErr || !profile) throw profileErr ?? new Error("Profile not found");
 
           // Generate JWT for this user
-          const jwt = await generateUserJWT({
-            sub: user.user_id,
-            email: profile.email,
-            lichess_username: profile.lichess_username
-          });
+          // const jwt = await generateUserJWT({
+          //   sub: user.user_id,
+          //   email: profile.email,
+          //   lichess_username: profile.lichess_username
+          // });
 
           // Call Python backend analyze_games endpoint
           const res = await fetch(`http://host.docker.internal:8000/api/analyze_games`, {
