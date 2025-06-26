@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { useReviewQueue } from '../../hooks/useReviewQueue';
-import { supabase } from '../../lib/supabase';
 import PuzzlePlayer from './PuzzlePlayer';
 import styles from './PuzzleSession.module.css';
+import { fetchSupabaseJWT } from '../../lib/auth/fetchSupabaseJWT';
+import { createClient } from '@supabase/supabase-js';
+import { useAuth } from '../../hooks/useAuth';
 
 interface PuzzleSessionProps {
   onExit: () => void;
@@ -10,6 +12,7 @@ interface PuzzleSessionProps {
 
 const PuzzleSession: React.FC<PuzzleSessionProps> = ({ onExit }) => {
   const { puzzles, loading, error } = useReviewQueue();
+  const { session } = useAuth();
   const [currentPuzzleIndex, setCurrentPuzzleIndex] = useState(0);
   const [isRecordingAttempt, setIsRecordingAttempt] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
@@ -18,13 +21,32 @@ const PuzzleSession: React.FC<PuzzleSessionProps> = ({ onExit }) => {
   const handlePuzzleComplete = async (success: boolean, attempts: number) => {
     const currentPuzzle = puzzles[currentPuzzleIndex];
     if (!currentPuzzle || isRecordingAttempt) return;
+    if (!session?.user?.id) {
+      console.error('No user session found. Cannot record puzzle attempt.');
+      return;
+    }
 
     setIsRecordingAttempt(true);
 
     try {
-      // Record the puzzle attempt
-      await supabase.from('puzzle_attempts').insert({
+      // Get a JWT for the current user
+      const supabaseJwt = await fetchSupabaseJWT({
+        sub: session.user.id,
+        email: session.user.email || undefined,
+        lichess_username: session.user.lichessUsername || undefined,
+      });
+      // Create an authenticated Supabase client
+      const supabaseWithAuth = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY, {
+        global: {
+          headers: {
+            Authorization: `Bearer ${supabaseJwt}`,
+          },
+        },
+      });
+      // Record the puzzle attempt with user_id
+      await supabaseWithAuth.from('puzzle_attempts').insert({
         deviation_id: currentPuzzle.deviation_id,
+        user_id: session?.user?.id,
         attempt_number: attempts,
         was_correct: success,
       });
@@ -42,7 +64,7 @@ const PuzzleSession: React.FC<PuzzleSessionProps> = ({ onExit }) => {
         nextReviewDate = new Date(now.getTime() + 1 * 60 * 60 * 1000); // 1 hour
       }
 
-      await supabase
+      await supabaseWithAuth
         .from('review_queue')
         .update({
           next_review_at: nextReviewDate.toISOString(),
