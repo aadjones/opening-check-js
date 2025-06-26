@@ -3,6 +3,7 @@ name: Call Supabase scheduled-sync every 5 minutes
 on:
   schedule:
     - cron: '*/5 * * * *'  # Every 5 minutes (UTC)
+  workflow_dispatch:
 
 jobs:
   call-scheduled-sync:
