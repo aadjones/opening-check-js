@@ -14,7 +14,7 @@ from pathlib import Path
 
 # === NEW: Set project root as base directory ===
 SCRIPT_DIR = Path(__file__).resolve().parent
-PROJECT_ROOT = SCRIPT_DIR.parent
+PROJECT_ROOT = SCRIPT_DIR  # start.py is in the project root, so SCRIPT_DIR is PROJECT_ROOT
 os.chdir(PROJECT_ROOT)
 # === END NEW ===
 
