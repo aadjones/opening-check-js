@@ -10,12 +10,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Call Supabase Edge Function
+        env:
+          SR_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          URL:  https://fsmtmtconmgujlhmkqgp.functions.supabase.co/scheduled-sync
         run: |
           set -e
-          response=$(curl -s -w "%{http_code}" -o response.txt -X POST "https://fsmtmtconmgujlhmkqgp.functions.supabase.co/scheduled-sync" \
-            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}")
+          code=$(curl -s -o response.txt -w '%{http_code}' -X POST "$URL" \
+                  -H "apikey: $SR_KEY" \
+                  -H "Authorization: Bearer $SR_KEY")
           cat response.txt
-          if [ "$response" -lt 200 ] || [ "$response" -ge 300 ]; then
-            echo "Request failed with status code $response"
-            exit 1
-          fi
+          [ "$code" -ge 200 ] && [ "$code" -lt 300 ] || {
+              echo "Request failed with status $code"; exit 1; }
