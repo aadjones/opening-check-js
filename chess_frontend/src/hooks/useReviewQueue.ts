@@ -15,6 +15,12 @@ export interface PuzzleData {
   difficulty_level: number;
   previous_position_fen: string | null;
   pgn: string | null;
+  // New spaced repetition fields
+  ease_factor?: number;
+  interval_days?: number;
+  consecutive_successes?: number;
+  total_reviews?: number;
+  algorithm_type?: string;
 }
 
 interface UseReviewQueueResult {
@@ -45,10 +51,10 @@ export function useReviewQueue(): UseReviewQueueResult {
       setLoading(true);
       setError(null);
 
-      // First get review queue entries
+      // First get review queue entries with new schema fields
       const { data: queueData, error: queueError } = await supabase
         .from('review_queue')
-        .select('id, deviation_id, review_count, difficulty_level')
+        .select('id, deviation_id, review_count, difficulty_level, ease_factor, interval_days, consecutive_successes, total_reviews, algorithm_type')
         .eq('user_id', session.user.id)
         .lte('next_review_at', new Date().toISOString())
         .order('next_review_at', { ascending: true })
@@ -83,6 +89,11 @@ export function useReviewQueue(): UseReviewQueueResult {
           deviation_id: queueItem.deviation_id,
           review_count: queueItem.review_count,
           difficulty_level: queueItem.difficulty_level,
+          ease_factor: queueItem.ease_factor,
+          interval_days: queueItem.interval_days,
+          consecutive_successes: queueItem.consecutive_successes,
+          total_reviews: queueItem.total_reviews,
+          algorithm_type: queueItem.algorithm_type,
           position_fen: deviation.position_fen,
           expected_move: deviation.expected_move,
           actual_move: deviation.actual_move,
