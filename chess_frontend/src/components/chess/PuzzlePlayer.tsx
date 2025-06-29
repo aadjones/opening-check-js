@@ -26,6 +26,37 @@ const PuzzlePlayer: React.FC<PuzzlePlayerProps> = ({ puzzle, onComplete, onNext 
     squares: Record<string, Record<string, string | number>>;
   }>({ arrows: [], squares: {} });
 
+  // Helper function to parse expected moves (handles "move1 or move2" format)
+  const parseExpectedMoves = (expectedMove: string): string[] => {
+    return expectedMove.split(' or ').map(move => move.trim());
+  };
+
+  // Helper function to get the first valid expected move for animation
+  const getFirstValidExpectedMove = (expectedMove: string, fen: string): string | null => {
+    const expectedMoves = parseExpectedMoves(expectedMove);
+    const tempGame = new Chess(fen);
+    
+    for (const move of expectedMoves) {
+      try {
+        // Test if this move is valid in the current position
+        const testGame = new Chess(fen);
+        testGame.move(move);
+        return move; // Return the first valid move
+      } catch {
+        // Move is invalid, continue to next
+        continue;
+      }
+    }
+    
+    return null; // No valid moves found
+  };
+
+  // Helper function to check if a move matches any expected moves
+  const isExpectedMove = (moveNotation: string, expectedMove: string): boolean => {
+    const expectedMoves = parseExpectedMoves(expectedMove);
+    return expectedMoves.includes(moveNotation);
+  };
+
   // Helper function to find opponent's move between two positions
   const findOpponentMove = (fromFen: string, toFen: string) => {
     try {
@@ -90,15 +121,22 @@ const PuzzlePlayer: React.FC<PuzzlePlayerProps> = ({ puzzle, onComplete, onNext 
       setCurrentFen(puzzle.position_fen);
 
       const animateTimer = setTimeout(() => {
-        // Make the correct move and show the result
-        const correctGame = new Chess(puzzle.position_fen);
-        try {
-          correctGame.move(puzzle.expected_move);
-          setCurrentFen(correctGame.fen());
-          // Highlight the correct move with arrow and square highlighting
-          setMoveHighlight(createMoveHighlight(puzzle.expected_move, puzzle.position_fen));
-        } catch (error) {
-          console.error('Could not animate correct move:', error);
+        // Get the first valid expected move for animation
+        const firstValidMove = getFirstValidExpectedMove(puzzle.expected_move, puzzle.position_fen);
+        
+        if (firstValidMove) {
+          // Make the correct move and show the result
+          const correctGame = new Chess(puzzle.position_fen);
+          try {
+            correctGame.move(firstValidMove);
+            setCurrentFen(correctGame.fen());
+            // Highlight the correct move with arrow and square highlighting
+            setMoveHighlight(createMoveHighlight(firstValidMove, puzzle.position_fen));
+          } catch (error) {
+            console.error('Could not animate correct move:', error);
+          }
+        } else {
+          console.error('No valid expected moves found for animation');
         }
       }, 1000);
 
@@ -140,12 +178,12 @@ const PuzzlePlayer: React.FC<PuzzlePlayerProps> = ({ puzzle, onComplete, onNext 
       const move = tempGame.move({ from, to });
       const moveNotation = move.san;
 
-      // Check if this matches the expected move
-      if (moveNotation === puzzle.expected_move) {
+      // Check if this matches any of the expected moves
+      if (isExpectedMove(moveNotation, puzzle.expected_move)) {
         // Update the board to show the correct move
         setCurrentFen(tempGame.fen());
         // Highlight the correct move
-        setMoveHighlight(createMoveHighlight(puzzle.expected_move, puzzle.position_fen));
+        setMoveHighlight(createMoveHighlight(moveNotation, puzzle.position_fen));
         setState('correct');
         onComplete(true, moveAttempt);
       } else {
