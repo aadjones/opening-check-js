@@ -8,6 +8,10 @@ from typing import Iterator, List
 import chess
 import chess.pgn
 
+import logging_config
+
+logger = logging_config.setup_logging(__name__)
+
 
 def pgn_string_to_game(pgn_str: str) -> chess.pgn.Game:
     """
@@ -35,7 +39,7 @@ def pgn_to_pgn_list(pgn_data: str) -> list[chess.pgn.Game]:
 
 
 def walk_pgn_variations(game: chess.pgn.Game) -> Iterator[List[chess.Move]]:
-    print(f"[Parser] Walking PGN. Game has {len(game.variations)} starting variations.")
+    logger.info(f"[Parser] Walking PGN. Game has {len(game.variations)} starting variations.")
     stack = [(v, [v.move]) for v in reversed(game.variations)]
 
     count = 0
@@ -47,4 +51,4 @@ def walk_pgn_variations(game: chess.pgn.Game) -> Iterator[List[chess.Move]]:
         for variation in reversed(node.variations):
             new_path = path + [variation.move]
             stack.append((variation, new_path))
-    print(f"[Parser] Walk complete. Yielded {count} paths.")
+    logger.info(f"[Parser] Walk complete. Yielded {count} paths.")

@@ -2,6 +2,7 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import styles from './GamesList.module.css';
 import type { Database } from '../types/supabase';
+import { formatTimeControl } from '../utils/time';
 
 type Deviation = Database['public']['Tables']['opening_deviations']['Row'];
 
@@ -22,14 +23,6 @@ export interface GamesListProps {
   games: GameListItem[];
   isLoading?: boolean;
   onGameClick?: (gameId: string) => void;
-}
-
-function formatTimeControl(tc: string) {
-  if (tc === '1+0' || tc === '60') return 'Bullet';
-  if (tc === '3+0' || tc === '180') return 'Blitz';
-  if (tc === '10+0' || tc === '600') return 'Rapid';
-  if (tc === '30+0' || tc === '1800') return 'Classical';
-  return tc;
 }
 
 function formatResult(result: string, hasDeviation: boolean, firstDeviator?: 'user' | 'opponent') {
@@ -119,11 +112,7 @@ const GamesList: React.FC<GamesListProps> = ({ games, isLoading, onGameClick }) 
 
           <div className={styles.gameActions}>
             {game.hasDeviation && (
-              <Link
-                to={`/deviation/${game.deviation?.id ?? game.id}`}
-                className={styles.deviationLink}
-                onClick={e => e.stopPropagation()}
-              >
+              <Link to={`/deviation/${game.deviation?.id ?? game.id}`} className={styles.reviewLink}>
                 Review →
               </Link>
             )}

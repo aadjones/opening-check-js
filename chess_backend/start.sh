@@ -35,8 +35,14 @@ echo -e "\n🔗  PUBLIC URL → $URL"
 # ───────────────────────────────────────────────
 # Push to Supabase & redeploy analyze‑games
 # ───────────────────────────────────────────────
-echo "▶︎ updating BACKEND_URL secret…"
-supabase secrets set BACKEND_URL="$URL" >/dev/null
+# Set the backend URL secret based on mode
+if [ "$mode" = "dev" ]; then
+  echo "▶︎ updating BACKEND_URL_DEV secret…"
+  supabase secrets set BACKEND_URL_DEV="$URL"
+else
+  echo "▶︎ updating BACKEND_URL secret…"
+  supabase secrets set BACKEND_URL="https://opening-check-js-production.up.railway.app"
+fi
 echo "▶︎ redeploying edge functions…"
 cd "$(dirname "$0")/.."
 for fn in $(ls supabase/functions); do
