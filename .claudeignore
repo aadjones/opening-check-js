@@ -1,0 +1,49 @@
+# Environment files
+.env*
+*.env
+chess_frontend/.env*
+chess_backend/.env*
+
+# Cursor IDE files
+.cursor/
+
+# Authentication/Security files
+*.key
+*.pem
+*.crt
+*.p12
+*.pfx
+
+# SSH keys
+.ssh/
+
+# AWS credentials
+.aws/
+
+# API keys and tokens
+secrets/
+tokens/
+
+# Database credentials
+database.url
+
+# OAuth secrets
+oauth_*
+
+# Private configuration
+private/
+confidential/
+
+# Backup files that might contain sensitive data
+*.bak
+*.backup
+
+# Log files that might contain sensitive info
+*.log
+logs/
+
+# Node modules (can contain cached tokens)
+node_modules/.cache/
+
+# VSCode settings that might contain tokens
+.vscode/settings.json
