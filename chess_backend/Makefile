@@ -18,7 +18,7 @@ ifeq ($(OS),Windows_NT)
     RM_DIR := if (Test-Path $$1) { Remove-Item -Recurse -Force $$1 }
 else
     # Unix-like system (Mac/Linux)
-    PYTHON := python3.11
+    PYTHON := python
     VENV_ACTIVATE := . env/bin/activate
     ECHO := echo
     RM_DIR := rm -rf $$1
@@ -29,13 +29,18 @@ BACKEND_PORT ?= 8000          # change if you don't use 8000
 NGROK_BIN    ?= ngrok         # or full path if it isn't on PATH
 PROJECT_REF  ?= fsmtmtconngujlhmkqgp   # your project id
 
+# Mode: dev (default) or prod
+MODE ?= dev
+# Production backend URL
+PROD_BACKEND_URL ?= https://opening-check-js-production.up.railway.app
+
 # Help
 help:
 ifeq ($(OS),Windows_NT)
 	$(ECHO) ""
 	$(ECHO) "Available commands:"
 	$(ECHO) "  make setup      - Create virtual environment and install dependencies"
-	$(ECHO) "  make start      - Start the development server"
+	$(ECHO) "  make start      - Start the development server (MODE=dev updates BACKEND_URL secret to ngrok, MODE=prod sets BACKEND_URL to production URL)"
 	$(ECHO) "  make dev        - Start server with external access"
 	$(ECHO) "  make install    - Install dependencies only"
 	$(ECHO) "  make test       - Run tests"
@@ -51,7 +56,7 @@ else
 	@echo ""
 	@echo "Available commands:"
 	@echo "  make setup      - Create virtual environment and install dependencies"
-	@echo "  make start      - Start the development server"
+	@echo "  make start      - Start the development server (MODE=dev updates BACKEND_URL secret to ngrok, MODE=prod sets BACKEND_URL to production URL)"
 	@echo "  make dev        - Start server with external access"
 	@echo "  make install    - Install dependencies only"
 	@echo "  make test       - Run tests"
@@ -93,8 +98,24 @@ ifeq ($(OS),Windows_NT)
 	$(ECHO) "▶︎ This auto‑update flow is Bash‑only for now.\
 Use the PowerShell block above or run WSL."
 else
-	@chmod +x start.sh
-	@$(VENV_ACTIVATE) && ./start.sh
+	@if [ "$(MODE)" = "prod" ]; then \
+		echo "[PROD] Setting BACKEND_URL secret to $(PROD_BACKEND_URL)"; \
+		supabase secrets set BACKEND_URL=$(PROD_BACKEND_URL); \
+		echo "[PROD] Redeploying edge functions..."; \
+		cd $(dir $(lastword $(MAKEFILE_LIST)))/..; \
+		for fn in $(shell ls supabase/functions); do \
+		  if [ -d "supabase/functions/$$fn" ] && [ "$$fn" != "_shared" ]; then \
+		    supabase functions deploy $$fn; \
+		  fi; \
+		done; \
+		echo "✅  Edge functions deployed successfully!"; \
+		echo "   • sign-jwt: Ready to authenticate users"; \
+		echo "   • analyze-games: Ready to process game analysis"; \
+		echo "   • BACKEND_URL: $(PROD_BACKEND_URL)"; \
+	else \
+		chmod +x start.sh; \
+		$(VENV_ACTIVATE) && ./start.sh; \
+	fi
 endif
 
 # Start with external access
