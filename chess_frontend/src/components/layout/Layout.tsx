@@ -2,7 +2,6 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ThemeToggle } from '../';
 import styles from './Layout.module.css';
-import { SHOW_ANALYSIS_PAGE } from '../../featureFlags';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -38,16 +37,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     Review
                   </Link>
                 </li>
-                {SHOW_ANALYSIS_PAGE && (
-                  <li>
-                    <Link
-                      to="/analysis"
-                      className={`${styles.navLink} ${location.pathname === '/analysis' ? styles.active : ''}`}
-                    >
-                      Analysis
-                    </Link>
-                  </li>
-                )}
                 <li>
                   <Link
                     to="/settings"

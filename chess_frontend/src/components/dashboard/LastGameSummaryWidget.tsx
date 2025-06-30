@@ -4,6 +4,7 @@ import styles from './LastGameSummaryWidget.module.css';
 import { parsePgnHeaders } from '../../utils/pgn';
 import type { Database } from '../../types/supabase';
 import { useAuth } from '../../hooks/useAuth';
+import { formatTimeControl } from '../../utils/time';
 
 type Deviation = Database['public']['Tables']['opening_deviations']['Row'];
 
@@ -55,7 +56,7 @@ const LastGameSummaryWidget: React.FC<LastGameSummaryWidgetProps> = ({ lastDevia
           {isUserDeviation ? '❌ Deviation' : '✅ Prep Held'}
         </span>
         <span className={styles.opponent}>vs {opponent}</span>
-        <span>{timeControl}</span>
+        <span>{formatTimeControl(timeControl)}</span>
         <span className={styles.result}>{result}</span>
       </div>
 

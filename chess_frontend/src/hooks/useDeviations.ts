@@ -52,7 +52,6 @@ export function useDeviations(options: UseDeviationsOptions = {}, refreshKey?: u
 
         // Build query params
         const params = new URLSearchParams({
-          user_id: session.user.id, // TODO: Remove when backend uses auth context
           limit: String(options.limit || 10),
           offset: String(currentOffset),
         });
@@ -61,7 +60,11 @@ export function useDeviations(options: UseDeviationsOptions = {}, refreshKey?: u
           params.append('review_status', options.reviewStatus);
         }
 
-        const res = await fetch(`${API_BASE_URL}/api/deviations?${params.toString()}`);
+        const res = await fetch(`${API_BASE_URL}/api/deviations?${params.toString()}`, {
+          headers: {
+            ...(session?.accessToken ? { Authorization: `Bearer ${session.accessToken}` } : {}),
+          },
+        });
         if (!res.ok) throw new Error(`Failed to fetch deviations: ${res.status}`);
         const data: Deviation[] = await res.json();
 
@@ -79,7 +82,7 @@ export function useDeviations(options: UseDeviationsOptions = {}, refreshKey?: u
         setLoading(false);
       }
     },
-    [session?.user?.id, options.limit, options.reviewStatus]
+    [session?.user?.id, session?.accessToken, options.limit, options.reviewStatus]
   );
 
   // Initial fetch
@@ -87,7 +90,7 @@ export function useDeviations(options: UseDeviationsOptions = {}, refreshKey?: u
     console.log('[useDeviations] useEffect triggered, refreshKey:', refreshKey);
     fetchDeviations(0, false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session?.user?.id, options.limit, refreshKey]);
+  }, [session?.user?.id, session?.accessToken, options.limit, refreshKey]);
 
   // Load more function
   const loadMore = useCallback(() => fetchDeviations(offset, true), [fetchDeviations, offset]);

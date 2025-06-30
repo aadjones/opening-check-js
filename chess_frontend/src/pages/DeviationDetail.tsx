@@ -10,6 +10,7 @@ import { SHOW_MOVE_COMPARISON_CARDS, SHOW_REPLAY_PREP_LINE_BUTTON } from '../fea
 import DeviationMoveControls from '../components/chess/DeviationMoveControls';
 import type { DeviationMoveControlState } from '../components/chess/DeviationMoveControls';
 import { supabase } from '../lib/supabase';
+import { formatTimeControl } from '../utils/time';
 
 type Deviation = Database['public']['Tables']['opening_deviations']['Row'];
 
@@ -201,7 +202,7 @@ const DeviationDetail: React.FC = () => {
           <div className={styles.openingInfo}>📖 Opening: {openingName}</div>
           <div className={styles.opponentInfo}>
             🤝 vs. {opponent}
-            {timeControl ? ` — ${timeControl}` : ''}
+            {timeControl ? ` — ${formatTimeControl(timeControl)}` : ''}
             {gameResult ? ` — Result: ${gameResult}` : ''}
           </div>
         </div>

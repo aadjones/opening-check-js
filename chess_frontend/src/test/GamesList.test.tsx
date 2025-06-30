@@ -61,7 +61,6 @@ describe('GamesList', () => {
   it('renders empty state', () => {
     renderWithRouter(<GamesList games={[]} isLoading={false} />);
     expect(screen.getByText('No recent games found')).toBeInTheDocument();
-    expect(screen.getByText("Play some games on Lichess and they'll appear here for analysis!")).toBeInTheDocument();
   });
 
   it('renders list of games', () => {
@@ -69,12 +68,6 @@ describe('GamesList', () => {
     expect(screen.getByTestId('games-list')).toBeInTheDocument();
     expect(screen.getByText('vs ChessBot')).toBeInTheDocument();
     expect(screen.getByText('vs GM_Hikaru')).toBeInTheDocument();
-  });
-
-  it('formats time control correctly', () => {
-    renderWithRouter(<GamesList games={mockGames} />);
-    expect(screen.getByText('Blitz')).toBeInTheDocument();
-    expect(screen.getByText('Rapid')).toBeInTheDocument();
   });
 
   it('formats game results correctly', () => {

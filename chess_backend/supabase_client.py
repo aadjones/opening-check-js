@@ -163,11 +163,10 @@ def get_study_id_from_url(study_url: str, user_id: str) -> Optional[str]:
     return None
 
 
-def insert_deviation_to_db(deviation: Dict[str, Any], pgn: str, username: str, study_url: Optional[str] = None) -> None:
-    """Saves a deviation record to the database."""
+def insert_deviation_to_db(deviation: Dict[str, Any], pgn: str, user_id: str, study_url: Optional[str] = None) -> None:
+    """Saves a deviation record to the database using user_id (UUID)."""
     client = get_admin_client()
     game_id = extract_game_id_from_pgn(pgn)
-    user_id = get_user_id_from_username(username)
 
     # Get study_id if study_url is provided
     study_id = None
