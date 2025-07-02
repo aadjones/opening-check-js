@@ -4,10 +4,7 @@ export type Outcome = 'win' | 'loss' | 'draw' | null;
  * Derive the outcome from the PGN result string ("1-0", "0-1", "1/2-1/2") and the user's color.
  * Returns `null` when the result is malformed or userColor is unknown.
  */
-export function deriveOutcome(
-  result: string | undefined,
-  userColor: 'white' | 'black' | null | undefined,
-): Outcome {
+export function deriveOutcome(result: string | undefined, userColor: 'white' | 'black' | null | undefined): Outcome {
   if (!result || !userColor) return null;
   if (result === '1/2-1/2') return 'draw';
 
@@ -20,4 +17,4 @@ export function deriveOutcome(
     if (cleaned === '1-0') return 'loss';
   }
   return null;
-} 
+}

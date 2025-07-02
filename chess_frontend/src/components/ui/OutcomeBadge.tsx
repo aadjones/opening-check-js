@@ -12,11 +12,9 @@ const OutcomeBadge: React.FC<OutcomeBadgeProps> = ({ outcome, className }) => {
   if (!SHOW_OUTCOME_BADGE || !outcome) return null;
   return (
     <span
-      className={
-        `${styles.badge} ${
-          outcome === 'win' ? styles.win : outcome === 'loss' ? styles.loss : styles.draw
-        } ${className ?? ''}`.trim()
-      }
+      className={`${styles.badge} ${
+        outcome === 'win' ? styles.win : outcome === 'loss' ? styles.loss : styles.draw
+      } ${className ?? ''}`.trim()}
       aria-label={`Game outcome: ${outcome}`}
     >
       {outcome}
@@ -24,4 +22,4 @@ const OutcomeBadge: React.FC<OutcomeBadgeProps> = ({ outcome, className }) => {
   );
 };
 
-export default OutcomeBadge; 
+export default OutcomeBadge;

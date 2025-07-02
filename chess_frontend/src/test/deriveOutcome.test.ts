@@ -18,4 +18,4 @@ describe('deriveOutcome', () => {
     expect(deriveOutcome(undefined, 'white')).toBeNull();
     expect(deriveOutcome('1-0', undefined)).toBeNull();
   });
-}); 
+});
