@@ -48,16 +48,16 @@ def start_server() -> None:
 
     print(f"🚀 Starting server on {host}:{port}")
 
-    # Start the server
-    uvicorn.run("main:app", host=host, port=port, log_level="info", access_log=True)
+    # Ensure imports resolve relative to the chess_backend package root.
+    script_dir = Path(__file__).resolve().parent  # chess_backend/scripts
+    os.chdir(script_dir.parent)  # cd to chess_backend/
+
+    # Use fully qualified module path so it works regardless of cwd
+    uvicorn.run("chess_backend.main:app", host=host, port=port, log_level="info", access_log=True)
 
 
 if __name__ == "__main__":
     print("🔧 Chess Analysis Backend - Production Startup")
-
-    # Change to the project root (<script>/../..)
-    script_dir = Path(__file__).resolve().parent
-    os.chdir(script_dir / ".." / "..")
 
     # Validate environment
     validate_environment()
