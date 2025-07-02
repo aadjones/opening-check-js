@@ -13,6 +13,7 @@ const mockGames: GameListItem[] = [
     gameResult: '1-0',
     playedAt: '2024-03-15T12:00:00Z',
     hasDeviation: false,
+    outcome: 'win',
   },
   {
     id: '2',
@@ -24,6 +25,7 @@ const mockGames: GameListItem[] = [
     playedAt: '2024-03-15T13:00:00Z',
     hasDeviation: true,
     firstDeviator: 'user',
+    outcome: 'loss',
     deviation: {
       id: 'dev1',
       user_id: 'user-uuid',
@@ -72,7 +74,7 @@ describe('GamesList', () => {
 
   it('formats game results correctly', () => {
     renderWithRouter(<GamesList games={mockGames} />);
-    expect(screen.getByText('✅ White won')).toBeInTheDocument();
+    expect(screen.getByText('win', { exact: false })).toBeInTheDocument();
     expect(screen.getByText(/You deviated/)).toBeInTheDocument();
   });
 

@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import styles from './GamesList.module.css';
 import type { Database } from '../types/supabase';
 import { formatTimeControl } from '../utils/time';
+import OutcomeBadge from './ui/OutcomeBadge';
+import type { Outcome } from '../utils/outcome';
 
 type Deviation = Database['public']['Tables']['opening_deviations']['Row'];
 
@@ -17,6 +19,7 @@ export interface GameListItem {
   hasDeviation: boolean;
   deviation?: Deviation;
   firstDeviator?: 'user' | 'opponent';
+  outcome?: Outcome;
 }
 
 export interface GamesListProps {
@@ -101,6 +104,7 @@ const GamesList: React.FC<GamesListProps> = ({ games, isLoading, onGameClick }) 
             <span className={styles.gameResult}>
               {formatResult(game.gameResult, game.hasDeviation, game.firstDeviator)}
             </span>
+            <OutcomeBadge outcome={game.outcome} />
           </div>
 
           <div className={styles.gameContent}>

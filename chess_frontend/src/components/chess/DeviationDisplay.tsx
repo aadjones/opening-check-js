@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import type { Arrow, Square } from 'react-chessboard/dist/chessboard/types';
 import type { Database } from '../../types/supabase';
-import ChessBoard from '../ChessBoard';
+import ChessBoard from './ChessBoard';
 import { useChessGame } from '../../hooks/useChessGame';
 import { useAuth } from '../../hooks/useAuth';
 import DeviationMoveControls from './DeviationMoveControls';

@@ -14,3 +14,6 @@ export const SHOW_REVIEW_STREAKS = false;
 // Backend Performance Features
 export const ENABLE_LICHESS_STUDY_THROTTLE = true;
 export const LICHESS_THROTTLE_DELAY_SECONDS = 1;
+
+// UI Experiments
+export const SHOW_OUTCOME_BADGE = true;

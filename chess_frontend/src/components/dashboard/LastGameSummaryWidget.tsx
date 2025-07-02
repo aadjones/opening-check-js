@@ -5,6 +5,8 @@ import { parsePgnHeaders } from '../../utils/pgn';
 import type { Database } from '../../types/supabase';
 import { useAuth } from '../../hooks/useAuth';
 import { formatTimeControl } from '../../utils/time';
+import { deriveOutcome } from '../../utils/outcome';
+import OutcomeBadge from '../ui/OutcomeBadge';
 
 type Deviation = Database['public']['Tables']['opening_deviations']['Row'];
 
@@ -44,6 +46,8 @@ const LastGameSummaryWidget: React.FC<LastGameSummaryWidgetProps> = ({ lastDevia
 
   const isUserDeviation = lastDeviation.first_deviator === 'user';
 
+  const outcome = deriveOutcome(result, userActualColor);
+
   return (
     <div className={styles.card}>
       <div className={styles.header}>
@@ -57,7 +61,7 @@ const LastGameSummaryWidget: React.FC<LastGameSummaryWidgetProps> = ({ lastDevia
         </span>
         <span className={styles.opponent}>vs {opponent}</span>
         <span>{formatTimeControl(timeControl)}</span>
-        <span className={styles.result}>{result}</span>
+        <OutcomeBadge outcome={outcome} />
       </div>
 
       <div className={styles.deviationDetails}>

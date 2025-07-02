@@ -54,7 +54,9 @@ def check_directories():
 def run_with_logging(command, cwd, log_file):
     """Run a command and log output to file"""
     try:
-        with open(PROJECT_ROOT / log_file, 'w', encoding='utf-8') as f:
+        logs_dir = PROJECT_ROOT / "logs"
+        logs_dir.mkdir(exist_ok=True)
+        with open(logs_dir / log_file, 'w', encoding='utf-8') as f:
             process = subprocess.Popen(
                 command,
                 cwd=PROJECT_ROOT / cwd,
@@ -71,7 +73,8 @@ def run_with_logging(command, cwd, log_file):
 def tail_log(log_file, lines=3):
     """Get the last few lines from a log file"""
     try:
-        log_path = PROJECT_ROOT / log_file
+        logs_dir = PROJECT_ROOT / "logs"
+        log_path = logs_dir / log_file
         if log_path.exists():
             with open(log_path, 'r', encoding='utf-8') as f:
                 all_lines = f.readlines()
@@ -83,7 +86,7 @@ def tail_log(log_file, lines=3):
 def get_frontend_port():
     """Extract the actual port from frontend logs"""
     try:
-        log_path = PROJECT_ROOT / "frontend.log"
+        log_path = PROJECT_ROOT / "logs" / "frontend.log"
         if log_path.exists():
             with open(log_path, 'r', encoding='utf-8') as f:
                 content = f.read()
@@ -191,8 +194,8 @@ def main():
     print_colored("Backend:  http://localhost:8000", Colors.BLUE)
     print()
     print_colored("📝 Logs are being written to:", Colors.YELLOW)
-    print("   Frontend: frontend.log")
-    print("   Backend:  backend.log")
+    print(f"   Frontend: logs/frontend.log")
+    print(f"   Backend:  logs/backend.log")
     print()
     print_colored("Press Ctrl+C to stop both servers", Colors.GREEN)
     print()
