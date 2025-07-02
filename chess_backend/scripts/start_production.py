@@ -52,8 +52,8 @@ def start_server() -> None:
     script_dir = Path(__file__).resolve().parent  # chess_backend/scripts
     os.chdir(script_dir.parent)  # cd to chess_backend/
 
-    # Use fully qualified module path so it works regardless of cwd
-    uvicorn.run("chess_backend.main:app", host=host, port=port, log_level="info", access_log=True)
+    # Import the app relative to current working dir (chess_backend)
+    uvicorn.run("main:app", host=host, port=port, log_level="info", access_log=True)
 
 
 if __name__ == "__main__":
