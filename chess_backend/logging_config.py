@@ -20,13 +20,14 @@ import sys
 from pathlib import Path
 from typing import Optional
 
-# Log directory setup
-LOG_DIR = Path("logs")
-LOG_DIR.mkdir(exist_ok=True)
+# Log directory located at the repository root so all services share one place
+# Resolve path: <repo_root>/logs
+REPO_ROOT = Path(__file__).resolve().parents[1]
+LOG_DIR = REPO_ROOT / "logs"
 
 # Log file paths
-DEBUG_LOG = LOG_DIR / "debug.log"
-ERROR_LOG = LOG_DIR / "error.log"
+DEBUG_LOG = LOG_DIR / "backend_debug.log"
+ERROR_LOG = LOG_DIR / "backend_error.log"
 
 # Log format
 LOG_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"

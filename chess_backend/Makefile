@@ -113,8 +113,8 @@ else
 		echo "   • analyze-games: Ready to process game analysis"; \
 		echo "   • BACKEND_URL: $(PROD_BACKEND_URL)"; \
 	else \
-		chmod +x start.sh; \
-		$(VENV_ACTIVATE) && ./start.sh; \
+		chmod +x scripts/start_dev.sh; \
+		$(VENV_ACTIVATE) && ./scripts/start_dev.sh; \
 	fi
 endif
 

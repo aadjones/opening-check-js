@@ -41,4 +41,4 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
   );
 };
 
-export default ChessBoard;
+export default ChessBoard; 
