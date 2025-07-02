@@ -25,6 +25,9 @@ from typing import Optional
 REPO_ROOT = Path(__file__).resolve().parents[1]
 LOG_DIR = REPO_ROOT / "logs"
 
+# Ensure the directory exists even in CI nested paths
+LOG_DIR.mkdir(parents=True, exist_ok=True)
+
 # Log file paths
 DEBUG_LOG = LOG_DIR / "backend_debug.log"
 ERROR_LOG = LOG_DIR / "backend_error.log"
