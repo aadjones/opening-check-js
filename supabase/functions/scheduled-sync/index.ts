@@ -64,21 +64,33 @@ Deno.serve(async (req) => {
             .single();
           if (profileErr || !profile) throw profileErr ?? new Error("Profile not found");
 
-          // Generate JWT for this user
-          // const jwt = await generateUserJWT({
-          //   sub: user.user_id,
-          //   email: profile.email,
-          //   lichess_username: profile.lichess_username
-          // });
+          // Fetch user's active studies
+          const { data: studies, error: studiesErr } = await supabase
+            .from("lichess_studies")
+            .select("study_url, study_name")
+            .eq("user_id", user.user_id)
+            .eq("is_active", true);
+          if (studiesErr) throw studiesErr;
 
-          // Call Python backend analyze_games endpoint
+          const whiteStudy = studies?.find(s => /white/i.test(s.study_name))?.study_url;
+          const blackStudy = studies?.find(s => /black/i.test(s.study_name))?.study_url;
+
+          if (!whiteStudy && !blackStudy) {
+            throw new Error("No active studies found for user");
+          }
+
+          // Call Python backend analyze_games endpoint with full payload
           const res = await fetch(ANALYZE_URL, {
             method: "POST",
             headers: {
               "Content-Type": "application/json"
             },
-            body: JSON.stringify({ 
-              max_games: 10
+            body: JSON.stringify({
+              username: profile.lichess_username,
+              study_url_white: whiteStudy,
+              study_url_black: blackStudy,
+              max_games: 10,
+              scope: "recent"
             })
           });
           if (!res.ok) {
