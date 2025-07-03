@@ -111,7 +111,7 @@ Deno.serve(async (req) => {
         syncedUsers,
         errors
       }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      { status: errors.length === 0 ? 200 : 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (err: unknown) {
     let errorMsg = "Unknown error";
