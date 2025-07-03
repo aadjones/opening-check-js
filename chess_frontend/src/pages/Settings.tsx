@@ -223,9 +223,15 @@ const Settings: React.FC = () => {
           },
         }
       );
-      // If enabling auto-sync, always set frequency to 5
+      // Determine whether auto-sync will be enabled after this update
       const updateObj = { ...updates };
-      if (updates.is_auto_sync_enabled) {
+      const willBeAuto =
+        updateObj.is_auto_sync_enabled !== undefined
+          ? updateObj.is_auto_sync_enabled
+          : syncPreferences.is_auto_sync_enabled;
+
+      // Ensure frequency is 5 whenever auto-sync is (or remains) enabled
+      if (willBeAuto) {
         updateObj.sync_frequency_minutes = 5;
       }
       const { error } = await supabaseWithAuth
