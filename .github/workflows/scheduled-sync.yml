@@ -8,8 +8,6 @@ on:
 jobs:
   call-scheduled-sync:
     runs-on: ubuntu-latest
-    env:
-      CRON_SECRET: ${{ secrets.CRON_SECRET }}
     steps:
       - name: Invoke scheduled-sync
         env:
