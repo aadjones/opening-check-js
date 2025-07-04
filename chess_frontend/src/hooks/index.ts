@@ -1,7 +1,9 @@
 export { useAuth } from './useAuth';
+export { useTheme } from './useTheme';
 export { usePageTitle } from './usePageTitle';
+export { useReviewQueue } from './useReviewQueue';
+export { useReviewSchedule } from './useReviewSchedule';
+export { useSpacedRepetition } from './useSpacedRepetition';
 export { useSupabaseSession } from './useSupabaseSession';
 export { useDeviations } from './useDeviations';
-export { useReviewQueue } from './useReviewQueue';
-export { useSpacedRepetition } from './useSpacedRepetition';
-export { useTheme } from './useTheme';
+export { useLearningStats } from './useLearningStats';

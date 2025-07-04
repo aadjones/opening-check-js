@@ -23,11 +23,31 @@
   line-height: 1.5;
 }
 
+.contentLayout {
+  display: flex;
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.mainContent {
+  flex: 1;
+  min-width: 0; /* Prevents flex blowout */
+}
+
 .launcherContent {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 300px;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 320px;
+  flex-shrink: 0;
 }
 
 .launcherCard {
@@ -283,9 +303,29 @@
   transition: opacity 0.3s;
 }
 
+@media (max-width: 960px) {
+  .contentLayout {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .sidebar {
+    order: -1; /* Show sidebar above main content on mobile */
+    width: 100%;
+  }
+}
+
 @media (max-width: 640px) {
+  .reviewQueue {
+    padding: 1rem;
+  }
+
+  .contentLayout {
+    gap: 1rem;
+  }
+
   .launcherCard {
-    margin: 0 1rem;
+    margin: 0;
     padding: 2rem 1.5rem;
   }
 
