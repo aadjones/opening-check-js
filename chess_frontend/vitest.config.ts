@@ -15,5 +15,13 @@ export default defineConfig({
     setupFiles: './src/test/setup.ts',
     testTimeout: 10000, // 10 second timeout per test
     hookTimeout: 10000, // 10 second timeout for hooks
+    // Exclude tests that require external dependencies
+    exclude: [
+      '**/node_modules/**',
+      '**/dist/**',
+      '**/supabase-integration.test.ts', // Requires Supabase connection
+      '**/dbSchema.test.ts', // Requires database connection
+      '**/*spacedRepetitionService.test.ts', // Requires Supabase mocking (removed)
+    ],
   },
 });
