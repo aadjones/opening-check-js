@@ -25,6 +25,10 @@ const PuzzlePlayer: React.FC<PuzzlePlayerProps> = ({ puzzle, onComplete, onNext 
     arrows: Arrow[];
     squares: Record<string, Record<string, string | number>>;
   }>({ arrows: [], squares: {} });
+  
+  // New state for click-to-move functionality
+  const [selectedSquare, setSelectedSquare] = useState<string | null>(null);
+  const [possibleMoves, setPossibleMoves] = useState<string[]>([]);
 
   // Helper function to parse expected moves (handles "move1 or move2" format)
   const parseExpectedMoves = (expectedMove: string): string[] => {
@@ -114,6 +118,14 @@ const PuzzlePlayer: React.FC<PuzzlePlayerProps> = ({ puzzle, onComplete, onNext 
     }
   }, [state]);
 
+  // Clear selection when state changes
+  React.useEffect(() => {
+    if (state !== 'waiting_for_move') {
+      setSelectedSquare(null);
+      setPossibleMoves([]);
+    }
+  }, [state]);
+
   // Animate the correct move when showing answer
   React.useEffect(() => {
     if (state === 'show_answer') {
@@ -165,12 +177,112 @@ const PuzzlePlayer: React.FC<PuzzlePlayerProps> = ({ puzzle, onComplete, onNext 
     return { arrows: [], squares: {} };
   };
 
+  // Helper function to get possible moves for a piece
+  const getPossibleMoves = (square: string, fen: string): string[] => {
+    try {
+      const tempGame = new Chess(fen);
+      const moves = tempGame.moves({ square: square as any, verbose: true }) as any[];
+      return moves.map(move => move.to);
+    } catch (error) {
+      console.error('Could not get possible moves:', error);
+      return [];
+    }
+  };
+
+  // Helper function to check if a move is a capture
+  const isCapture = (from: string, to: string, fen: string): boolean => {
+    try {
+      const tempGame = new Chess(fen);
+      // Check if there's a piece on the destination square before making the move
+      const piece = tempGame.get(to as any);
+      return piece !== null;
+    } catch (error) {
+      return false;
+    }
+  };
+
+  // Helper function to create move indicators (circles and triangles)
+  const createMoveIndicators = () => {
+    if (!selectedSquare || possibleMoves.length === 0 || state !== 'waiting_for_move') {
+      return {};
+    }
+
+    const squares: Record<string, Record<string, string | number>> = {};
+    
+    // Highlight selected square
+    squares[selectedSquare] = { backgroundColor: 'rgba(255, 255, 0, 0.4)' };
+    
+    // Add indicators for possible moves
+    possibleMoves.forEach(moveSquare => {
+      const capture = isCapture(selectedSquare, moveSquare, currentFen);
+      
+      if (capture) {
+        // Capture moves: thick border
+        squares[moveSquare] = {
+          border: '4px solid #3b82f6'
+        };
+      } else {
+        // Normal moves: centered dot using radial gradient
+        squares[moveSquare] = {
+          background: 'radial-gradient(circle at center, #3b82f6 25%, transparent 25%)'
+        };
+      }
+    });
+
+    return squares;
+  };
+
+  // Handle square clicks for piece selection and movement
+  const handleSquareClick = (square: string) => {
+    if (state !== 'waiting_for_move' || userMadeMove) return;
+
+    // If no piece is selected, try to select this square
+    if (!selectedSquare) {
+      const moves = getPossibleMoves(square, currentFen);
+      if (moves.length > 0) {
+        setSelectedSquare(square);
+        setPossibleMoves(moves);
+      }
+      return;
+    }
+
+    // If clicking the same square, deselect
+    if (selectedSquare === square) {
+      setSelectedSquare(null);
+      setPossibleMoves([]);
+      return;
+    }
+
+    // If clicking a possible move square, make the move
+    if (possibleMoves.includes(square)) {
+      handleMove(selectedSquare, square);
+      setSelectedSquare(null);
+      setPossibleMoves([]);
+      return;
+    }
+
+    // If clicking a different piece, select it instead
+    const moves = getPossibleMoves(square, currentFen);
+    if (moves.length > 0) {
+      setSelectedSquare(square);
+      setPossibleMoves(moves);
+    } else {
+      // Clicking an empty square or opponent piece, deselect
+      setSelectedSquare(null);
+      setPossibleMoves([]);
+    }
+  };
+
   const handleMove = (from: string, to: string) => {
     if (state !== 'waiting_for_move') return;
 
     const moveAttempt = attempts + 1;
     setAttempts(moveAttempt);
     setUserMadeMove(true);
+    
+    // Clear selection after move attempt
+    setSelectedSquare(null);
+    setPossibleMoves([]);
 
     // Create move string in format like "Nf3" or "exd5"
     const tempGame = new Chess(game.fen());
@@ -247,11 +359,15 @@ const PuzzlePlayer: React.FC<PuzzlePlayerProps> = ({ puzzle, onComplete, onNext 
           <ChessBoard
             fen={currentFen}
             arrows={moveHighlight.arrows}
-            customSquareStyles={moveHighlight.squares}
+            customSquareStyles={{
+              ...moveHighlight.squares,
+              ...createMoveIndicators()
+            }}
             orientation={puzzle.color.toLowerCase() === 'white' ? 'white' : 'black'}
             boardWidth={400}
             arePiecesDraggable={state === 'waiting_for_move' && !userMadeMove}
             onMove={handleMove}
+            onSquareClick={handleSquareClick}
           />
         </div>
 

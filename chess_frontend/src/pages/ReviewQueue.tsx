@@ -3,7 +3,7 @@ import { usePageTitle } from '../hooks/usePageTitle';
 import styles from './ReviewQueue.module.css';
 import { useReviewQueue } from '../hooks/useReviewQueue';
 import PuzzleSession from '../components/chess/PuzzleSession';
-import { ReviewTimePlanner, ReviewLearningStatus } from '../components/review';
+import { ReviewLearningStatus } from '../components/review';
 import { getRandomReviewQuote } from '../data/reviewQuotes';
 import { useAuth } from '../hooks/useAuth';
 import { createClient } from '@supabase/supabase-js';
@@ -118,7 +118,6 @@ const ReviewQueue: React.FC = () => {
         </div>
 
         <div className={styles.sidebar}>
-          <ReviewTimePlanner />
           <ReviewLearningStatus />
         </div>
       </div>

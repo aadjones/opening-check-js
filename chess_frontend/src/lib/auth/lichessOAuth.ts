@@ -124,9 +124,12 @@ export async function buildLichessOAuthURL(): Promise<string> {
 
   const authUrl = `${LICHESS_CONFIG.authorizationEndpoint}?${params.toString()}`;
 
-  console.log('Generated Lichess OAuth URL:', authUrl);
-  console.log('Redirect URI:', LICHESS_CONFIG.redirectUri);
-  console.log('Client ID:', LICHESS_CONFIG.clientId);
+  // Only log in development
+  if (import.meta.env.DEV) {
+    console.log('Generated Lichess OAuth URL:', authUrl);
+    console.log('Redirect URI:', LICHESS_CONFIG.redirectUri);
+    console.log('Client ID:', LICHESS_CONFIG.clientId);
+  }
 
   return authUrl;
 }
@@ -188,7 +191,9 @@ export async function exchangeCodeForToken(code: string, codeVerifier: string): 
     code_verifier: codeVerifier,
   });
 
-  console.log('Exchanging code for token with Lichess...');
+  if (import.meta.env.DEV) {
+    console.log('Exchanging code for token with Lichess...');
+  }
 
   const response = await fetch(LICHESS_CONFIG.tokenEndpoint, {
     method: 'POST',
@@ -201,12 +206,16 @@ export async function exchangeCodeForToken(code: string, codeVerifier: string): 
 
   if (!response.ok) {
     const errorText = await response.text();
-    console.error('Token exchange failed:', response.status, errorText);
-    throw new Error(`Token exchange failed: ${response.status} ${errorText}`);
+    if (import.meta.env.DEV) {
+      console.error('Token exchange failed:', response.status, errorText);
+    }
+    throw new Error(`Token exchange failed: ${response.status}`);
   }
 
   const tokenData = await response.json();
-  console.log('Token exchange successful');
+  if (import.meta.env.DEV) {
+    console.log('Token exchange successful');
+  }
 
   return tokenData;
 }
@@ -215,7 +224,9 @@ export async function exchangeCodeForToken(code: string, codeVerifier: string): 
  * Fetches user profile from Lichess using access token
  */
 export async function fetchLichessUser(accessToken: string): Promise<LichessUser> {
-  console.log('Fetching Lichess user profile...');
+  if (import.meta.env.DEV) {
+    console.log('Fetching Lichess user profile...');
+  }
 
   const response = await fetch(LICHESS_CONFIG.userInfoEndpoint, {
     headers: {
@@ -226,12 +237,16 @@ export async function fetchLichessUser(accessToken: string): Promise<LichessUser
 
   if (!response.ok) {
     const errorText = await response.text();
-    console.error('User info fetch failed:', response.status, errorText);
-    throw new Error(`Failed to fetch user info: ${response.status} ${errorText}`);
+    if (import.meta.env.DEV) {
+      console.error('User info fetch failed:', response.status, errorText);
+    }
+    throw new Error(`Failed to fetch user info: ${response.status}`);
   }
 
   const userData = await response.json();
-  console.log('User profile fetched successfully:', userData.username);
+  if (import.meta.env.DEV) {
+    console.log('User profile fetched successfully:', userData.username);
+  }
 
   return userData;
 }

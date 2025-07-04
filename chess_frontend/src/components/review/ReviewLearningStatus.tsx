@@ -97,15 +97,15 @@ const ReviewLearningStatus: React.FC = () => {
         <h4 className={styles.sectionTitle}>Reviews Due</h4>
         <div className={styles.reviewSchedule}>
           <div className={styles.scheduleItem}>
+            <span className={styles.scheduleLabel}>Today</span>
+            <span className={styles.scheduleCount}>{schedule.find(entry => entry.date === new Date().toISOString().split('T')[0])?.count || 0}</span>
+          </div>
+          <div className={styles.scheduleItem}>
             <span className={styles.scheduleLabel}>Tomorrow</span>
             <span className={styles.scheduleCount}>{reviewsDue.tomorrow}</span>
           </div>
           <div className={styles.scheduleItem}>
-            <span className={styles.scheduleLabel}>Day After</span>
-            <span className={styles.scheduleCount}>{reviewsDue.dayAfter}</span>
-          </div>
-          <div className={styles.scheduleItem}>
-            <span className={styles.scheduleLabel}>Next Week</span>
+            <span className={styles.scheduleLabel}>1 Week</span>
             <span className={styles.scheduleCount}>{reviewsDue.oneWeek}</span>
           </div>
         </div>

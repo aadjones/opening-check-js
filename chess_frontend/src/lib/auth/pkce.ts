@@ -52,10 +52,20 @@ export async function generatePKCE(): Promise<{
 
 /**
  * Stores code verifier securely (in sessionStorage for now)
- * In production, this should be an HTTP-only cookie
+ * 
+ * ⚠️ SECURITY TODO: In production, this should be an HTTP-only cookie
+ * to prevent XSS attacks from accessing the code verifier.
+ * 
+ * Current implementation uses sessionStorage which is acceptable for:
+ * - Development and testing
+ * - Applications with strong XSS protection
+ * 
+ * For production deployment, consider implementing:
+ * - HTTP-only cookies with SameSite=Strict
+ * - Server-side session storage
+ * - Encrypted storage with short expiration
  */
 export function storeCodeVerifier(verifier: string): void {
-  // TODO: Replace with secure HTTP-only cookie in production
   sessionStorage.setItem('oauth_code_verifier', verifier);
 }
 
