@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Chess } from 'chess.js';
+import { Chess, Square, Move } from 'chess.js';
 import ChessBoard from '../ChessBoard';
 import type { PuzzleData } from '../../hooks/useReviewQueue';
 import type { Arrow } from 'react-chessboard/dist/chessboard/types';
@@ -38,7 +38,6 @@ const PuzzlePlayer: React.FC<PuzzlePlayerProps> = ({ puzzle, onComplete, onNext 
   // Helper function to get the first valid expected move for animation
   const getFirstValidExpectedMove = (expectedMove: string, fen: string): string | null => {
     const expectedMoves = parseExpectedMoves(expectedMove);
-    const tempGame = new Chess(fen);
     
     for (const move of expectedMoves) {
       try {
@@ -154,7 +153,7 @@ const PuzzlePlayer: React.FC<PuzzlePlayerProps> = ({ puzzle, onComplete, onNext 
 
       return () => clearTimeout(animateTimer);
     }
-  }, [state, puzzle.position_fen, puzzle.expected_move]);
+  }, [state, puzzle.position_fen, puzzle.expected_move, getFirstValidExpectedMove]);
 
   // Helper function to create move highlighting
   const createMoveHighlight = (move: string, fen: string) => {
@@ -181,10 +180,10 @@ const PuzzlePlayer: React.FC<PuzzlePlayerProps> = ({ puzzle, onComplete, onNext 
   const getPossibleMoves = (square: string, fen: string): string[] => {
     try {
       const tempGame = new Chess(fen);
-      const moves = tempGame.moves({ square: square as any, verbose: true }) as any[];
+      const moves = tempGame.moves({ square: square as Square, verbose: true }) as Move[];
       return moves.map(move => move.to);
-    } catch (error) {
-      console.error('Could not get possible moves:', error);
+    } catch {
+      console.error('Could not get possible moves');
       return [];
     }
   };
@@ -194,9 +193,9 @@ const PuzzlePlayer: React.FC<PuzzlePlayerProps> = ({ puzzle, onComplete, onNext 
     try {
       const tempGame = new Chess(fen);
       // Check if there's a piece on the destination square before making the move
-      const piece = tempGame.get(to as any);
+      const piece = tempGame.get(to as Square);
       return piece !== null;
-    } catch (error) {
+    } catch {
       return false;
     }
   };

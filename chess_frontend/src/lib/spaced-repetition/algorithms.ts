@@ -208,7 +208,6 @@ export function calculateNextReview(
  */
 export function initializeReviewEntry(
   algorithmType: 'basic' | 'sm2plus' | 'fsrs' = 'sm2plus',
-  _difficultyLevel: number = 1,
   config: AlgorithmConfig = DEFAULT_CONFIG
 ): Partial<ReviewResult> {
   const now = new Date();

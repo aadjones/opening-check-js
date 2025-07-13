@@ -78,7 +78,7 @@ export class SpacedRepetitionService {
    */
   async recordPuzzleAttempt(
     attemptData: PuzzleAttemptData,
-    currentQueueEntry: any
+    currentQueueEntry: Record<string, unknown>
   ): Promise<void> {
     try {
       // 1. Record the puzzle attempt
