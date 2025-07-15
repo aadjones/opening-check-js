@@ -32,7 +32,7 @@ PROJECT_REF  ?= fsmtmtconngujlhmkqgp   # your project id
 # Mode: dev (default) or prod
 MODE ?= dev
 # Production backend URL
-PROD_BACKEND_URL ?= https://opening-check-js-production.up.railway.app
+PROD_BACKEND_URL ?= https://opening-check-js-production-abc5.up.railway.app
 
 # Help
 help:

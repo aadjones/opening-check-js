@@ -43,8 +43,8 @@ if [ "$mode" = "dev" ]; then
   supabase secrets set BACKEND_URL_DEV="$URL"
 else
   echo "▶︎ updating BACKEND_URL secret…"
-  supabase secrets set BACKEND_URL="https://opening-check-js-production.up.railway.app"
-fi
+    supabase secrets set BACKEND_URL="https://opening-check-js-production-abc5.up.railway.app"
+  fi
 
 # The script now lives in chess_backend/scripts, so the project root is two levels up.
 PROJECT_ROOT="$(dirname "$0")/../.."
