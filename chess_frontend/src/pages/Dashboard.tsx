@@ -9,6 +9,7 @@ import { parsePgnHeaders } from '../utils/pgn';
 import PrepScoreWidget from '../components/dashboard/PrepScoreWidget';
 import LastGameSummaryWidget from '../components/dashboard/LastGameSummaryWidget';
 import InsightsBlock from '../components/dashboard/InsightsBlock';
+import { deriveOutcome } from '../utils/outcome';
 
 const Dashboard: React.FC = () => {
   usePageTitle('Dashboard');
@@ -52,6 +53,8 @@ const Dashboard: React.FC = () => {
     const playedAt = deviation.detected_at ?? '';
     const gameUrl = deviation.game_id ? `https://lichess.org/${deviation.game_id}` : '';
 
+    const outcome = deriveOutcome(gameResult, userActualColor);
+
     return {
       id: deviation.id ?? '',
       gameId: deviation.game_id ?? '',
@@ -63,6 +66,7 @@ const Dashboard: React.FC = () => {
       hasDeviation: true,
       deviation,
       firstDeviator: deviation.first_deviator as 'user' | 'opponent' | undefined,
+      outcome,
     };
   });
 

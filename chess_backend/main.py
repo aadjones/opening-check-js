@@ -35,11 +35,9 @@ from datetime import datetime
 from typing import Any, Awaitable, Callable, List, Optional, Tuple
 
 import httpx
-import jwt
 from fastapi import Depends, FastAPI, HTTPException, Query, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from jwt.exceptions import InvalidTokenError
 from pydantic import BaseModel, HttpUrl
 
 # Import your new service and the DeviationResult class
@@ -47,7 +45,7 @@ from analysis_service import perform_game_analysis
 from deviation_result import DeviationResult
 from error_handling import LichessApiError, handle_lichess_response, handle_network_error, handle_unexpected_error
 from logging_config import setup_logging
-from supabase_client import get_deviation_by_id, get_deviations_for_user
+from supabase_client import get_deviation_by_id, get_deviations_for_user, get_user_id_from_username
 from supabase_models import OpeningDeviation, User
 
 # Constants
@@ -56,41 +54,40 @@ LICHESS_API_BASE_URL = "https://lichess.org/api"
 
 # Auth
 async def get_current_user(request: Request) -> User:
-    """Get the current user from the request headers."""
+    """Get the current user from the Lichess OAuth token in the Authorization header, and look up their UUID."""
     auth_header = request.headers.get("Authorization")
     if not auth_header or not auth_header.startswith("Bearer "):
+        logger.error("Missing or invalid authorization header")
         raise HTTPException(status_code=401, detail="Missing or invalid authorization header")
 
     token = auth_header.split(" ")[1]
+    logger.debug(f"Received Lichess OAuth token: {token[:10]}...{token[-10:]}")
     try:
-        # Decode JWT token to get user info
-        # The token is signed by our edge function and contains user claims
-
-        # Get JWT secret from environment
-        jwt_secret = os.getenv("SUPABASE_JWT_SECRET") or os.getenv("JWT_SECRET")
-        if not jwt_secret:
-            raise HTTPException(status_code=500, detail="JWT secret not configured")
-
-        # Decode and verify token
-        payload = jwt.decode(token, jwt_secret, algorithms=["HS256"])
-
-        # Get user profile from database
-        from supabase_client import get_admin_client
-
-        client = get_admin_client()
-        response = client.table("profiles").select("*").eq("id", payload["sub"]).single().execute()
-
-        if not response.data:
-            raise HTTPException(status_code=401, detail="User not found")
-
-        profile = response.data
-        return User(
-            id=profile["id"], lichess_username=profile["lichess_username"], access_token=profile["access_token"]
-        )
-    except InvalidTokenError:
-        raise HTTPException(status_code=401, detail="Invalid token")
+        async with httpx.AsyncClient() as client:
+            resp = await client.get(
+                "https://lichess.org/api/account",
+                headers={"Authorization": f"Bearer {token}"},
+                timeout=10.0,
+            )
+            if resp.status_code != 200:
+                logger.error(f"Lichess token validation failed: {resp.status_code} {resp.text}")
+                raise HTTPException(status_code=401, detail="Invalid Lichess token")
+            account = resp.json()
+            lichess_username = account.get("username")
+            if not lichess_username:
+                logger.error("Lichess account response missing username")
+                raise HTTPException(status_code=401, detail="Invalid Lichess account response")
+            logger.info(f"Authenticated Lichess user: {lichess_username}")
+            # Look up user in DB by Lichess username to get UUID
+            try:
+                user_id = get_user_id_from_username(lichess_username)
+            except Exception as e:
+                logger.error(f"User not found in DB for Lichess username {lichess_username}: {e}")
+                raise HTTPException(status_code=404, detail="User not found in database")
+            return User(id=user_id, lichess_username=lichess_username, access_token=token)
     except Exception as e:
-        raise HTTPException(status_code=401, detail=f"Authentication failed: {str(e)}")
+        logger.error(f"Lichess OAuth validation failed: {e}")
+        raise HTTPException(status_code=401, detail=f"Lichess OAuth validation failed: {str(e)}")
 
 
 # --- Pydantic Models ---
@@ -153,8 +150,12 @@ async def analyze_games_endpoint(request: AnalysisRequest) -> AnalysisResponse:
             since = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
             logger.info(f"Analyzing today's games since {since}")
 
+        # Look up user_id (UUID) from username
+        user_id = get_user_id_from_username(request.username)
+
         python_results: List[Tuple[Optional[DeviationResult], str]] = perform_game_analysis(
             username=request.username,
+            user_id=user_id,
             study_url_white=str(request.study_url_white),
             study_url_black=str(request.study_url_black),
             max_games=request.max_games,
@@ -226,26 +227,30 @@ async def proxy_lichess(path: str, request: Request, current_user: User = Depend
 
 @app.get("/api/deviations", response_model=List[OpeningDeviation])
 async def get_deviations(
-    user_id: str = Query(..., description="User UUID. TODO: Replace with auth extraction."),
     limit: int = Query(10, ge=1, le=100, description="Number of deviations to fetch."),
     offset: int = Query(0, ge=0, description="Offset for pagination."),
     review_status: Optional[str] = Query(None, description="Filter by review status (needs_review, reviewed, etc.)"),
     active_studies_only: bool = Query(True, description="Only show deviations from active studies."),
+    current_user: User = Depends(get_current_user),
 ) -> List[OpeningDeviation]:
     """
-    Fetch deviations for a user with pagination and optional review_status filter.
+    Fetch deviations for the authenticated user with pagination and optional review_status filter.
     By default, only shows deviations from active studies.
-    TODO: Replace user_id query param with extraction from authentication context (JWT/session) for production security.
+    Requires a valid Lichess OAuth token in the Authorization header.
     """
-    rows = get_deviations_for_user(
-        user_id=user_id,
-        limit=limit,
-        offset=offset,
-        review_status=review_status,
-        active_studies_only=active_studies_only,
-    )
-    # Convert each dict (row) into an OpeningDeviation instance.
-    return [OpeningDeviation(**row) for row in rows]
+    try:
+        assert current_user.id is not None
+        rows = get_deviations_for_user(
+            user_id=current_user.id,
+            limit=limit,
+            offset=offset,
+            review_status=review_status,
+            active_studies_only=active_studies_only,
+        )
+        return [OpeningDeviation(**row) for row in rows]
+    except Exception as e:
+        logger.error(f"Error fetching deviations: {e}")
+        raise HTTPException(status_code=500, detail="Failed to fetch deviations")
 
 
 @app.get("/api/deviations/{deviation_id}", response_model=OpeningDeviation)

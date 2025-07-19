@@ -37,9 +37,7 @@ ifeq ($(OS),Windows_NT)
 else
 
     # Unix-like system (Mac/Linux)
-
     PYTHON := python3
-
     VENV_ACTIVATE := . env/bin/activate
 
     ECHO := echo
@@ -58,7 +56,10 @@ NGROK_BIN    ?= ngrok         # or full path if it isn't on PATH
 
 PROJECT_REF  ?= fsmtmtconngujlhmkqgp   # your project id
 
-
+# Mode: dev (default) or prod
+MODE ?= dev
+# Production backend URL
+PROD_BACKEND_URL ?= https://opening-check-js-production.up.railway.app
 
 # Help
 
@@ -71,9 +72,7 @@ ifeq ($(OS),Windows_NT)
 	$(ECHO) "Available commands:"
 
 	$(ECHO) "  make setup      - Create virtual environment and install dependencies"
-
-	$(ECHO) "  make start      - Start the development server"
-
+	$(ECHO) "  make start      - Start the development server (MODE=dev updates BACKEND_URL secret to ngrok, MODE=prod sets BACKEND_URL to production URL)"
 	$(ECHO) "  make dev        - Start server with external access"
 
 	$(ECHO) "  make install    - Install dependencies only"
@@ -103,9 +102,7 @@ else
 	@echo "Available commands:"
 
 	@echo "  make setup      - Create virtual environment and install dependencies"
-
-	@echo "  make start      - Start the development server"
-
+	@echo "  make start      - Start the development server (MODE=dev updates BACKEND_URL secret to ngrok, MODE=prod sets BACKEND_URL to production URL)"
 	@echo "  make dev        - Start server with external access"
 
 	@echo "  make install    - Install dependencies only"
@@ -187,11 +184,24 @@ ifeq ($(OS),Windows_NT)
 Use the PowerShell block above or run WSL."
 
 else
-
-	@chmod +x start.sh
-
-	@$(VENV_ACTIVATE) && ./start.sh
-
+	@if [ "$(MODE)" = "prod" ]; then \
+		echo "[PROD] Setting BACKEND_URL secret to $(PROD_BACKEND_URL)"; \
+		supabase secrets set BACKEND_URL=$(PROD_BACKEND_URL); \
+		echo "[PROD] Redeploying edge functions..."; \
+		cd $(dir $(lastword $(MAKEFILE_LIST)))/..; \
+		for fn in $(shell ls supabase/functions); do \
+		  if [ -d "supabase/functions/$$fn" ] && [ "$$fn" != "_shared" ]; then \
+		    supabase functions deploy $$fn; \
+		  fi; \
+		done; \
+		echo "✅  Edge functions deployed successfully!"; \
+		echo "   • sign-jwt: Ready to authenticate users"; \
+		echo "   • analyze-games: Ready to process game analysis"; \
+		echo "   • BACKEND_URL: $(PROD_BACKEND_URL)"; \
+	else \
+		chmod +x scripts/start_dev.sh; \
+		$(VENV_ACTIVATE) && ./scripts/start_dev.sh; \
+	fi
 endif
 
 

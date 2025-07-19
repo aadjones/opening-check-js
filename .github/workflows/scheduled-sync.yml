@@ -8,14 +8,12 @@ on:
 jobs:
   call-scheduled-sync:
     runs-on: ubuntu-latest
-    env:
-      CRON_SECRET: ${{ secrets.CRON_SECRET }}
     steps:
       - name: Invoke scheduled-sync
         env:
           SB_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}   # already in your repo secrets
         run: |
-          curl -f -s -o /dev/null -w 'HTTP %{http_code}\n' \
+          curl -f -w '\nHTTP %{http_code}\n' \
             -X POST \
             -H "apikey: $SB_KEY" \
             -H "Authorization: Bearer $SB_KEY" \

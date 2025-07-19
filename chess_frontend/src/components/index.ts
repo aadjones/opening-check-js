@@ -2,7 +2,6 @@
 export { default as DeviationDisplay } from './chess/DeviationDisplay';
 
 // Form components
-export { default as AnalysisForm } from './forms/AnalysisForm';
 export { default as StudySelector } from './StudySelector';
 
 // Layout components

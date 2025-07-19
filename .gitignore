@@ -68,6 +68,10 @@ chess_frontend/dist/
 logs
 *.log
 
+# TypeScript incremental builds
+*.tsbuildinfo
+node_modules/.tmp/
+
 # Runtime data
 pids
 *.pid

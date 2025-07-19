@@ -1,0 +1,5 @@
+# railway.toml
+[services.backend]
+source = "chess_backend"
+start  = "python scripts/start_production.py"
+build  = "pip install --upgrade pip && pip install -r requirements.txt"

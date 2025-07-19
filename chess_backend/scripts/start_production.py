@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
 Production startup script for Chess Analysis Backend
+Moved into chess_backend/scripts for consistency.
 Handles environment variable validation and starts the server
 """
 
@@ -47,16 +48,16 @@ def start_server() -> None:
 
     print(f"🚀 Starting server on {host}:{port}")
 
-    # Start the server
+    # Ensure imports resolve relative to the chess_backend package root.
+    script_dir = Path(__file__).resolve().parent  # chess_backend/scripts
+    os.chdir(script_dir.parent)  # cd to chess_backend/
+
+    # Import the app relative to current working dir (chess_backend)
     uvicorn.run("main:app", host=host, port=port, log_level="info", access_log=True)
 
 
 if __name__ == "__main__":
     print("🔧 Chess Analysis Backend - Production Startup")
-
-    # Change to the script directory
-    script_dir = Path(__file__).resolve().parent
-    os.chdir(script_dir)
 
     # Validate environment
     validate_environment()

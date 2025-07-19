@@ -6,7 +6,6 @@ import {
   Dashboard,
   DeviationDetail,
   Settings,
-  Analysis,
   Demo,
   AuthCallback,
   OnboardingPage,
@@ -16,7 +15,6 @@ import { AuthProvider } from './contexts/AuthJSContext';
 import { StudyUpdateProvider } from './contexts/StudyUpdateContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import './styles/index.css';
-import { SHOW_ANALYSIS_PAGE } from './featureFlags';
 
 function App() {
   return (
@@ -69,16 +67,6 @@ function App() {
                         </ProtectedRoute>
                       }
                     />
-                    {SHOW_ANALYSIS_PAGE && (
-                      <Route
-                        path="/analysis"
-                        element={
-                          <ProtectedRoute>
-                            <Analysis />
-                          </ProtectedRoute>
-                        }
-                      />
-                    )}
                     <Route
                       path="/review-queue"
                       element={

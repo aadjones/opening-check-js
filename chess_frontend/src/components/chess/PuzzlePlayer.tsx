@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Chess, Square, Move } from 'chess.js';
-import ChessBoard from '../ChessBoard';
+import ChessBoard from './ChessBoard';
 import type { PuzzleData } from '../../hooks/useReviewQueue';
 import type { Arrow } from 'react-chessboard/dist/chessboard/types';
 import styles from './PuzzlePlayer.module.css';

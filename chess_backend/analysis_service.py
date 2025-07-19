@@ -38,6 +38,7 @@ and finding deviations.
 
 def perform_game_analysis(
     username: str,
+    user_id: str,
     study_url_white: str,
     study_url_black: str,
     max_games: int = 10,
@@ -48,7 +49,7 @@ def perform_game_analysis(
     using the new, more reliable game export strategy.
     """
     try:
-        logger.info(f"Starting analysis for user: {username} with Game Export strategy.")
+        logger.info(f"Starting analysis for user: {username} (UUID: {user_id}) with Game Export strategy.")
 
         # --- Part 1: Fetch Game IDs ---
         game_ids = get_last_game_ids(username, max_games, since)
@@ -125,8 +126,8 @@ def perform_game_analysis(
                     elif player_color == "Black":
                         study_url = study_url_black
 
-                    # Call the DB function with the dictionary, PGN string, username, and study URL
-                    insert_deviation_to_db(deviation_dict, pgn_string, username, study_url)
+                    # Call the DB function with the dictionary, PGN string, user_id, and study URL
+                    insert_deviation_to_db(deviation_dict, pgn_string, user_id, study_url)
 
                 results.append((deviation_info, pgn_string))
 

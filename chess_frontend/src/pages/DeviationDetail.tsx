@@ -5,11 +5,14 @@ import { useDeviationById } from '../hooks/useDeviations';
 import styles from './DeviationDetail.module.css';
 import DeviationDisplay from '../components/chess/DeviationDisplay';
 import { parsePgnHeaders } from '../utils/pgn';
+import { deriveOutcome } from '../utils/outcome';
+import OutcomeBadge from '../components/ui/OutcomeBadge';
 import type { Database } from '../types/supabase';
 import { SHOW_MOVE_COMPARISON_CARDS, SHOW_REPLAY_PREP_LINE_BUTTON } from '../featureFlags';
 import DeviationMoveControls from '../components/chess/DeviationMoveControls';
 import type { DeviationMoveControlState } from '../components/chess/DeviationMoveControls';
 import { supabase } from '../lib/supabase';
+import { formatTimeControl } from '../utils/time';
 
 type Deviation = Database['public']['Tables']['opening_deviations']['Row'];
 
@@ -79,6 +82,8 @@ const DeviationDetail: React.FC = () => {
     : '';
   const playedMove = deviation.actual_move;
   const createdAt = new Date(deviation.detected_at ?? '');
+
+  const outcome = deriveOutcome(gameResult, userColor?.toLowerCase() as 'white' | 'black' | null);
 
   const handleMarkReviewed = async () => {
     if (!deviation?.id) return;
@@ -201,8 +206,8 @@ const DeviationDetail: React.FC = () => {
           <div className={styles.openingInfo}>📖 Opening: {openingName}</div>
           <div className={styles.opponentInfo}>
             🤝 vs. {opponent}
-            {timeControl ? ` — ${timeControl}` : ''}
-            {gameResult ? ` — Result: ${gameResult}` : ''}
+            {timeControl ? ` — ${formatTimeControl(timeControl)}` : ''}
+            <OutcomeBadge outcome={outcome} />
           </div>
         </div>
 
