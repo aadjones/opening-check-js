@@ -4,12 +4,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Out Of Book is a chess analysis application that compares played games against opening preparation to identify deviations. The project consists of:
+Out Of Book is a chess analysis application that compares played games against opening preparation to identify deviations. The project also includes a comprehensive spaced repetition system for chess puzzle practice and learning. The project consists of:
 
 - **Frontend**: React + TypeScript + Vite application 
 - **Backend**: FastAPI Python service with chess analysis engine
 - **Database**: Supabase PostgreSQL with RLS policies
 - **Authentication**: Lichess OAuth integration via Supabase Auth
+- **Spaced Repetition**: Scientific learning system using SM2+ and Basic algorithms for optimized chess puzzle practice
 
 ## Architecture
 

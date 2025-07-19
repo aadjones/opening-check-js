@@ -22,12 +22,16 @@ const AuthCallback: React.FC = () => {
         // Get URL parameters
         const urlParams = new URLSearchParams(window.location.search);
 
-        console.log('OAuth callback received with params:', Object.fromEntries(urlParams));
+        if (import.meta.env.DEV) {
+          console.log('OAuth callback received with params:', Object.fromEntries(urlParams));
+        }
 
         // Validate the callback parameters
         const { code, state } = validateOAuthCallback(urlParams);
 
-        console.log('OAuth validation successful:', { code: code.substring(0, 10) + '...', state });
+        if (import.meta.env.DEV) {
+          console.log('OAuth validation successful:', { code: code.substring(0, 10) + '...', state });
+        }
 
         // Get the stored code verifier
         const codeVerifier = getStoredCodeVerifier();

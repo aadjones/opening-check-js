@@ -42,6 +42,7 @@
   --color-background-card: #ffffff;
   --color-background-input: #f7fafd;
   --color-border: #d1d9e6;
+  --color-border-light: #e5e9ef;
   --color-border-focus: var(--color-primary);
 
   /* Typography */
@@ -159,6 +160,7 @@
   --color-background-card: #1e293b;
   --color-background-input: #334155;
   --color-border: #475569;
+  --color-border-light: #64748b;
   --color-border-focus: var(--color-primary);
 
   /* Shadows - Adjusted for dark theme */

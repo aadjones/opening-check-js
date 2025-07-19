@@ -2,9 +2,8 @@ import React, { useState } from 'react';
 import { useReviewQueue } from '../../hooks/useReviewQueue';
 import PuzzlePlayer from './PuzzlePlayer';
 import styles from './PuzzleSession.module.css';
-import { fetchSupabaseJWT } from '../../lib/auth/fetchSupabaseJWT';
-import { createClient } from '@supabase/supabase-js';
 import { useAuth } from '../../hooks/useAuth';
+import { spacedRepetitionService } from '../../lib/spaced-repetition';
 
 interface PuzzleSessionProps {
   onExit: () => void;
@@ -29,48 +28,23 @@ const PuzzleSession: React.FC<PuzzleSessionProps> = ({ onExit }) => {
     setIsRecordingAttempt(true);
 
     try {
-      // Get a JWT for the current user
-      const supabaseJwt = await fetchSupabaseJWT({
-        sub: session.user.id,
-        email: session.user.email || undefined,
-        lichess_username: session.user.lichessUsername || undefined,
-      });
-      // Create an authenticated Supabase client
-      const supabaseWithAuth = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY, {
-        global: {
-          headers: {
-            Authorization: `Bearer ${supabaseJwt}`,
-          },
+      // Authenticate the spaced repetition service
+      await spacedRepetitionService.authenticate(
+        session.user.id,
+        session.user.email || undefined,
+        session.user.lichessUsername || undefined
+      );
+
+      // Record the puzzle attempt and update review queue using the new algorithm
+      await spacedRepetitionService.recordPuzzleAttempt(
+        {
+          deviationId: currentPuzzle.deviation_id,
+          userId: session.user.id,
+          attemptNumber: attempts,
+          wasCorrect: success,
         },
-      });
-      // Record the puzzle attempt with user_id
-      await supabaseWithAuth.from('puzzle_attempts').insert({
-        deviation_id: currentPuzzle.deviation_id,
-        user_id: session?.user?.id,
-        attempt_number: attempts,
-        was_correct: success,
-      });
-
-      // Update review queue with basic spaced repetition logic
-      const now = new Date();
-      let nextReviewDate: Date;
-
-      if (success) {
-        // Success: longer interval based on review count
-        const intervalDays = Math.min(1 + currentPuzzle.review_count * 2, 30);
-        nextReviewDate = new Date(now.getTime() + intervalDays * 24 * 60 * 60 * 1000);
-      } else {
-        // Failed: review again soon
-        nextReviewDate = new Date(now.getTime() + 1 * 60 * 60 * 1000); // 1 hour
-      }
-
-      await supabaseWithAuth
-        .from('review_queue')
-        .update({
-          next_review_at: nextReviewDate.toISOString(),
-          review_count: currentPuzzle.review_count + 1,
-        })
-        .eq('id', currentPuzzle.id);
+        currentPuzzle // Pass the current queue entry for algorithm calculations
+      );
     } catch (err) {
       console.error('Error recording puzzle attempt:', err);
     } finally {

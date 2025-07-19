@@ -10,6 +10,7 @@ export interface ChessBoardProps {
   boardWidth?: number;
   arePiecesDraggable?: boolean;
   onMove?: (from: string, to: string) => void;
+  onSquareClick?: (square: string) => void;
 }
 
 const ChessBoard: React.FC<ChessBoardProps> = ({
@@ -20,6 +21,7 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
   boardWidth = 300,
   arePiecesDraggable = false,
   onMove,
+  onSquareClick,
 }) => {
   return (
     <Chessboard
@@ -37,6 +39,7 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
             }
           : undefined
       }
+      onSquareClick={onSquareClick}
     />
   );
 };

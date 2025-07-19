@@ -7,6 +7,7 @@ import { fetchSupabaseJWT } from '../lib/auth/fetchSupabaseJWT';
 import { createClient } from '@supabase/supabase-js';
 import { saveUserStudySelections, getUserStudySelections } from '../lib/database/studyOperations';
 import { useTriggerStudyUpdate } from '../contexts/useStudyUpdate';
+import SpacedRepetitionConfig from '../components/forms/SpacedRepetitionConfig';
 
 interface SyncPreferences {
   sync_frequency_minutes: number;
@@ -465,8 +466,21 @@ const Settings: React.FC = () => {
           </div>
         </div>
       </section>
+
+      <section className={styles.section}>
+        <div className={styles.sectionHeader}>
+          <h2 className={styles.sectionTitle}>Spaced Repetition</h2>
+        </div>
+        <div className={styles.sectionContent}>
+          <SpacedRepetitionConfig />
+        </div>
+      </section>
+
+
     </div>
   );
 };
+
+
 
 export default Settings;
