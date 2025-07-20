@@ -40,7 +40,7 @@
   font-size: 1rem;
 }
 
-.field input[type="range"] {
+.field input[type='range'] {
   width: calc(100% - 60px);
   margin-right: 0.5rem;
 }
@@ -150,14 +150,14 @@
   .container {
     background: var(--color-background-card);
   }
-  
+
   .field input,
   .field select {
     background: var(--color-background);
     border-color: var(--color-border);
     color: var(--color-text);
   }
-  
+
   .field input:focus,
   .field select:focus {
     outline: 2px solid var(--color-primary);

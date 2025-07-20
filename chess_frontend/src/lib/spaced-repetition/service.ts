@@ -1,6 +1,6 @@
 /**
  * Spaced Repetition Service
- * 
+ *
  * Handles all spaced repetition operations including:
  * - Recording puzzle attempts
  * - Updating review queues
@@ -60,37 +60,28 @@ export class SpacedRepetitionService {
       lichess_username: lichessUsername,
     });
 
-    this.supabase = createClient(
-      import.meta.env.VITE_SUPABASE_URL,
-      import.meta.env.VITE_SUPABASE_ANON_KEY,
-      {
-        global: {
-          headers: {
-            Authorization: `Bearer ${jwt}`,
-          },
+    this.supabase = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY, {
+      global: {
+        headers: {
+          Authorization: `Bearer ${jwt}`,
         },
-      }
-    );
+      },
+    });
   }
 
   /**
    * Record a puzzle attempt and update the review queue
    */
-  async recordPuzzleAttempt(
-    attemptData: PuzzleAttemptData,
-    currentQueueEntry: Record<string, unknown>
-  ): Promise<void> {
+  async recordPuzzleAttempt(attemptData: PuzzleAttemptData, currentQueueEntry: Record<string, unknown>): Promise<void> {
     try {
       // 1. Record the puzzle attempt
-      const { error: attemptError } = await this.supabase
-        .from('puzzle_attempts')
-        .insert({
-          user_id: attemptData.userId,
-          deviation_id: attemptData.deviationId,
-          attempt_number: attemptData.attemptNumber,
-          was_correct: attemptData.wasCorrect,
-          response_time_ms: attemptData.responseTimeMs,
-        });
+      const { error: attemptError } = await this.supabase.from('puzzle_attempts').insert({
+        user_id: attemptData.userId,
+        deviation_id: attemptData.deviationId,
+        attempt_number: attemptData.attemptNumber,
+        was_correct: attemptData.wasCorrect,
+        response_time_ms: attemptData.responseTimeMs,
+      });
 
       if (attemptError) throw attemptError;
 
@@ -133,7 +124,6 @@ export class SpacedRepetitionService {
         .eq('id', currentQueueEntry.id);
 
       if (updateError) throw updateError;
-
     } catch (error) {
       console.error('Error recording puzzle attempt:', error);
       throw error;
@@ -181,7 +171,6 @@ export class SpacedRepetitionService {
 
       await this.createUserConfig(userId, defaultConfig);
       return defaultConfig;
-
     } catch (error) {
       console.error('Error getting user config:', error);
       // Return defaults on error
@@ -202,18 +191,16 @@ export class SpacedRepetitionService {
    */
   async updateUserConfig(userId: string, config: Partial<SpacedRepetitionConfig>): Promise<void> {
     try {
-      const { error } = await this.supabase
-        .from('spaced_repetition_config')
-        .upsert({
-          user_id: userId,
-          algorithm_type: config.algorithmType,
-          max_daily_reviews: config.maxDailyReviews,
-          target_retention_rate: config.targetRetentionRate,
-          initial_ease_factor: config.initialEaseFactor,
-          ease_adjustment_factor: config.easeAdjustmentFactor,
-          minimum_interval_hours: config.minimumIntervalHours,
-          maximum_interval_days: config.maximumIntervalDays,
-        });
+      const { error } = await this.supabase.from('spaced_repetition_config').upsert({
+        user_id: userId,
+        algorithm_type: config.algorithmType,
+        max_daily_reviews: config.maxDailyReviews,
+        target_retention_rate: config.targetRetentionRate,
+        initial_ease_factor: config.initialEaseFactor,
+        ease_adjustment_factor: config.easeAdjustmentFactor,
+        minimum_interval_hours: config.minimumIntervalHours,
+        maximum_interval_days: config.maximumIntervalDays,
+      });
 
       if (error) throw error;
     } catch (error) {
@@ -227,20 +214,19 @@ export class SpacedRepetitionService {
    */
   private async createUserConfig(userId: string, config: SpacedRepetitionConfig): Promise<void> {
     try {
-      const { error } = await this.supabase
-        .from('spaced_repetition_config')
-        .insert({
-          user_id: userId,
-          algorithm_type: config.algorithmType,
-          max_daily_reviews: config.maxDailyReviews,
-          target_retention_rate: config.targetRetentionRate,
-          initial_ease_factor: config.initialEaseFactor,
-          ease_adjustment_factor: config.easeAdjustmentFactor,
-          minimum_interval_hours: config.minimumIntervalHours,
-          maximum_interval_days: config.maximumIntervalDays,
-        });
+      const { error } = await this.supabase.from('spaced_repetition_config').insert({
+        user_id: userId,
+        algorithm_type: config.algorithmType,
+        max_daily_reviews: config.maxDailyReviews,
+        target_retention_rate: config.targetRetentionRate,
+        initial_ease_factor: config.initialEaseFactor,
+        ease_adjustment_factor: config.easeAdjustmentFactor,
+        minimum_interval_hours: config.minimumIntervalHours,
+        maximum_interval_days: config.maximumIntervalDays,
+      });
 
-      if (error && error.code !== '23505') { // Ignore unique constraint violations
+      if (error && error.code !== '23505') {
+        // Ignore unique constraint violations
         throw error;
       }
     } catch (error) {
@@ -252,7 +238,10 @@ export class SpacedRepetitionService {
   /**
    * Get user's review statistics
    */
-  async getReviewStats(userId: string, days: number = 30): Promise<{
+  async getReviewStats(
+    userId: string,
+    days: number = 30
+  ): Promise<{
     totalAttempts: number;
     correctAttempts: number;
     accuracyRate: number;
@@ -274,17 +263,14 @@ export class SpacedRepetitionService {
       const totalAttempts = attempts?.length || 0;
       const correctAttempts = attempts?.filter(a => a.was_correct).length || 0;
       const accuracyRate = totalAttempts > 0 ? correctAttempts / totalAttempts : 0;
-      
+
       const attemptNumbers = attempts?.map(a => a.attempt_number) || [];
-      const averageAttempts = attemptNumbers.length > 0 
-        ? attemptNumbers.reduce((sum, num) => sum + num, 0) / attemptNumbers.length 
-        : 0;
+      const averageAttempts =
+        attemptNumbers.length > 0 ? attemptNumbers.reduce((sum, num) => sum + num, 0) / attemptNumbers.length : 0;
 
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      const reviewsToday = attempts?.filter(a => 
-        new Date(a.created_at) >= today
-      ).length || 0;
+      const reviewsToday = attempts?.filter(a => new Date(a.created_at) >= today).length || 0;
 
       return {
         totalAttempts,

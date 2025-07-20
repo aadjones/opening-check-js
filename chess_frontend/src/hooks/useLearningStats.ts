@@ -52,19 +52,18 @@ export function useLearningStats(): UseLearningStatsResult {
 
       // Count learning vs mature items
       const totalCount = data.length;
-      const learningCount = data.filter(item => 
-        item.consecutive_successes === null || item.consecutive_successes < 3
+      const learningCount = data.filter(
+        item => item.consecutive_successes === null || item.consecutive_successes < 3
       ).length;
-      const matureCount = data.filter(item => 
-        item.consecutive_successes !== null && item.consecutive_successes >= 3
+      const matureCount = data.filter(
+        item => item.consecutive_successes !== null && item.consecutive_successes >= 3
       ).length;
 
       setStats({
         learningCount,
         matureCount,
-        totalCount
+        totalCount,
       });
-
     } catch (err) {
       console.error('Error fetching learning stats:', err);
       setError(err instanceof Error ? err : new Error('Failed to fetch learning stats'));
@@ -83,4 +82,4 @@ export function useLearningStats(): UseLearningStatsResult {
     error,
     refetch: fetchStats,
   };
-} 
+}

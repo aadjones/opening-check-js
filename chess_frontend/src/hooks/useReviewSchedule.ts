@@ -58,7 +58,7 @@ export function useReviewSchedule(): UseReviewScheduleResult {
 
       // Group by date and count
       const dateMap = new Map<string, number>();
-      
+
       // Initialize next 7 days with 0 counts
       for (let i = 0; i < 7; i++) {
         const date = new Date();
@@ -103,4 +103,4 @@ export function useReviewSchedule(): UseReviewScheduleResult {
     error,
     refetch: fetchSchedule,
   };
-} 
+}

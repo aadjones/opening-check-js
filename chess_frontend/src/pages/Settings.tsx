@@ -475,12 +475,8 @@ const Settings: React.FC = () => {
           <SpacedRepetitionConfig />
         </div>
       </section>
-
-
     </div>
   );
 };
-
-
 
 export default Settings;

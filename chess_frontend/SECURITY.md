@@ -3,6 +3,7 @@
 ## ✅ Current Security Measures
 
 ### Authentication & Authorization
+
 - ✅ **OAuth 2.0 with PKCE**: Secure Lichess OAuth implementation
 - ✅ **State Parameter Validation**: CSRF protection in OAuth flow
 - ✅ **JWT Tokens**: Server-side JWT generation for Supabase RLS
@@ -10,6 +11,7 @@
 - ✅ **Session Management**: Proper session lifecycle management
 
 ### Data Protection
+
 - ✅ **Environment Variables**: Sensitive config in environment variables
 - ✅ **No Hardcoded Secrets**: All secrets externalized
 - ✅ **Anon Key Scoping**: Supabase anon key properly scoped
@@ -17,6 +19,7 @@
 - ✅ **Input Validation**: API URL validation to prevent injection
 
 ### Code Security
+
 - ✅ **Development-Only Logging**: Sensitive logs only in development
 - ✅ **Error Message Sanitization**: No sensitive data in error messages
 - ✅ **Dependency Security**: Using maintained packages
@@ -25,6 +28,7 @@
 ## ⚠️ Security TODOs for Production
 
 ### High Priority
+
 1. **HTTP-Only Cookies**: Move OAuth code verifier to HTTP-only cookies
 2. **Content Security Policy**: Implement CSP headers
 3. **Environment Validation**: Add runtime environment variable validation
@@ -32,6 +36,7 @@
 5. **Error Monitoring**: Set up secure error tracking (no sensitive data)
 
 ### Medium Priority
+
 1. **Session Timeout**: Implement automatic session expiration
 2. **CORS Configuration**: Strict CORS policy for production
 3. **Audit Logging**: Log security-relevant events
@@ -39,6 +44,7 @@
 5. **Code Signing**: Sign production builds
 
 ### Low Priority
+
 1. **Subresource Integrity**: SRI for CDN resources
 2. **Feature Policy**: Restrict browser features
 3. **Referrer Policy**: Control referrer information
@@ -46,6 +52,7 @@
 ## 🔒 Security Best Practices
 
 ### Environment Variables
+
 ```bash
 # ✅ Good - Use environment variables
 VITE_SUPABASE_URL=https://your-project.supabase.co
@@ -56,6 +63,7 @@ const SUPABASE_URL = "https://your-project.supabase.co";
 ```
 
 ### Token Storage
+
 ```typescript
 // ✅ Good - sessionStorage for temporary tokens
 sessionStorage.setItem('oauth_code_verifier', verifier);
@@ -65,6 +73,7 @@ localStorage.setItem('access_token', token);
 ```
 
 ### Error Handling
+
 ```typescript
 // ✅ Good - Generic error messages
 throw new Error('Authentication failed');
@@ -74,6 +83,7 @@ throw new Error(`Database connection failed: ${dbError.message}`);
 ```
 
 ### Logging
+
 ```typescript
 // ✅ Good - Development only
 if (import.meta.env.DEV) {
@@ -87,6 +97,7 @@ console.log('User token:', accessToken);
 ## 🛡️ Security Checklist for Deployment
 
 ### Pre-Deployment
+
 - [ ] All console.log statements are development-only
 - [ ] No hardcoded secrets in source code
 - [ ] Environment variables are properly configured
@@ -94,6 +105,7 @@ console.log('User token:', accessToken);
 - [ ] Error messages don't expose sensitive information
 
 ### Production Environment
+
 - [ ] CSP headers are configured
 - [ ] CORS is properly restricted
 - [ ] Rate limiting is implemented
@@ -101,6 +113,7 @@ console.log('User token:', accessToken);
 - [ ] Dependency vulnerabilities are scanned
 
 ### Monitoring
+
 - [ ] Security events are logged
 - [ ] Error tracking is configured (without sensitive data)
 - [ ] Access patterns are monitored
@@ -109,24 +122,28 @@ console.log('User token:', accessToken);
 ## 📋 Security Code Review Checklist
 
 ### Authentication
+
 - [ ] OAuth flow uses PKCE
 - [ ] State parameter is validated
 - [ ] Tokens are properly scoped
 - [ ] Session management is secure
 
 ### Data Handling
+
 - [ ] No sensitive data in client-side storage
 - [ ] Input validation on all user inputs
 - [ ] SQL injection prevention (using parameterized queries)
 - [ ] XSS prevention (proper escaping)
 
 ### API Security
+
 - [ ] All API calls use HTTPS
 - [ ] Authentication tokens are included
 - [ ] Rate limiting is implemented
 - [ ] Error responses don't leak information
 
 ### Dependencies
+
 - [ ] All dependencies are up to date
 - [ ] No known vulnerabilities
 - [ ] Minimal dependency footprint
@@ -135,6 +152,7 @@ console.log('User token:', accessToken);
 ## 🚨 Security Incident Response
 
 ### If a Security Issue is Discovered
+
 1. **Immediate**: Assess the scope and impact
 2. **Contain**: Implement temporary fixes if needed
 3. **Investigate**: Determine root cause and affected systems
@@ -143,6 +161,7 @@ console.log('User token:', accessToken);
 6. **Document**: Update security measures and procedures
 
 ### Contact Information
+
 - Security Team: [security@yourcompany.com]
 - Emergency Contact: [emergency@yourcompany.com]
 - Incident Response: [incident@yourcompany.com]
@@ -157,4 +176,4 @@ console.log('User token:', accessToken);
 ---
 
 **Last Updated**: January 2025
-**Next Review**: February 2025 
+**Next Review**: February 2025

@@ -45,7 +45,7 @@ const ReviewQueue: React.FC = () => {
                 <h3>No puzzles available!</h3>
                 <p>You don't have any unresolved deviations where you went off-book first.</p>
                 <p>Play some games and come back when you have deviations to review.</p>
-                
+
                 {/* Debug reset section when no puzzles */}
                 <ResetQueueSection onReset={refetch} />
               </div>
@@ -146,7 +146,11 @@ const ResetQueueSection: React.FC<{ onReset: () => void }> = ({ onReset }) => {
       return;
     }
 
-    if (!confirm('Are you sure you want to reset your review queue? This will make all your puzzles available for review again.')) {
+    if (
+      !confirm(
+        'Are you sure you want to reset your review queue? This will make all your puzzles available for review again.'
+      )
+    ) {
       return;
     }
 
@@ -199,26 +203,23 @@ const ResetQueueSection: React.FC<{ onReset: () => void }> = ({ onReset }) => {
           // Don't set next_review_at - let it default to NOW()
         }));
 
-        const { error: insertError } = await supabaseWithAuth
-          .from('review_queue')
-          .insert(queueEntries);
+        const { error: insertError } = await supabaseWithAuth.from('review_queue').insert(queueEntries);
 
         if (insertError) throw insertError;
 
-        setResetMessage({ 
-          type: 'success', 
-          text: `Review queue reset! ${deviations.length} puzzles are now available for review.` 
+        setResetMessage({
+          type: 'success',
+          text: `Review queue reset! ${deviations.length} puzzles are now available for review.`,
         });
       } else {
-        setResetMessage({ 
-          type: 'success', 
-          text: 'Review queue reset, but no puzzles found. Play some games to create deviations!' 
+        setResetMessage({
+          type: 'success',
+          text: 'Review queue reset, but no puzzles found. Play some games to create deviations!',
         });
       }
 
       // Refresh the queue after reset
       onReset();
-
     } catch (err: unknown) {
       let message = 'Failed to reset review queue';
       if (err instanceof Error) message = err.message;
@@ -230,25 +231,27 @@ const ResetQueueSection: React.FC<{ onReset: () => void }> = ({ onReset }) => {
   };
 
   return (
-    <div style={{ 
-      marginTop: '2rem', 
-      padding: '1rem',
-      background: 'var(--color-background-card)',
-      border: '1px solid var(--color-border)',
-      borderRadius: 8,
-      maxWidth: 340,
-      marginLeft: 'auto',
-      marginRight: 'auto',
-    }}>
-      <div style={{ 
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'space-between',
-        marginBottom: showResetSection ? '1rem' : '0'
-      }}>
-        <span style={{ fontSize: '0.9rem', color: 'var(--color-text-muted)' }}>
-          🛠️ Debug Tools
-        </span>
+    <div
+      style={{
+        marginTop: '2rem',
+        padding: '1rem',
+        background: 'var(--color-background-card)',
+        border: '1px solid var(--color-border)',
+        borderRadius: 8,
+        maxWidth: 340,
+        marginLeft: 'auto',
+        marginRight: 'auto',
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginBottom: showResetSection ? '1rem' : '0',
+        }}
+      >
+        <span style={{ fontSize: '0.9rem', color: 'var(--color-text-muted)' }}>🛠️ Debug Tools</span>
         <button
           onClick={() => setShowResetSection(!showResetSection)}
           style={{
@@ -263,14 +266,16 @@ const ResetQueueSection: React.FC<{ onReset: () => void }> = ({ onReset }) => {
           {showResetSection ? 'Hide' : 'Show'}
         </button>
       </div>
-      
+
       {showResetSection && (
         <>
-          <div style={{ 
-            fontSize: '0.85rem', 
-            color: 'var(--color-text-muted)', 
-            marginBottom: '1rem' 
-          }}>
+          <div
+            style={{
+              fontSize: '0.85rem',
+              color: 'var(--color-text-muted)',
+              marginBottom: '1rem',
+            }}
+          >
             Reset your review queue to make all puzzles available again. Useful for testing.
           </div>
           <button
@@ -291,15 +296,17 @@ const ResetQueueSection: React.FC<{ onReset: () => void }> = ({ onReset }) => {
             {isResetting ? 'Resetting...' : '🔄 Reset Review Queue'}
           </button>
           {resetMessage && (
-            <div style={{
-              marginTop: '0.5rem',
-              padding: '0.5rem',
-              borderRadius: 4,
-              fontSize: '0.85rem',
-              backgroundColor: resetMessage.type === 'success' ? '#dcfce7' : '#fee2e2',
-              color: resetMessage.type === 'success' ? '#166534' : '#dc2626',
-              border: `1px solid ${resetMessage.type === 'success' ? '#bbf7d0' : '#fecaca'}`,
-            }}>
+            <div
+              style={{
+                marginTop: '0.5rem',
+                padding: '0.5rem',
+                borderRadius: 4,
+                fontSize: '0.85rem',
+                backgroundColor: resetMessage.type === 'success' ? '#dcfce7' : '#fee2e2',
+                color: resetMessage.type === 'success' ? '#166534' : '#dc2626',
+                border: `1px solid ${resetMessage.type === 'success' ? '#bbf7d0' : '#fecaca'}`,
+              }}
+            >
               {resetMessage.text}
             </div>
           )}

@@ -62,27 +62,30 @@ export function useSpacedRepetition(): UseSpacedRepetitionResult {
     }
   }, [session?.user?.id, session?.user?.email, session?.user?.lichessUsername]);
 
-  const updateConfig = useCallback(async (newConfig: Partial<SpacedRepetitionConfig>) => {
-    if (!session?.user?.id) {
-      throw new Error('No user session found');
-    }
+  const updateConfig = useCallback(
+    async (newConfig: Partial<SpacedRepetitionConfig>) => {
+      if (!session?.user?.id) {
+        throw new Error('No user session found');
+      }
 
-    try {
-      await spacedRepetitionService.authenticate(
-        session.user.id,
-        session.user.email || undefined,
-        session.user.lichessUsername || undefined
-      );
+      try {
+        await spacedRepetitionService.authenticate(
+          session.user.id,
+          session.user.email || undefined,
+          session.user.lichessUsername || undefined
+        );
 
-      await spacedRepetitionService.updateUserConfig(session.user.id, newConfig);
-      
-      // Refetch to get updated config
-      await fetchData();
-    } catch (err) {
-      console.error('Error updating spaced repetition config:', err);
-      throw err;
-    }
-  }, [session?.user?.id, session?.user?.email, session?.user?.lichessUsername, fetchData]);
+        await spacedRepetitionService.updateUserConfig(session.user.id, newConfig);
+
+        // Refetch to get updated config
+        await fetchData();
+      } catch (err) {
+        console.error('Error updating spaced repetition config:', err);
+        throw err;
+      }
+    },
+    [session?.user?.id, session?.user?.email, session?.user?.lichessUsername, fetchData]
+  );
 
   useEffect(() => {
     fetchData();

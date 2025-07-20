@@ -25,7 +25,7 @@ const PuzzlePlayer: React.FC<PuzzlePlayerProps> = ({ puzzle, onComplete, onNext 
     arrows: Arrow[];
     squares: Record<string, Record<string, string | number>>;
   }>({ arrows: [], squares: {} });
-  
+
   // New state for click-to-move functionality
   const [selectedSquare, setSelectedSquare] = useState<string | null>(null);
   const [possibleMoves, setPossibleMoves] = useState<string[]>([]);
@@ -38,7 +38,7 @@ const PuzzlePlayer: React.FC<PuzzlePlayerProps> = ({ puzzle, onComplete, onNext 
   // Helper function to get the first valid expected move for animation
   const getFirstValidExpectedMove = (expectedMove: string, fen: string): string | null => {
     const expectedMoves = parseExpectedMoves(expectedMove);
-    
+
     for (const move of expectedMoves) {
       try {
         // Test if this move is valid in the current position
@@ -50,7 +50,7 @@ const PuzzlePlayer: React.FC<PuzzlePlayerProps> = ({ puzzle, onComplete, onNext 
         continue;
       }
     }
-    
+
     return null; // No valid moves found
   };
 
@@ -134,7 +134,7 @@ const PuzzlePlayer: React.FC<PuzzlePlayerProps> = ({ puzzle, onComplete, onNext 
       const animateTimer = setTimeout(() => {
         // Get the first valid expected move for animation
         const firstValidMove = getFirstValidExpectedMove(puzzle.expected_move, puzzle.position_fen);
-        
+
         if (firstValidMove) {
           // Make the correct move and show the result
           const correctGame = new Chess(puzzle.position_fen);
@@ -207,23 +207,23 @@ const PuzzlePlayer: React.FC<PuzzlePlayerProps> = ({ puzzle, onComplete, onNext 
     }
 
     const squares: Record<string, Record<string, string | number>> = {};
-    
+
     // Highlight selected square
     squares[selectedSquare] = { backgroundColor: 'rgba(255, 255, 0, 0.4)' };
-    
+
     // Add indicators for possible moves
     possibleMoves.forEach(moveSquare => {
       const capture = isCapture(selectedSquare, moveSquare, currentFen);
-      
+
       if (capture) {
         // Capture moves: thick border
         squares[moveSquare] = {
-          border: '4px solid #3b82f6'
+          border: '4px solid #3b82f6',
         };
       } else {
         // Normal moves: centered dot using radial gradient
         squares[moveSquare] = {
-          background: 'radial-gradient(circle at center, #3b82f6 25%, transparent 25%)'
+          background: 'radial-gradient(circle at center, #3b82f6 25%, transparent 25%)',
         };
       }
     });
@@ -278,7 +278,7 @@ const PuzzlePlayer: React.FC<PuzzlePlayerProps> = ({ puzzle, onComplete, onNext 
     const moveAttempt = attempts + 1;
     setAttempts(moveAttempt);
     setUserMadeMove(true);
-    
+
     // Clear selection after move attempt
     setSelectedSquare(null);
     setPossibleMoves([]);
@@ -360,7 +360,7 @@ const PuzzlePlayer: React.FC<PuzzlePlayerProps> = ({ puzzle, onComplete, onNext 
             arrows={moveHighlight.arrows}
             customSquareStyles={{
               ...moveHighlight.squares,
-              ...createMoveIndicators()
+              ...createMoveIndicators(),
             }}
             orientation={puzzle.color.toLowerCase() === 'white' ? 'white' : 'black'}
             boardWidth={400}

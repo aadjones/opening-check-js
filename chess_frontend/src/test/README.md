@@ -7,10 +7,12 @@ This directory contains comprehensive tests for the chess frontend application.
 ### ✅ Active Tests (60 tests across 15 files)
 
 **Algorithm Tests:**
+
 - `spacedRepetition.test.ts` - Core spaced repetition algorithms (SM2+, Basic) - 17 tests
 - `basicSpacedRep.test.ts` - Basic spaced repetition logic - 9 tests
 
 **Component Tests:**
+
 - `GamesList.test.tsx` - Games list component - 7 tests
 - `useSupabaseSession.test.tsx` - Supabase session hook - 5 tests
 - `pkce.test.ts` - PKCE authentication - 5 tests
@@ -36,6 +38,7 @@ The following tests are excluded from the test suite because they require extern
 ### Test Configuration
 
 Tests are configured in `vitest.config.ts` with:
+
 - 10-second timeouts for reliable CI/CD
 - jsdom environment for React component testing
 - Automatic exclusion of external dependency tests
@@ -60,6 +63,7 @@ npm run test filename.test.ts
 ### Philosophy
 
 This test suite focuses on:
+
 1. **Pure business logic** - Algorithms and utilities that work in any environment
 2. **Component behavior** - UI components with proper mocking
 3. **Fast execution** - No external dependencies that slow down testing

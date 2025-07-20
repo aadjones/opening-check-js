@@ -54,7 +54,9 @@ export function useReviewQueue(): UseReviewQueueResult {
       // First get review queue entries with new schema fields
       const { data: queueData, error: queueError } = await supabase
         .from('review_queue')
-        .select('id, deviation_id, review_count, difficulty_level, ease_factor, interval_days, consecutive_successes, total_reviews, algorithm_type')
+        .select(
+          'id, deviation_id, review_count, difficulty_level, ease_factor, interval_days, consecutive_successes, total_reviews, algorithm_type'
+        )
         .eq('user_id', session.user.id)
         .lte('next_review_at', new Date().toISOString())
         .order('next_review_at', { ascending: true })

@@ -20,11 +20,11 @@ const ReviewLearningStatus: React.FC = () => {
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
     const tomorrowStr = tomorrow.toISOString().split('T')[0];
-    
+
     const dayAfter = new Date(today);
     dayAfter.setDate(dayAfter.getDate() + 2);
     const dayAfterStr = dayAfter.toISOString().split('T')[0];
-    
+
     const oneWeekFromNow = new Date(today);
     oneWeekFromNow.setDate(oneWeekFromNow.getDate() + 7);
     const oneWeekStr = oneWeekFromNow.toISOString().split('T')[0];
@@ -32,7 +32,7 @@ const ReviewLearningStatus: React.FC = () => {
 
     const tomorrowEntry = schedule.find(entry => entry.date === tomorrowStr);
     const dayAfterEntry = schedule.find(entry => entry.date === dayAfterStr);
-    
+
     // For one week, sum all reviews from tomorrow until then
     const oneWeekCount = schedule
       .filter(entry => entry.date > todayStr && entry.date <= oneWeekStr)
@@ -41,7 +41,7 @@ const ReviewLearningStatus: React.FC = () => {
     return {
       tomorrow: tomorrowEntry?.count || 0,
       dayAfter: dayAfterEntry?.count || 0,
-      oneWeek: oneWeekCount
+      oneWeek: oneWeekCount,
     };
   };
 
@@ -72,7 +72,7 @@ const ReviewLearningStatus: React.FC = () => {
   return (
     <div className={styles.container}>
       <h3 className={styles.title}>Study Progress</h3>
-      
+
       {/* Learning Progress Section */}
       <div className={styles.section}>
         <h4 className={styles.sectionTitle}>Learning Status</h4>
@@ -98,7 +98,9 @@ const ReviewLearningStatus: React.FC = () => {
         <div className={styles.reviewSchedule}>
           <div className={styles.scheduleItem}>
             <span className={styles.scheduleLabel}>Today</span>
-            <span className={styles.scheduleCount}>{schedule.find(entry => entry.date === new Date().toISOString().split('T')[0])?.count || 0}</span>
+            <span className={styles.scheduleCount}>
+              {schedule.find(entry => entry.date === new Date().toISOString().split('T')[0])?.count || 0}
+            </span>
           </div>
           <div className={styles.scheduleItem}>
             <span className={styles.scheduleLabel}>Tomorrow</span>
@@ -114,4 +116,4 @@ const ReviewLearningStatus: React.FC = () => {
   );
 };
 
-export default ReviewLearningStatus; 
+export default ReviewLearningStatus;

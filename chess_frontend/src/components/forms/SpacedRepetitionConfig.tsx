@@ -40,17 +40,19 @@ const SpacedRepetitionConfig: React.FC = () => {
   return (
     <div className={styles.container}>
       <h3>Spaced Repetition Settings</h3>
-      
+
       {/* Algorithm Selection */}
       <div className={styles.field}>
         <label htmlFor="algorithm">Algorithm:</label>
         <select
           id="algorithm"
           value={localConfig.algorithmType}
-          onChange={(e) => setLocalConfig({
-            ...localConfig,
-            algorithmType: e.target.value as 'basic' | 'sm2plus' | 'fsrs'
-          })}
+          onChange={e =>
+            setLocalConfig({
+              ...localConfig,
+              algorithmType: e.target.value as 'basic' | 'sm2plus' | 'fsrs',
+            })
+          }
         >
           <option value="basic">Basic (Simple intervals)</option>
           <option value="sm2plus">SM2+ (Recommended)</option>
@@ -70,14 +72,14 @@ const SpacedRepetitionConfig: React.FC = () => {
           min="5"
           max="100"
           value={localConfig.maxDailyReviews}
-          onChange={(e) => setLocalConfig({
-            ...localConfig,
-            maxDailyReviews: parseInt(e.target.value)
-          })}
+          onChange={e =>
+            setLocalConfig({
+              ...localConfig,
+              maxDailyReviews: parseInt(e.target.value),
+            })
+          }
         />
-        <p className={styles.description}>
-          Maximum number of puzzles to review per day.
-        </p>
+        <p className={styles.description}>Maximum number of puzzles to review per day.</p>
       </div>
 
       {/* Target Retention Rate */}
@@ -90,24 +92,22 @@ const SpacedRepetitionConfig: React.FC = () => {
           max="0.99"
           step="0.05"
           value={localConfig.targetRetentionRate}
-          onChange={(e) => setLocalConfig({
-            ...localConfig,
-            targetRetentionRate: parseFloat(e.target.value)
-          })}
+          onChange={e =>
+            setLocalConfig({
+              ...localConfig,
+              targetRetentionRate: parseFloat(e.target.value),
+            })
+          }
         />
-        <span className={styles.rangeValue}>
-          {Math.round(localConfig.targetRetentionRate * 100)}%
-        </span>
-        <p className={styles.description}>
-          Higher values mean more frequent reviews but better retention.
-        </p>
+        <span className={styles.rangeValue}>{Math.round(localConfig.targetRetentionRate * 100)}%</span>
+        <p className={styles.description}>Higher values mean more frequent reviews but better retention.</p>
       </div>
 
       {/* Advanced Settings (only for SM2+) */}
       {localConfig.algorithmType === 'sm2plus' && (
         <details className={styles.advanced}>
           <summary>Advanced Settings</summary>
-          
+
           <div className={styles.field}>
             <label htmlFor="easeFactor">Initial ease factor:</label>
             <input
@@ -117,14 +117,14 @@ const SpacedRepetitionConfig: React.FC = () => {
               max="2.5"
               step="0.1"
               value={localConfig.initialEaseFactor}
-              onChange={(e) => setLocalConfig({
-                ...localConfig,
-                initialEaseFactor: parseFloat(e.target.value)
-              })}
+              onChange={e =>
+                setLocalConfig({
+                  ...localConfig,
+                  initialEaseFactor: parseFloat(e.target.value),
+                })
+              }
             />
-            <span className={styles.rangeValue}>
-              {localConfig.initialEaseFactor.toFixed(1)}
-            </span>
+            <span className={styles.rangeValue}>{localConfig.initialEaseFactor.toFixed(1)}</span>
           </div>
 
           <div className={styles.field}>
@@ -136,10 +136,12 @@ const SpacedRepetitionConfig: React.FC = () => {
               max="24"
               step="0.25"
               value={localConfig.minimumIntervalHours}
-              onChange={(e) => setLocalConfig({
-                ...localConfig,
-                minimumIntervalHours: parseFloat(e.target.value)
-              })}
+              onChange={e =>
+                setLocalConfig({
+                  ...localConfig,
+                  minimumIntervalHours: parseFloat(e.target.value),
+                })
+              }
             />
           </div>
 
@@ -151,10 +153,12 @@ const SpacedRepetitionConfig: React.FC = () => {
               min="30"
               max="730"
               value={localConfig.maximumIntervalDays}
-              onChange={(e) => setLocalConfig({
-                ...localConfig,
-                maximumIntervalDays: parseInt(e.target.value)
-              })}
+              onChange={e =>
+                setLocalConfig({
+                  ...localConfig,
+                  maximumIntervalDays: parseInt(e.target.value),
+                })
+              }
             />
           </div>
         </details>
@@ -170,15 +174,11 @@ const SpacedRepetitionConfig: React.FC = () => {
               <span className={styles.statLabel}>Total Attempts</span>
             </div>
             <div className={styles.stat}>
-              <span className={styles.statValue}>
-                {Math.round(stats.accuracyRate * 100)}%
-              </span>
+              <span className={styles.statValue}>{Math.round(stats.accuracyRate * 100)}%</span>
               <span className={styles.statLabel}>Accuracy</span>
             </div>
             <div className={styles.stat}>
-              <span className={styles.statValue}>
-                {stats.averageAttempts.toFixed(1)}
-              </span>
+              <span className={styles.statValue}>{stats.averageAttempts.toFixed(1)}</span>
               <span className={styles.statLabel}>Avg Attempts</span>
             </div>
             <div className={styles.stat}>
@@ -190,11 +190,7 @@ const SpacedRepetitionConfig: React.FC = () => {
       )}
 
       <div className={styles.actions}>
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          className={styles.saveButton}
-        >
+        <button onClick={handleSave} disabled={saving} className={styles.saveButton}>
           {saving ? 'Saving...' : 'Save Settings'}
         </button>
       </div>

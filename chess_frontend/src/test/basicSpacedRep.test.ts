@@ -8,15 +8,15 @@ const calculateInterval = (
   easeFactor: number
 ): { interval: number; easeFactor: number } => {
   let newEaseFactor = easeFactor;
-  
+
   if (quality < 3) {
     // Failed review - reset repetitions
     return { interval: 1, easeFactor: newEaseFactor };
   }
-  
+
   // Update ease factor
   newEaseFactor = Math.max(1.3, newEaseFactor + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02)));
-  
+
   let newInterval: number;
   if (repetitions === 0) {
     newInterval = 1;
@@ -25,7 +25,7 @@ const calculateInterval = (
   } else {
     newInterval = Math.round(previousInterval * newEaseFactor);
   }
-  
+
   return { interval: newInterval, easeFactor: newEaseFactor };
 };
 
@@ -62,7 +62,7 @@ describe('Basic Spaced Repetition Logic', () => {
       // High quality should increase ease factor
       const goodResult = calculateInterval(5, 2, 6, 2.5);
       expect(goodResult.easeFactor).toBeGreaterThan(2.5);
-      
+
       // Low quality should decrease ease factor
       const poorResult = calculateInterval(3, 2, 6, 2.5);
       expect(poorResult.easeFactor).toBeLessThan(2.5);
@@ -93,41 +93,41 @@ describe('Basic Spaced Repetition Logic', () => {
       let repetitions = 0;
       let interval = 0;
       let easeFactor = 2.5;
-      
+
       // First review (quality 4)
       const first = calculateInterval(4, repetitions, interval, easeFactor);
       repetitions++;
       interval = first.interval;
       easeFactor = first.easeFactor;
-      
+
       expect(interval).toBe(1);
       expect(isCardMature(repetitions, interval)).toBe(false);
-      
+
       // Second review (quality 4)
       const second = calculateInterval(4, repetitions, interval, easeFactor);
       repetitions++;
       interval = second.interval;
       easeFactor = second.easeFactor;
-      
+
       expect(interval).toBe(6);
       expect(isCardMature(repetitions, interval)).toBe(false);
-      
+
       // Third review (quality 4)
       const third = calculateInterval(4, repetitions, interval, easeFactor);
       repetitions++;
       interval = third.interval;
       easeFactor = third.easeFactor;
-      
+
       expect(interval).toBe(15);
       expect(isCardMature(repetitions, interval)).toBe(false);
-      
+
       // Fourth review (quality 4) - should become mature
       const fourth = calculateInterval(4, repetitions, interval, easeFactor);
       repetitions++;
       interval = fourth.interval;
-      
+
       expect(interval).toBeGreaterThan(21);
       expect(isCardMature(repetitions, interval)).toBe(true);
     });
   });
-}); 
+});

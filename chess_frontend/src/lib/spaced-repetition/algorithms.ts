@@ -1,6 +1,6 @@
 /**
  * Spaced Repetition Algorithms
- * 
+ *
  * Implements multiple spaced repetition algorithms including:
  * - SM2+ (Enhanced SuperMemo 2)
  * - Basic algorithm (current implementation)
@@ -42,19 +42,16 @@ const DEFAULT_CONFIG: AlgorithmConfig = {
 
 /**
  * SM2+ Algorithm (Enhanced SuperMemo 2)
- * 
+ *
  * Improvements over basic SM2:
  * - Better handling of multiple attempts
  * - Graduated intervals for failed items
  * - Chess-specific optimizations
  * - Difficulty-based adjustments
  */
-export function calculateSM2Plus(
-  input: ReviewInput,
-  config: AlgorithmConfig = DEFAULT_CONFIG
-): ReviewResult {
+export function calculateSM2Plus(input: ReviewInput, config: AlgorithmConfig = DEFAULT_CONFIG): ReviewResult {
   const { wasCorrect, attempts, currentEaseFactor, currentIntervalDays, consecutiveSuccesses, difficultyLevel } = input;
-  
+
   let newEaseFactor = currentEaseFactor;
   let newIntervalDays = currentIntervalDays;
   let newConsecutiveSuccesses = consecutiveSuccesses;
@@ -62,7 +59,7 @@ export function calculateSM2Plus(
   if (wasCorrect) {
     // Successful review
     newConsecutiveSuccesses = consecutiveSuccesses + 1;
-    
+
     // Adjust ease factor based on performance
     if (attempts === 1) {
       // Perfect first attempt - increase ease factor slightly
@@ -86,15 +83,14 @@ export function calculateSM2Plus(
     // Apply difficulty adjustment (harder puzzles get longer intervals)
     const difficultyMultiplier = 1.0 + (difficultyLevel - 1) * 0.2;
     newIntervalDays *= difficultyMultiplier;
-
   } else {
     // Failed review
     newConsecutiveSuccesses = 0;
-    
+
     // Reduce ease factor based on number of attempts
     const easeReduction = config.easeAdjustmentFactor * attempts;
     newEaseFactor = Math.max(1.3, currentEaseFactor - easeReduction);
-    
+
     // Graduated failure intervals - more forgiving than basic algorithm
     if (consecutiveSuccesses === 0) {
       // Already failed recently - short interval
@@ -109,10 +105,7 @@ export function calculateSM2Plus(
   }
 
   // Apply constraints
-  newIntervalDays = Math.max(
-    config.minimumIntervalHours / 24,
-    Math.min(config.maximumIntervalDays, newIntervalDays)
-  );
+  newIntervalDays = Math.max(config.minimumIntervalHours / 24, Math.min(config.maximumIntervalDays, newIntervalDays));
 
   // Calculate next review date
   const nextReviewAt = new Date(Date.now() + newIntervalDays * 24 * 60 * 60 * 1000);
@@ -127,34 +120,31 @@ export function calculateSM2Plus(
 
 /**
  * Basic Algorithm (current implementation, enhanced)
- * 
+ *
  * Improved version of the current simple algorithm
  */
-export function calculateBasic(
-  input: ReviewInput,
-  config: AlgorithmConfig = DEFAULT_CONFIG
-): ReviewResult {
+export function calculateBasic(input: ReviewInput, config: AlgorithmConfig = DEFAULT_CONFIG): ReviewResult {
   const { wasCorrect, attempts, reviewCount, difficultyLevel } = input;
-  
+
   let newIntervalDays: number;
   let newConsecutiveSuccesses = input.consecutiveSuccesses;
 
   if (wasCorrect) {
     newConsecutiveSuccesses = input.consecutiveSuccesses + 1;
-    
+
     // Enhanced basic algorithm with better progression
     const baseInterval = Math.min(1 + reviewCount * 2, 30);
-    
+
     // Adjust for performance
     const performanceMultiplier = attempts === 1 ? 1.2 : attempts === 2 ? 1.0 : 0.8;
-    
+
     // Adjust for difficulty
     const difficultyMultiplier = 1.0 + (difficultyLevel - 1) * 0.3;
-    
+
     newIntervalDays = baseInterval * performanceMultiplier * difficultyMultiplier;
   } else {
     newConsecutiveSuccesses = 0;
-    
+
     // Graduated failure recovery
     if (input.consecutiveSuccesses === 0) {
       newIntervalDays = config.minimumIntervalHours / 24; // 1 hour
@@ -166,10 +156,7 @@ export function calculateBasic(
   }
 
   // Apply constraints
-  newIntervalDays = Math.max(
-    config.minimumIntervalHours / 24,
-    Math.min(config.maximumIntervalDays, newIntervalDays)
-  );
+  newIntervalDays = Math.max(config.minimumIntervalHours / 24, Math.min(config.maximumIntervalDays, newIntervalDays));
 
   const nextReviewAt = new Date(Date.now() + newIntervalDays * 24 * 60 * 60 * 1000);
 
@@ -211,7 +198,7 @@ export function initializeReviewEntry(
   config: AlgorithmConfig = DEFAULT_CONFIG
 ): Partial<ReviewResult> {
   const now = new Date();
-  
+
   if (algorithmType === 'sm2plus') {
     return {
       nextReviewAt: now, // Available immediately for first review
