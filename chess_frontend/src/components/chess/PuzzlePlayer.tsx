@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Chess, Square, Move } from 'chess.js';
 import ChessBoard from './ChessBoard';
 import type { PuzzleData } from '../../hooks/useReviewQueue';
@@ -31,28 +31,31 @@ const PuzzlePlayer: React.FC<PuzzlePlayerProps> = ({ puzzle, onComplete, onNext 
   const [possibleMoves, setPossibleMoves] = useState<string[]>([]);
 
   // Helper function to parse expected moves (handles "move1 or move2" format)
-  const parseExpectedMoves = (expectedMove: string): string[] => {
+  const parseExpectedMoves = useCallback((expectedMove: string): string[] => {
     return expectedMove.split(' or ').map(move => move.trim());
-  };
+  }, []);
 
   // Helper function to get the first valid expected move for animation
-  const getFirstValidExpectedMove = (expectedMove: string, fen: string): string | null => {
-    const expectedMoves = parseExpectedMoves(expectedMove);
+  const getFirstValidExpectedMove = useCallback(
+    (expectedMove: string, fen: string): string | null => {
+      const expectedMoves = parseExpectedMoves(expectedMove);
 
-    for (const move of expectedMoves) {
-      try {
-        // Test if this move is valid in the current position
-        const testGame = new Chess(fen);
-        testGame.move(move);
-        return move; // Return the first valid move
-      } catch {
-        // Move is invalid, continue to next
-        continue;
+      for (const move of expectedMoves) {
+        try {
+          // Test if this move is valid in the current position
+          const testGame = new Chess(fen);
+          testGame.move(move);
+          return move; // Return the first valid move
+        } catch {
+          // Move is invalid, continue to next
+          continue;
+        }
       }
-    }
 
-    return null; // No valid moves found
-  };
+      return null; // No valid moves found
+    },
+    [parseExpectedMoves]
+  );
 
   // Helper function to check if a move matches any expected moves
   const isExpectedMove = (moveNotation: string, expectedMove: string): boolean => {
