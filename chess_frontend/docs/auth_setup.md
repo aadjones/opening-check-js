@@ -23,6 +23,7 @@ SUPABASE_JWT_SECRET=your_supabase_jwt_secret
 **No registration required!** Lichess now uses a public-client-only model:
 
 - **For Development**: Use any globally unique string as `client_id`
+
   - Example: `outofbook.dev.local` (already set above)
   - Keep it stable so users don't have to re-consent
 

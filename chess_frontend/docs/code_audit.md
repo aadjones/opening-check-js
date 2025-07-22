@@ -7,18 +7,22 @@ _Audit of `chess_frontend/` directory for stale code, loose ends, complexity, an
 ## 1. Stale Code, Loose Ends, and TODOs
 
 - **TODOs/Loose Ends**
+
   - `src/hooks/useDeviations.ts`: TODO to remove the `user_id` param when backend auth is ready. This is a real loose end, mirroring the backend.
   - No other major TODOs, "unfinished," or "deprecated" comments found in the main code.
 
 - **Feature Flags**
+
   - `src/featureFlags.ts`: Several review queue features are marked as "currently broken, do not enable." These are not dead code, but indicate unfinished or experimental features.
 
 - **Debug/Print Statements**
+
   - `src/contexts/StudyUpdateContext.tsx` and `src/contexts/useStudyUpdate.ts` have `console.log` statements for development.
   - `src/hooks/useDeviations.ts` uses `console.log` and `console.error` for debugging.
   - These are not harmful but could be cleaned up or replaced with proper logging if needed.
 
 - **Development/Temporary Styles**
+
   - `src/styles/base.css`: `.dev` class and marker for development, easy to remove later.
 
 - **Development Helpers**
