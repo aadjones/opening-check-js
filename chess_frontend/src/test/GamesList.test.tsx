@@ -42,6 +42,7 @@ const mockGames: GameListItem[] = [
       pgn: '[Event "Test"]\n1. e4 e5 2. Nf3 Nc6',
       deviation_uci: null,
       reference_uci: null,
+      previous_position_fen: null,
       first_deviator: 'user',
       review_status: 'needs_review',
       opening_name: 'Sicilian Defense',

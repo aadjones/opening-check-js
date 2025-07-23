@@ -192,10 +192,10 @@ const PuzzlePlayer: React.FC<PuzzlePlayerProps> = ({ puzzle, onComplete, onNext 
   };
 
   // Helper function to check if a move is a capture
-  const isCapture = (from: string, to: string, fen: string): boolean => {
+  const isCapture = (to: string, fen: string): boolean => {
     try {
       const tempGame = new Chess(fen);
-      // Check if there's a piece on the destination square before making the move
+      // Check if there's a piece on the destination square (destination occupied means capture)
       const piece = tempGame.get(to as Square);
       return piece !== null;
     } catch {
@@ -216,7 +216,7 @@ const PuzzlePlayer: React.FC<PuzzlePlayerProps> = ({ puzzle, onComplete, onNext 
 
     // Add indicators for possible moves
     possibleMoves.forEach(moveSquare => {
-      const capture = isCapture(selectedSquare, moveSquare, currentFen);
+      const capture = isCapture(moveSquare, currentFen);
 
       if (capture) {
         // Capture moves: thick border

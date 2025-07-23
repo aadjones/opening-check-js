@@ -40,6 +40,17 @@ export interface SpacedRepetitionConfig {
   maximumIntervalDays: number;
 }
 
+export interface ReviewQueueEntry {
+  id: string;
+  ease_factor?: number | null;
+  interval_days?: number | null;
+  consecutive_successes?: number | null;
+  review_count?: number | null;
+  total_reviews?: number | null;
+  difficulty_level?: number | null;
+  // include other fields we may read if needed in future
+}
+
 /**
  * Service class for managing spaced repetition operations
  */
@@ -72,7 +83,7 @@ export class SpacedRepetitionService {
   /**
    * Record a puzzle attempt and update the review queue
    */
-  async recordPuzzleAttempt(attemptData: PuzzleAttemptData, currentQueueEntry: Record<string, unknown>): Promise<void> {
+  async recordPuzzleAttempt(attemptData: PuzzleAttemptData, currentQueueEntry: ReviewQueueEntry): Promise<void> {
     try {
       // 1. Record the puzzle attempt
       const { error: attemptError } = await this.supabase.from('puzzle_attempts').insert({
