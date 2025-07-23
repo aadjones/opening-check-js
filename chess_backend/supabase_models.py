@@ -17,6 +17,7 @@ class OpeningDeviation(BaseModel):
     opening_name: Optional[str] = None
     pgn: Optional[str] = None
     position_fen: Optional[str] = None
+    previous_position_fen: Optional[str] = None
     reference_uci: Optional[str] = None
     review_result: Optional[str] = None
     review_status: Optional[Any] = None
