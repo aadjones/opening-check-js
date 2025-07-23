@@ -57,8 +57,12 @@ export interface ReviewQueueEntry {
 export class SpacedRepetitionService {
   private supabase;
 
-  constructor(supabaseUrl: string, supabaseKey: string) {
-    this.supabase = createClient(supabaseUrl, supabaseKey);
+  constructor(supabaseUrl?: string, supabaseKey?: string) {
+    // Provide placeholders in non-production environments (e.g. Jest/Vitest)
+    const url = supabaseUrl || 'https://placeholder.supabase.co';
+    const key = supabaseKey || 'placeholder-anon-key';
+
+    this.supabase = createClient(url, key);
   }
 
   /**
@@ -71,7 +75,10 @@ export class SpacedRepetitionService {
       lichess_username: lichessUsername,
     });
 
-    this.supabase = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY, {
+    const url = import.meta.env.VITE_SUPABASE_URL || 'https://placeholder.supabase.co';
+    const key = import.meta.env.VITE_SUPABASE_ANON_KEY || 'placeholder-anon-key';
+
+    this.supabase = createClient(url, key, {
       global: {
         headers: {
           Authorization: `Bearer ${jwt}`,
@@ -304,7 +311,7 @@ export class SpacedRepetitionService {
 }
 
 // Export singleton instance
-export const spacedRepetitionService = new SpacedRepetitionService(
-  import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_ANON_KEY
-);
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://placeholder.supabase.co';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'placeholder-anon-key';
+
+export const spacedRepetitionService = new SpacedRepetitionService(supabaseUrl, supabaseAnonKey);
