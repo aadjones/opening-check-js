@@ -1,6 +1,7 @@
 # tests/test_analysis_service.py
 """Integration tests for analysis_service.py to ensure end-of-book scenarios are handled correctly."""
 
+from typing import Dict, Any, List, Tuple, Optional, Generator
 from unittest.mock import patch
 
 import pytest
@@ -12,11 +13,11 @@ from deviation_result import DeviationResult
 class MockStudy:
     """Mock Study class for testing."""
 
-    def __init__(self, chapters):
+    def __init__(self, chapters: List[Any]) -> None:
         self.chapters = chapters
 
     @classmethod
-    def fetch_url(cls, url: str):
+    def fetch_url(cls, url: str) -> 'MockStudy':
         """Mock study fetching with predefined chapters."""
         if "white" in url.lower():
             # White repertoire: 1. e4 e5 2. Nf3
@@ -38,7 +39,7 @@ class MockStudy:
 
 
 @pytest.fixture
-def mock_dependencies():
+def mock_dependencies() -> Generator[Dict[str, Any], None, None]:
     """Mock external dependencies for analysis service."""
     with (
         patch("analysis_service.get_last_game_ids") as mock_game_ids,
@@ -50,7 +51,7 @@ def mock_dependencies():
         yield {"game_ids": mock_game_ids, "game_data": mock_game_data, "insert_db": mock_insert_db}
 
 
-def test_analysis_service_end_of_book_no_insertion(mock_dependencies):
+def test_analysis_service_end_of_book_no_insertion(mock_dependencies: Dict[str, Any]) -> None:
     """Test that games continuing beyond prep don't get inserted into database."""
     # Setup mock data
     mock_dependencies["game_ids"].return_value = ["game123"]
@@ -84,7 +85,7 @@ def test_analysis_service_end_of_book_no_insertion(mock_dependencies):
     mock_dependencies["insert_db"].assert_not_called()
 
 
-def test_analysis_service_true_deviation_gets_inserted(mock_dependencies):
+def test_analysis_service_true_deviation_gets_inserted(mock_dependencies: Dict[str, Any]) -> None:
     """Test that true deviations (when alternatives exist) get inserted into database."""
     # Setup mock data
     mock_dependencies["game_ids"].return_value = ["game456"]
@@ -122,7 +123,7 @@ def test_analysis_service_true_deviation_gets_inserted(mock_dependencies):
     mock_dependencies["insert_db"].assert_called_once()
 
 
-def test_analysis_service_validation_prevents_end_of_book_insertion(mock_dependencies):
+def test_analysis_service_validation_prevents_end_of_book_insertion(mock_dependencies: Dict[str, Any]) -> None:
     """Test that the analysis service validation layer prevents any End of book insertions."""
     # Setup mock data
     mock_dependencies["game_ids"].return_value = ["game789"]
@@ -169,7 +170,7 @@ def test_analysis_service_validation_prevents_end_of_book_insertion(mock_depende
     mock_dependencies["insert_db"].assert_not_called()
 
 
-def test_analysis_service_multiple_games_mixed_scenarios(mock_dependencies):
+def test_analysis_service_multiple_games_mixed_scenarios(mock_dependencies: Dict[str, Any]) -> None:
     """Test analysis with multiple games having different deviation scenarios."""
     # Setup mock data for multiple games
     mock_dependencies["game_ids"].return_value = ["game1", "game2", "game3"]
@@ -236,7 +237,7 @@ def test_analysis_service_multiple_games_mixed_scenarios(mock_dependencies):
     assert mock_dependencies["insert_db"].call_count == 1
 
 
-def test_analysis_service_error_handling_with_invalid_pgn(mock_dependencies):
+def test_analysis_service_error_handling_with_invalid_pgn(mock_dependencies: Dict[str, Any]) -> None:
     """Test that the analysis service handles errors gracefully."""
     # Setup mock data
     mock_dependencies["game_ids"].return_value = ["invalid_game"]
@@ -262,7 +263,7 @@ def test_analysis_service_error_handling_with_invalid_pgn(mock_dependencies):
     mock_dependencies["insert_db"].assert_not_called()
 
 
-def test_analysis_service_security_no_code_injection(mock_dependencies):
+def test_analysis_service_security_no_code_injection(mock_dependencies: Dict[str, Any]) -> None:
     """Test that the analysis service handles potentially malicious input safely."""
     # Setup mock data with potentially malicious content
     mock_dependencies["game_ids"].return_value = ["malicious_game"]

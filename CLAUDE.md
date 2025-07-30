@@ -87,6 +87,7 @@ supabase gen types typescript --project-id [PROJECT_ID] > chess_frontend/src/typ
 - Error handling: `HTTPException(status_code=422, detail="message")`
 - Authentication: JWT token validation via `authorization: str = Header(None)`
 - Environment: `os.getenv()` for configuration
+- **Type Annotations**: ALL functions must have complete type annotations for parameters and return values
 
 ### Database
 - RLS policies enforce row-level security
