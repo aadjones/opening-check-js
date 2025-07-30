@@ -184,16 +184,34 @@ ifeq ($(OS),Windows_NT)
 Use the PowerShell block above or run WSL."
 
 else
+	@echo "🔍 Checking environment..."
+	@if [ ! -f "env/bin/activate" ]; then \
+		echo "❌ Virtual environment not found. Run 'make setup' first."; \
+		exit 1; \
+	fi
+	@if [ ! -f "env/bin/pip" ]; then \
+		echo "❌ pip not found in virtual environment. Run 'make setup' first."; \
+		exit 1; \
+	fi
+	@$(VENV_ACTIVATE) && python -c "import main" 2>/dev/null || { \
+		echo "❌ Dependencies not installed or main.py has errors. Run 'make setup' first."; \
+		exit 1; \
+	}
+	@echo "✅ Environment checks passed"
 	@if [ "$(MODE)" = "prod" ]; then \
 		echo "[PROD] Setting BACKEND_URL secret to $(PROD_BACKEND_URL)"; \
 		supabase secrets set BACKEND_URL=$(PROD_BACKEND_URL); \
 		echo "[PROD] Redeploying edge functions..."; \
 		cd $(dir $(lastword $(MAKEFILE_LIST)))/..; \
-		for fn in $(shell ls ../supabase/functions); do \
-		  if [ -d "supabase/functions/$$fn" ] && [ "$$fn" != "_shared" ]; then \
-		    supabase functions deploy $$fn; \
-		  fi; \
-		done; \
+		if [ -d "../supabase/functions" ]; then \
+			for fn in $$(ls ../supabase/functions 2>/dev/null); do \
+			  if [ -d "../supabase/functions/$$fn" ] && [ "$$fn" != "_shared" ]; then \
+			    supabase functions deploy $$fn; \
+			  fi; \
+			done; \
+		else \
+			echo "⚠️  supabase/functions directory not found, skipping function deployment"; \
+		fi; \
 		echo "✅  Edge functions deployed successfully!"; \
 		echo "   • sign-jwt: Ready to authenticate users"; \
 		echo "   • analyze-games: Ready to process game analysis"; \

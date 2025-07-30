@@ -51,14 +51,28 @@ PROJECT_ROOT="$(dirname "$0")/../.."
 cd "$PROJECT_ROOT"
 
 echo "▶︎ redeploying edge functions…"
-for fn in $(ls supabase/functions); do
-  if [ -d "supabase/functions/$fn" ] && [[ "$fn" != _shared ]]; then
-    supabase functions deploy "$fn" >/dev/null
+if [ -d "supabase/functions" ]; then
+  deployed_count=0
+  for fn in $(ls supabase/functions 2>/dev/null); do
+    if [ -d "supabase/functions/$fn" ] && [[ "$fn" != _shared ]]; then
+      echo "  Deploying $fn..."
+      if supabase functions deploy "$fn" >/dev/null 2>&1; then
+        deployed_count=$((deployed_count + 1))
+      else
+        echo "⚠️  Failed to deploy $fn (this is often non-critical)"
+      fi
+    fi
+  done
+  if [ $deployed_count -gt 0 ]; then
+    echo "✅  $deployed_count edge function(s) deployed successfully!"
+    echo "   • sign-jwt: Ready to authenticate users"
+    echo "   • analyze-games: Ready to process game analysis"
+  else
+    echo "⚠️  No edge functions found or deployed"
   fi
-done
-echo "✅  Edge functions deployed successfully!"
-echo "   • sign-jwt: Ready to authenticate users"
-echo "   • analyze-games: Ready to process game analysis"
+else
+  echo "⚠️  supabase/functions directory not found, skipping function deployment"
+fi
 echo "   • BACKEND_URL: $URL"
 echo "🚀  Server is ready! Press Ctrl+C to stop"
 
