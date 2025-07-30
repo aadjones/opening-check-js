@@ -162,9 +162,8 @@ def test_analysis_service_validation_prevents_end_of_book_insertion(mock_depende
     # Should have one result, but deviation should be filtered out
     assert len(results) == 1
     deviation_result, pgn = results[0]
-    # The deviation should still be in the results (for backwards compatibility)
-    # but database insertion should be prevented
-    assert isinstance(deviation_result, DeviationResult)
+    # The deviation should be None since "End of book" deviations are filtered out
+    assert deviation_result is None
 
     # Database insertion should NOT have been called due to validation
     mock_dependencies["insert_db"].assert_not_called()
