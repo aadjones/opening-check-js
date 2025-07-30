@@ -1,7 +1,7 @@
 # tests/test_analysis_service.py
 """Integration tests for analysis_service.py to ensure end-of-book scenarios are handled correctly."""
 
-from typing import Any, Dict, Generator, List, Optional, Tuple
+from typing import Any, Dict, Generator, List
 from unittest.mock import patch
 
 import pytest
