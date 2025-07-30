@@ -1,7 +1,7 @@
 # tests/test_analysis_service.py
 """Integration tests for analysis_service.py to ensure end-of-book scenarios are handled correctly."""
 
-from typing import Dict, Any, List, Tuple, Optional, Generator
+from typing import Any, Dict, Generator, List, Optional, Tuple
 from unittest.mock import patch
 
 import pytest
@@ -17,7 +17,7 @@ class MockStudy:
         self.chapters = chapters
 
     @classmethod
-    def fetch_url(cls, url: str) -> 'MockStudy':
+    def fetch_url(cls, url: str) -> "MockStudy":
         """Mock study fetching with predefined chapters."""
         if "white" in url.lower():
             # White repertoire: 1. e4 e5 2. Nf3

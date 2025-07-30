@@ -125,10 +125,18 @@ chess_backend/
 
 ## Testing Strategy
 
-- **Frontend**: Component testing with Vitest + React Testing Library
+- **Frontend**: 
+  - **Preferred**: Unit tests for business logic and utility functions (fast, reliable)
+  - **When needed**: Component/UI testing with Vitest + React Testing Library (only when specifically requested)
 - **Backend**: API testing with pytest + httpx
 - **Integration**: Supabase integration tests in both frontend and backend
 - **Run all tests**: `make check-all` (backend) + `npm run test` (frontend)
+
+### Testing Guidelines
+- **Default to unit tests**: Test pure functions and business logic without UI complexity
+- **Avoid UI tests unless requested**: UI tests are slower, more brittle, and harder to maintain
+- **Focus on logic**: Test the core functionality, not the presentation layer
+- **Keep tests simple**: Prefer isolated, fast-running tests over complex integration tests
 
 ## Development Workflow
 
@@ -137,3 +145,4 @@ chess_backend/
 3. **Database Changes**: Create migration → test locally → deploy
 4. **Testing**: Run tests locally before committing
 5. **Type Safety**: Always run type generation after schema changes
+6. **Before Pushing**: Always run `make format` in chess_backend/ before pushing to GitHub

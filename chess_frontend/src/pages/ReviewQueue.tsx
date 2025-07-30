@@ -187,15 +187,25 @@ const ResetQueueSection: React.FC<{ onReset: () => void }> = ({ onReset }) => {
       // Get user deviations where they went off-book first
       const { data: deviations, error: fetchError } = await supabaseWithAuth
         .from('opening_deviations')
-        .select('id, user_id')
+        .select('id, user_id, position_fen, expected_move, color')
         .eq('user_id', session.user.id)
         .eq('first_deviator', 'user');
 
       if (fetchError) throw fetchError;
 
       if (deviations && deviations.length > 0) {
-        // Insert fresh review queue entries
-        const queueEntries = deviations.map(deviation => ({
+        // Deduplicate by position: group by position_fen + expected_move + color
+        const uniquePositions = new Map<string, (typeof deviations)[0]>();
+
+        deviations.forEach(deviation => {
+          const positionKey = `${deviation.position_fen}|${deviation.expected_move}|${deviation.color}`;
+          if (!uniquePositions.has(positionKey)) {
+            uniquePositions.set(positionKey, deviation);
+          }
+        });
+
+        // Insert fresh review queue entries (one per unique position)
+        const queueEntries = Array.from(uniquePositions.values()).map(deviation => ({
           user_id: deviation.user_id,
           deviation_id: deviation.id,
           review_count: 0,
@@ -209,7 +219,7 @@ const ResetQueueSection: React.FC<{ onReset: () => void }> = ({ onReset }) => {
 
         setResetMessage({
           type: 'success',
-          text: `Review queue reset! ${deviations.length} puzzles are now available for review.`,
+          text: `Review queue reset! ${queueEntries.length} unique puzzles are now available for review.`,
         });
       } else {
         setResetMessage({
