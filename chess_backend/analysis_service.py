@@ -122,20 +122,20 @@ def perform_game_analysis(
                             f"Skipping invalid 'End of book' deviation for game {game_id}. "
                             f"This should not occur with the fixed trie logic."
                         )
-                        continue
+                        deviation_info = None  # Set to None instead of skipping the game
+                    else:
+                        deviation_dict = deviation_info.model_dump()
+                        deviation_dict["opening_name"] = opening_name
 
-                    deviation_dict = deviation_info.model_dump()
-                    deviation_dict["opening_name"] = opening_name
+                        # Determine which study URL to use based on player color
+                        study_url = None
+                        if player_color == "White":
+                            study_url = study_url_white
+                        elif player_color == "Black":
+                            study_url = study_url_black
 
-                    # Determine which study URL to use based on player color
-                    study_url = None
-                    if player_color == "White":
-                        study_url = study_url_white
-                    elif player_color == "Black":
-                        study_url = study_url_black
-
-                    # Call the DB function with the dictionary, PGN string, user_id, and study URL
-                    insert_deviation_to_db(deviation_dict, pgn_string, user_id, study_url)
+                        # Call the DB function with the dictionary, PGN string, user_id, and study URL
+                        insert_deviation_to_db(deviation_dict, pgn_string, user_id, study_url)
 
                 results.append((deviation_info, pgn_string))
 
