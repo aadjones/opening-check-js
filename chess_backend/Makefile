@@ -189,7 +189,7 @@ else
 		supabase secrets set BACKEND_URL=$(PROD_BACKEND_URL); \
 		echo "[PROD] Redeploying edge functions..."; \
 		cd $(dir $(lastword $(MAKEFILE_LIST)))/..; \
-		for fn in $(shell ls supabase/functions); do \
+		for fn in $(shell ls ../supabase/functions); do \
 		  if [ -d "supabase/functions/$$fn" ] && [ "$$fn" != "_shared" ]; then \
 		    supabase functions deploy $$fn; \
 		  fi; \
