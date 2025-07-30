@@ -145,4 +145,6 @@ chess_backend/
 3. **Database Changes**: Create migration → test locally → deploy
 4. **Testing**: Run tests locally before committing
 5. **Type Safety**: Always run type generation after schema changes
-6. **Before Pushing**: Always run `make format` in chess_backend/ before pushing to GitHub
+6. **Before Pushing**: Always run `make check-all` in chess_backend/ before pushing to GitHub
+   - This includes: format, lint (flake8), type-check (mypy), and tests
+   - Ensures code passes all CI checks locally before pushing
