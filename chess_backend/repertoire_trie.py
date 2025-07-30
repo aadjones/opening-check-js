@@ -88,14 +88,29 @@ class RepertoireTrie:
                 current_trie_node = current_trie_node.children[move.uci()]
                 board.push(move)
             else:
-                # Deviation found!
+                # Check if we've reached the end of our preparation (no more moves in repertoire)
+                if not current_trie_node.children:
+                    # End of book - this is natural, not a deviation. Continue analyzing the game.
+                    logger.debug(
+                        f"[Trie] Reached end of repertoire at move {move_number} ({player_color}). "
+                        f"Move {board.san(move)} continues beyond prepared lines."
+                    )
+                    board.push(move)
+                    continue
+
+                # True deviation found - we have expected moves but player chose differently
                 first_deviator = "user" if player_color == my_color else "opponent"
 
                 expected_sans = [node.san for node in current_trie_node.children.values() if node.san is not None]
-                reference_san = " or ".join(sorted(expected_sans)) if expected_sans else "End of book"
+                reference_san = " or ".join(sorted(expected_sans))
 
                 # We need all potential reference UCIs for a complete result
                 reference_ucis = list(current_trie_node.children.keys())
+
+                logger.info(
+                    f"[Trie] True deviation detected at move {move_number} ({player_color}). "
+                    f"Played: {board.san(move)}, Expected: {reference_san}"
+                )
 
                 # Calculate the previous position FEN
                 pgn_string = str(recent_game)

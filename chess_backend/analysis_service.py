@@ -116,6 +116,14 @@ def perform_game_analysis(
                     logger.warning(f"Could not determine color for {username} in game {game_id}. Skipping.")
 
                 if deviation_info:
+                    # Additional validation: Skip "End of book" scenarios that shouldn't have been flagged as deviations
+                    if deviation_info.reference_san == "End of book":
+                        logger.warning(
+                            f"Skipping invalid 'End of book' deviation for game {game_id}. "
+                            f"This should not occur with the fixed trie logic."
+                        )
+                        continue
+
                     deviation_dict = deviation_info.model_dump()
                     deviation_dict["opening_name"] = opening_name
 
