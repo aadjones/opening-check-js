@@ -43,27 +43,6 @@ npm run test        # Run tests
 npm run build       # Build for production
 ```
 
-## BrowserTools MCP (Debugging)
-
-For enhanced debugging with Cursor AI, start the BrowserTools server to capture browser logs:
-
-### Setup (One-time)
-1. Install Chrome extension from [AgentDesk BrowserTools](https://github.com/AgentDeskAI/browser-tools-mcp)
-2. MCP server is already configured in `.cursor/mcp.json`
-
-### Daily Usage
-```bash
-# Start BrowserTools server (in a separate terminal)
-npx @agentdeskai/browser-tools-server@1.2.0
-
-# Open Chrome dev tools on your chess app
-# Right-click → Inspect (or press F12)
-```
-
-Once running, you can ask Cursor:
-- "Enter debugger mode and analyze console logs"
-- "Take a screenshot of the current state" 
-- "Check for network errors"
 
 ## API
 
