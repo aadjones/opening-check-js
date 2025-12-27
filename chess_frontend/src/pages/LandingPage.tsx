@@ -1,33 +1,37 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
 import styles from './LandingPage.module.css';
 
 const LandingPage: React.FC = () => {
-  const { signInWithOAuth, loading } = useAuth();
-
-  const handleLichessLogin = async () => {
-    try {
-      await signInWithOAuth('lichess');
-    } catch (error) {
-      console.error('Login failed:', error);
-    }
-  };
-
   return (
     <div className={styles.landingPage}>
+      <div className={styles.maintenanceBanner}>
+        <div className={styles.bannerContent}>
+          <span className={styles.bannerIcon}>🚧</span>
+          <span className={styles.bannerText}>
+            This project is currently under reconstruction.
+          </span>
+          <a
+            href="https://github.com/aadjones/opening-check-js"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.bannerLink}
+          >
+            View on GitHub →
+          </a>
+        </div>
+      </div>
       <div className="container">
         <section className={styles.hero}>
           <h1 className={styles.heroTitle}>🧠 OutOfBook</h1>
           <p className={styles.heroSubtitle}>Track your real chess games against your real prep.</p>
 
           <div className={styles.heroActions}>
-            <button onClick={handleLichessLogin} disabled={loading} className="btn btn-primary btn-lg">
-              {loading ? 'Connecting...' : 'Connect with Lichess'}
+            <button disabled className="btn btn-primary btn-lg" style={{ opacity: 0.5, cursor: 'not-allowed' }}>
+              Connect with Lichess
             </button>
-            <Link to="/demo" className="btn btn-secondary btn-lg">
+            <button disabled className="btn btn-secondary btn-lg" style={{ opacity: 0.5, cursor: 'not-allowed' }}>
               Try a demo
-            </Link>
+            </button>
           </div>
         </section>
       </div>

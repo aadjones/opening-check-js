@@ -3,6 +3,45 @@
   background: var(--color-background);
 }
 
+.maintenanceBanner {
+  background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
+  color: white;
+  padding: var(--spacing-lg) 0;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.bannerContent {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-lg);
+  flex-wrap: wrap;
+}
+
+.bannerIcon {
+  font-size: var(--font-size-xl);
+}
+
+.bannerText {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+}
+
+.bannerLink {
+  color: white;
+  text-decoration: underline;
+  font-weight: var(--font-weight-semibold);
+  transition: opacity var(--transition-normal);
+}
+
+.bannerLink:hover {
+  opacity: 0.8;
+}
+
 .hero {
   padding: var(--spacing-6xl) 0;
   text-align: center;
@@ -86,6 +125,16 @@
 
 /* Mobile styles */
 @media (max-width: 768px) {
+  .bannerContent {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    padding: 0 var(--spacing-md);
+  }
+
+  .bannerText {
+    font-size: var(--font-size-md);
+  }
+
   .hero {
     padding: var(--spacing-4xl) 0;
   }
