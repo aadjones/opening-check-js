@@ -1,5 +1,8 @@
 # Out Of Book
 
+> **⚠️ Project Status: Under Reconstruction**
+> This project is currently paused while infrastructure is being rebuilt. The live site displays a maintenance banner, and backend services are temporarily offline.
+
 Compare the chess openings in the games you play to your preparation to track patterns.
 
 ## Quick Start
